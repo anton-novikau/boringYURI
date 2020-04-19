@@ -23,14 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Query parameter of an integer (or long integer) constant value.
- * <p>
- * Example:
+ * <p>Query parameter of an integer (or long integer) constant value.</p>
+ * <p>Example:</p>
  * <pre><code>
- *     &#64UriBuilder("contacts")
- *     &#LongParam(name = "limit", value= 100)
+ *     &#64;UriBuilder("contacts")
+ *     &#64;LongParam(name = "limit", value= 100)
  *     public Uri buildFetchContactsUri();
  * </code></pre>
+ * <p>
  * Calling {@code foo.buildFetchContactsUri()} yields {@code /contacts?limit=100}
  * </p>
  *

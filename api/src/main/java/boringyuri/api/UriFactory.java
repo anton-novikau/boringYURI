@@ -28,18 +28,20 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * Example:
+ * </p>
  * <pre><code>
- *     &#64UriFactory(scheme = "content", authority="com.example.provider")
+ *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
  *     interface UserProviderUriBuilder {
  *
- *          &#64UriBuilder("user/regular")
+ *          &#64;UriBuilder("user/regular")
  *          Uri buildRegularUserUri(@Param String phoneNumber, @Param String name);
  *
- *          &#64UriBuilder("user/admin")
+ *          &#64;UriBuilder("user/admin")
  *          Uri buildAdminUserUri(@Param String phoneNumber, @Param String name);
  *
  *     }
  * </code></pre>
+ * <p>
  * Calling {@code uriBuilder.buildRegularUserUri("10020042", "John Doe")} will produce
  * {@code content://com.example.provider/user/regular?phoneNumber="10020042"&name="John%20Doe"}
  * whereas {@code uriBuilder.buildAdminUserUri("20030042", "Jane Doe")} will produce
@@ -53,17 +55,19 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface UriFactory {
     /**
-     * A {code Uri} scheme applied to all the build methods in the factory.
+     * A {@code Uri} scheme applied to all the build methods in the factory.
      * Example: "http" or "content".
      */
     String scheme();
 
     /**
+     * <p>
      * An authority part of the {@code Uri}s built by every method declared
      * in the factory. For server addresses, the authority is structured as follows:
      * {@code [ userinfo '@' ] host [ ':' port ]}
+     * </p>
      *
-     * <p>Examples: "google.com", "bob@google.com:80"
+     * <p>Examples: "google.com", "bob@google.com:80"</p>
      */
     String authority();
 }

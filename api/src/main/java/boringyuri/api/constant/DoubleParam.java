@@ -23,14 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Query parameter of a constant floating point value.
- * <p>
- * Example:
+ * <p>Query parameter of a constant floating point value.</p>
+ * <p>Example:</p>
  * <pre><code>
- *     &#64UriBuilder("location")
- *     &#DoubleParam(name = "zoom", value= 1.5)
+ *     &#64;UriBuilder("location")
+ *     &#64;DoubleParam(name = "zoom", value= 1.5)
  *     public Uri buildMapFragmentUri();
  * </code></pre>
+ * <p>
  * Calling {@code foo.buildMapFragmentUri()} yields {@code /location?zoom=1.5}
  * </p>
  *

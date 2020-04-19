@@ -22,44 +22,41 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Query parameter appended to the {@code Uri}.
  * <p>
+ * Query parameter appended to the {@code Uri}.
+ * </p><p>
  * Values of primitive types, primitive wrapper types, {@code String} or {@code Uri} can be
  * serialized and deserialized with a built-in type converter. For every other type of the
- * method parameter annotated with <code>&#64Param</code> there should exist a
+ * method parameter annotated with <code>&#64;Param</code> there should exist a
  * {@link boringyuri.api.adapter.BoringTypeAdapter BoringTypeAdapter} implementation
  * registered with {@link boringyuri.api.adapter.TypeAdapter TypeAdapter}.
- * <p>
+ * </p><p>
  * Example:
- * <p>
+ *
  * <pre><code>
- *     &#64UriBuilder("user")
- *     public Uri buildFetchUserDetailsUri(&#64Param int userId);
+ *     &#64;UriBuilder("user")
+ *     public Uri buildFetchUserDetailsUri(&#64;Param int userId);
  * </code></pre>
  * Calling with {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?userId=100}
- * </p><p>
- * ------
+ *
  * <pre><code>
- *     &#64UriBuilder("user")
- *     public Uri buildFetchUserDetailsUri(&#64Param("id") int userId);
+ *     &#64;UriBuilder("user")
+ *     public Uri buildFetchUserDetailsUri(&#64;Param("id") int userId);
  * </code></pre>
  * Calling with {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?id=100}
- * </p><p>
- * ------
+ *
  * <pre><code>
- *     &#64Param
+ *     &#64;Param
  *     int getUserId();
  * </code></pre>
  * Calling with {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("userId")}
- * </p><p>
- * ------
+ *
  * <pre><code>
- *     &#64Param("id")
+ *     &#64;Param("id")
  *     int getUserId();
  * </code></pre>
  * Calling with {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("id")}
- * </p><p>
- * ------
+ *
  *
  * @see boringyuri.api.Path
  * @see boringyuri.api.adapter.TypeAdapter
@@ -68,27 +65,25 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 public @interface Param {
     /**
+     * <p>
      * Specifies the {@code Uri} query parameter name.
-     * <p/>
-     * If not specified, the method parameter name will be used. If &#64Param is used
+     * </p><p>
+     * If not specified, the method parameter name will be used. If &#64;Param is used
      * with a getter method of a uri data interface and the parameter name is not specified,
      * the getter name will be taken without the {@code get}, {@code is} or {@code are}
      * prefix and the lowering the first letter. For example:
-     * <p>
+     * </p>
      * <pre><code>
-     * &#64Param
+     * &#64;Param
      * String getName();
      * </code></pre>
      * Becomes "name"
-     * </p><p>
-     * ------
+     *
      * <pre><code>
-     * &#64Param
+     * &#64;Param
      * String isEnabled();
      * </code></pre>
      * Becomes "enabled"
-     * </p><p>
-     * ------
      */
     String value() default "";
 }

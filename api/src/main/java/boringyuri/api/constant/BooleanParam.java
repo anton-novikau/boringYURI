@@ -23,14 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Query parameter of a constant {@code boolean} value.
- * <p>
- * Example:
+ * <p>Query parameter of a constant {@code boolean} value.</p>
+ * <p>Example:</p>
  * <pre><code>
- *     &#64UriBuilder("contacts")
- *     &#64BooleanParams(name = "address_book", value= true)
+ *     &#64;UriBuilder("contacts")
+ *     &#64;BooleanParams(name = "address_book", value= true)
  *     public Uri buildFetchContactsUri();
  * </code></pre>
+ * <p>
  * Calling {@code foo.buildFetchContactsUri()} yields {@code /contacts?address_book=true}
  * </p>
  *

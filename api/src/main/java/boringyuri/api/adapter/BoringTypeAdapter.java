@@ -19,23 +19,24 @@ package boringyuri.api.adapter;
 import androidx.annotation.NonNull;
 
 /**
- * Converts Java or Kotlin objects to {@code String} and back.
- * <p/>
+ * <p>Converts Java or Kotlin objects to {@code String} and back.</p>
+ * <p>
  * By default Boring YURI knows how to serialize and deserialize only
  * primitives, primitive wrappers, {@code String} and {@code Uri}.
  * If the standard conversion is not appropriate or it is required
  * to use some non standard type in the uri builder, implement this
  * interface and use it as in the examples below:
- * <pre> {@code
- *      public class RectAdapter implements BoringTypeAdapter<Rect> {
+ * </p>
+ * <pre><code>
+ *      public class RectAdapter implements BoringTypeAdapter&lt;Rect&gt; {
  *
- *          @NonNull
- *          public String serialize(@NonNull Rect rect) {
+ *          &#64;NonNull
+ *          public String serialize(&#64;NonNull Rect rect) {
  *              return rect.left + ";" + rect.top + ";" + rect.right + ";" + rect.bottom;
  *          }
  *
- *          @NonNull
- *          public Rect deserialize(@NonNull String rect) {
+ *          &#64;NonNull
+ *          public Rect deserialize(&#64;NonNull String rect) {
  *              String[] vertices = rect.splint(";");
  *
  *              return new Rect(
@@ -45,14 +46,15 @@ import androidx.annotation.NonNull;
  *                  Integer.parseInt(vertices[3]));
  *          }
  *
- *      }}</pre>
- * To use the custom type adapter there are two possible ways:
+ *      }
+ * </code></pre>
+ * <p>To use the custom type adapter there are two possible ways:</p>
  * <ol>
  *     <li>
  *     Use {@link TypeAdapter} annotation for the class that must be converted.
  *     This way works good for the custom types that belong to your code.
  *     <pre><code>
- *          &#64TypeAdapter(UserTypeAdapter.class)
+ *          &#64;TypeAdapter(UserTypeAdapter.class)
  *          public class User {
  *
  *              public final String firstName;
@@ -71,20 +73,20 @@ import androidx.annotation.NonNull;
  *     {@link boringyuri.api.Param} or {@link boringyuri.api.Path} in uri builder
  *     method signature or in data class getter method
  *     <pre><code>
- *          &#64UriFactory(scheme = "https", authority = "example.com")
+ *          &#64;UriFactory(scheme = "https", authority = "example.com")
  *          public interface ImageApi {
  *
- *              &#64UriBuilder("select_rect")
- *              public Uri buildHighlightUri(&#64Param &#64TypeAdapter(RectAdapter.class) Rect highlightArea);
+ *              &#64;UriBuilder("select_rect")
+ *              public Uri buildHighlightUri(&#64;Param &#64;TypeAdapter(RectAdapter.class) Rect highlightArea);
  *
  *          }
  *     </code></pre>
  *     <pre><code>
- *          &#64UriData
+ *          &#64;UriData
  *          public interface HighlightData {
  *
- *              &#64Param
- *              &#64TypeAdapter(RectAdapter.class)
+ *              &#64;Param
+ *              &#64;TypeAdapter(RectAdapter.class)
  *              Rect getHighlightArea();
  *
  *          }
@@ -92,7 +94,7 @@ import androidx.annotation.NonNull;
  *     </li>
  * </ol>
  *
- * @param <T> Type to convert to String and back to the object of the type T
+ * @param <T> Type to convert into String and back into the object of the type T
  */
 public interface BoringTypeAdapter<T> {
     /**

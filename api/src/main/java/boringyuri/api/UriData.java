@@ -31,39 +31,44 @@ import java.lang.annotation.Target;
  * Example: You have a {@code Uri} builder for a {@code ContentProvider} that can produce
  * two similar {@code Uri}s with different base paths (so they can be distinguished by the
  * {@code UriMatcher}) but the same query parameters.
+ * </p>
  * <pre><code>
- *     &#64UriFactory(scheme = "content", authority="com.example.provider")
+ *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
  *     interface UserProviderUriBuilder {
  *
- *          &#64UriBuilder("user/regular")
+ *          &#64;UriBuilder("user/regular")
  *          Uri buildRegularUserUri(@Param String phoneNumber, @Param String name);
  *
- *          &#64UriBuilder("user/admin")
+ *          &#64;UriBuilder("user/admin")
  *          Uri buildAdminUserUri(@Param String phoneNumber, @Param String name);
  *
  *     }
  * </code></pre>
+ * <p>
  * To obtain the query parameters data from two of these {@code Uri}s it would be better
  * to have objects of the same type, so the {@code ContentProvider} could handle some
  * similar user related logic for both requests. In this case an interface with getters
  * can be defined and this interface will represent both {@code Uri}s data.
+ * </p>
  * <pre><code>
- *     &#64UriData
+ *     &#64;UriData
  *     public interface UserData {
  *
- *         &#64Param
+ *         &#64;Param
  *         String getPhoneNumber();
  *
- *         &#64Param
+ *         &#64;Param
  *         String getName();
  *
  *     }
  * </code></pre>
+ * <p>
  * For the interface there will be created a {@code Uri} based data class implementation
  * similar to the one described for {@link WithUriData}:
+ * </p>
  * <pre><code>
  *     public final class UserDataImpl {
- *         &#64NonNull
+ *         &#64;NonNull
  *         private final Uri mDataUri;
  *
  *         ...
@@ -72,7 +77,7 @@ import java.lang.annotation.Target;
  *
  *         private String mName;
  *
- *         public UserDataImpl(&#64NonNull Uri uri) {
+ *         public UserDataImpl(&#64;NonNull Uri uri) {
  *             mDataUri = uri;
  *         }
  *
@@ -87,7 +92,6 @@ import java.lang.annotation.Target;
  *         }
  *     }
  * </code></pre>
- * </p>
  *
  * @see WithUriData
  */

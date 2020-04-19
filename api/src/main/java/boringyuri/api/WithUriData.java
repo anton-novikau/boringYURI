@@ -29,15 +29,18 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * Example:
+ * </p>
  * <pre><code>
- *     &#64UriBuilder("user/create")
- *     &#64WithUriData
- *     Uri buildCreateUserUri(&#64Path long id, &#64Param String name, &#64Param String phoneNumber);
+ *     &#64;UriBuilder("user/create")
+ *     &#64;WithUriData
+ *     Uri buildCreateUserUri(&#64;Path long id, &#64;Param String name, &#64;Param String phoneNumber);
  * </code></pre>
+ * <p>
  * For the {@code Uri} above there going to be generated the following data class:
+ * </p>
  * <pre><code>
  *     public final class CreateUserData {
- *         &#64NonNull
+ *         &#64;NonNull
  *         private final Uri mDataUri;
  *
  *         ...
@@ -48,7 +51,7 @@ import java.lang.annotation.Target;
  *
  *         private String mPhoneNumber;
  *
- *         public CreateUserData(&#64NonNull Uri uri) {
+ *         public CreateUserData(&#64;NonNull Uri uri) {
  *             mDataUri = uri;
  *         }
  *
@@ -68,6 +71,7 @@ import java.lang.annotation.Target;
  *         }
  *     }
  * </code></pre>
+ * <p>
  * Every field will be obtained from an appropriate query parameter of a path segment and converted
  * from {@code String} into appropriate type if the type conversion is defined: the parameter is
  * of a standard type or a {@link boringyuri.api.adapter.BoringTypeAdapter BoringTypeAdapter}

@@ -28,10 +28,12 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * Example:
+ * </p>
  * <pre><code>
- *     &#64UriBuilder("user")
- *     public Uri buildFetchUserDetailsUri(&#64Path String group, &#64Param("id") int userId);
+ *     &#64;UriBuilder("user")
+ *     public Uri buildFetchUserDetailsUri(&#64;Path String group, &#64;Param("id") int userId);
  * </code></pre>
+ * <p>
  * Calling {@code foo.buildFetchUserDetailsUri("friends", 42)} yields {@code /user/friends?id=42}
  * </p>
  *
@@ -45,7 +47,7 @@ public @interface UriBuilder {
      * Relative {@code Uri} path.
      *
      * <p>If the path doesn't start with a '/', the builder will prepend the
-     * given path with a '/'.
+     * given path with a '/'.</p>
      */
     String value() default "";
 

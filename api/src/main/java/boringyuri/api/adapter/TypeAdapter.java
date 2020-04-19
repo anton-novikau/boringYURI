@@ -22,13 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * <p>
  * An annotation that indicates to use {@link BoringTypeAdapter} with a class, method or
  * a method parameter when they are of a non standard type supported by Boring YURI (eg.
  * primitive, primitive wrapper, {@code String} or {@code Uri}) or the type require some
  * non standard type serialization/deserialization.
+ * </p>
  * <p>Here are some examples of how this annotation is used:</p>
  * <pre><code>
- *      &#64TypeAdapter(UserTypeAdapter.class)
+ *      &#64;TypeAdapter(UserTypeAdapter.class)
  *      public class User {
  *
  *          public final String firstName;
@@ -43,21 +45,21 @@ import java.lang.annotation.Target;
  * </code></pre>
  *
  * <pre><code>
- *      &#64UriFactory(scheme = "https", authority = "example.com")
+ *      &#64;UriFactory(scheme = "https", authority = "example.com")
  *      public interface ImageApi {
  *
- *          &#64UriBuilder("select_rect")
- *          public Uri buildHighlightUri(&#64Param &#64TypeAdapter(RectAdapter.class) Rect highlightArea);
+ *          &#64;UriBuilder("select_rect")
+ *          public Uri buildHighlightUri(&#64;Param &#64;TypeAdapter(RectAdapter.class) Rect highlightArea);
  *
  *      }
  * </code></pre>
  *
  * <pre><code>
- *      &#64UriData
+ *      &#64;UriData
  *      public interface HighlightData {
  *
- *          &#64Param
- *          &#64TypeAdapter(RectAdapter.class)
+ *          &#64;Param
+ *          &#64;TypeAdapter(RectAdapter.class)
  *          Rect getHighlightArea();
  *
  *      }

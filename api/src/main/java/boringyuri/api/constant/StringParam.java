@@ -23,14 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Query parameter of a constant {@code String} value.
- * <p>
- * Example:
+ * <p>Query parameter of a constant {@code String} value.</p>
+ * <p>Example:</p>
  * <pre><code>
- *     &#64UriBuilder("image")
- *     &#StringParam(name = "format", value= "png")
+ *     &#64;UriBuilder("image")
+ *     &#64;StringParam(name = "format", value= "png")
  *     public Uri buildImageUri();
  * </code></pre>
+ * <p>
  * Calling {@code foo.buildImageUri()} yields {@code /image?format=png}
  * </p>
  *

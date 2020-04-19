@@ -92,6 +92,5 @@ bintray {
     }
 }
 
-//bintrayUpload {
-//    dependsOn("publishBoringPublicationToMavenLocal")
-//}
+project.ext.publicationName = 'maven'
+apply from: rootProject.file('artifactory.gradle')

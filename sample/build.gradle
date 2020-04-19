@@ -21,7 +21,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion project.compile_sdk_version
-    buildToolsVersion project.build_tools_version
+    buildToolsVersion project.buildToolsVersion
 
     defaultConfig {
         applicationId "boringyuri.sample"
@@ -46,17 +46,18 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation "androidx.core:core-ktx:$ktx_version"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    implementation "androidx.core:core-ktx:$ktxVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
 
     // code generators
     compileOnly project(':api')
     kapt project(':processor')
 
     // unit tests
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "junit:junit:$junitVersion"
 }
 
 kapt {

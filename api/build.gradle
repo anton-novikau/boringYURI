@@ -15,11 +15,74 @@
  */
 
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+apply from: rootProject.file('pom.gradle')
+
+group = GROUP_ID
+version = VERSION
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api "androidx.annotation:annotation:$annotation_version"
+
+    api "androidx.annotation:annotation:$annotationVersion"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.java.srcDirs
+    archiveClassifier.set('sources')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        Boring(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            groupId GROUP_ID
+            artifactId ARTIFACT_ID_API
+            version VERSION
+
+            configurePom(Boring(MavenPublication), ARTIFACT_ID_API)
+        }
+    }
+}
+
+bintray {
+    publications = ['Boring']
+    user = bintrayUser
+    key = bintrayApiKey
+    dryRun = bintrayDryRun
+    publish = true
+
+    pkg {
+        repo = REPO_ID
+        userOrg = DEVELOPER_ID
+        name = ARTIFACT_ID_API
+        vcsUrl = VCS_URL
+        websiteUrl = WEBSITE
+        licenses = [LICENSE]
+        version {
+            name = VERSION
+            desc = DESCRIPTION
+        }
+    }
+}
+
+//bintrayUpload {
+//    dependsOn("publishBoringPublicationToMavenLocal")
+//}

@@ -53,8 +53,8 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
 
     // code generators
-    compileOnly project(':api')
-    kapt project(':processor')
+    implementation project(':api')  // implementation 'org.boringyuri:boringyuri-api:1.0.0'
+    kapt project(':processor')      // kapt 'org.boringyuri:boringyuri-processor:1.0.0'
 
     // unit tests
     testImplementation "junit:junit:$junitVersion"

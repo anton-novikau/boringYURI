@@ -39,11 +39,11 @@ import boringyuri.sample.data.adapter.RectTypeAdapter;
 )
 public interface ContactUriBuilder {
     @NonNull
-    @UriBuilder("data")
+    @UriBuilder("/data/{contactId}")
     Uri buildContactDataUri(@Path long contactId);
 
     @NonNull
-    @UriBuilder("file/photo")
+    @UriBuilder("/file/photo/{group}/{contactId}")
     @WithUriData
     Uri buildContactPhotoUri(
             @Path @NonNull String group,
@@ -51,10 +51,10 @@ public interface ContactUriBuilder {
             @Param("desired_dimensions") @TypeAdapter(RectTypeAdapter.class) Rect desiredDimens);
 
     @NonNull
-    @UriBuilder("file/vcard")
+    @UriBuilder("/file/vcard/{contactId}")
     Uri buildVCardUri(
             @Path long contactId,
             @NonNull @Param String firstName,
-            @Nullable @Path String lastName,
+            @Nullable @Param String lastName,
             @Nullable @Param("address") Address homeAddress);
 }

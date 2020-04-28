@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * Example:
  * </p>
  * <pre><code>
- *     &#64;UriBuilder("user/create")
+ *     &#64;UriBuilder("user/create/{id}")
  *     &#64;WithUriData
  *     Uri buildCreateUserUri(&#64;Path long id, &#64;Param String name, &#64;Param String phoneNumber);
  * </code></pre>
@@ -41,33 +41,33 @@ import java.lang.annotation.Target;
  * <pre><code>
  *     public final class CreateUserData {
  *         &#64;NonNull
- *         private final Uri mDataUri;
+ *         private final Uri dataUri;
  *
  *         ...
  *
- *         private long mId;
+ *         private long id;
  *
- *         private String mName;
+ *         private String name;
  *
- *         private String mPhoneNumber;
+ *         private String phoneNumber;
  *
  *         public CreateUserData(&#64;NonNull Uri uri) {
- *             mDataUri = uri;
+ *             dataUri = uri;
  *         }
  *
  *         public long getId() {
  *             ...
- *             return mId;
+ *             return id;
  *         }
  *
  *         public String getName() {
  *             ...
- *             return mName;
+ *             return name;
  *         }
  *
  *         public String getPhoneNumber() {
  *             ...
- *             return mPhoneNumber;
+ *             return phoneNumber;
  *         }
  *     }
  * </code></pre>

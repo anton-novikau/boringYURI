@@ -19,7 +19,6 @@ package boringyuri.processor.base
 import com.google.auto.common.BasicAnnotationProcessor
 import javax.annotation.processing.RoundEnvironment
 
-
 abstract class BoringAnnotationProcessor : BasicAnnotationProcessor() {
 
     private var steps: Iterable<BoringProcessingStep>? = null

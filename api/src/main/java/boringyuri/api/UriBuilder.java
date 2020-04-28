@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * Example:
  * </p>
  * <pre><code>
- *     &#64;UriBuilder("user")
+ *     &#64;UriBuilder("/user/{group}")
  *     public Uri buildFetchUserDetailsUri(&#64;Path String group, &#64;Param("id") int userId);
  * </code></pre>
  * <p>
@@ -44,8 +44,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface UriBuilder {
     /**
-     * Relative {@code Uri} path.
-     *
+     * <p>
+     * Relative {@code Uri} path. Can contain the placeholders for <code>&#64;Path</code>
+     * method parameters that are used as variable segments of the <code>Uri</code> path.
+     *</p>
      * <p>If the path doesn't start with a '/', the builder will prepend the
      * given path with a '/'.</p>
      */

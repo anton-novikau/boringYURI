@@ -21,13 +21,13 @@ import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
 
-@UriData
+@UriData("/*/user/{id}/{title}")
 interface ContactDetailsData {
     @Path
     fun getId(): Long
 
     @Param
-    fun geFirstName(): String
+    fun getFirstName(): String
 
     @Param
     fun getLastName(): String?

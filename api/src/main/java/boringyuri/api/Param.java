@@ -71,7 +71,7 @@ public @interface Param {
      * If not specified, the method parameter name will be used. If &#64;Param is used
      * with a getter method of a uri data interface and the parameter name is not specified,
      * the getter name will be taken without the {@code get}, {@code is} or {@code are}
-     * prefix and the lowering the first letter. For example:
+     * prefix and the first letter will be lowered. For example:
      * </p>
      * <pre><code>
      * &#64;Param

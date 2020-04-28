@@ -38,7 +38,7 @@ public interface UserProviderUriBuilder {
             @Param("phone_number") String phoneNumber);
 
     @NonNull
-    @UriBuilder("/user")
+    @UriBuilder("/user/{userId}")
     Uri buildUserUri(@Path int userId);
 
     @NonNull
@@ -47,4 +47,8 @@ public interface UserProviderUriBuilder {
             @Param("data")
             @TypeAdapter(UserTypeAdapter.class)
             @NonNull User user);
+
+    @NonNull
+    @UriBuilder("/user/{id}/photo")
+    Uri buildUserPhotoUri(@Path("id") int userId);
 }

@@ -15,10 +15,7 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriBuilder
-import boringyuri.api.WithUriData
+import boringyuri.api.*
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.api.constant.*
 import boringyuri.processor.base.BoringAnnotationProcessor
@@ -39,18 +36,19 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
-class MediaUriProcessor : BoringAnnotationProcessor() {
+class UriFactoryProcessor : BoringAnnotationProcessor() {
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return ImmutableSet.of(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-            MediaUriGeneratorStep(session, annotationHandler)
+            UriFactoryGeneratorStep(session, annotationHandler)
         )
     }
 
     private companion object {
         val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+            ClassName.get(UriFactory::class.java),
             ClassName.get(UriBuilder::class.java),
             ClassName.get(WithUriData::class.java),
             ClassName.get(TypeAdapter::class.java),

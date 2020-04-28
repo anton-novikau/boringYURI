@@ -24,11 +24,29 @@ import java.lang.annotation.Target;
 /**
  * <p>
  * An annotation that indicates to use the method parameter as a {@code Uri} path segment.
- * An order of the method parameters annotated with <code>&#64;Path</code> is important as
- * it defines the order of the path segments. Example:
+ * Every path segment can be referenced in the base path of the <code>&#64;UriBuilder</code>
+ * in parenthesises by the path name (the name in the {@link #value()} or the name of the
+ * annotated method parameter). Example:
  * </p>
  * <pre><code>
- *     &#64;UriBuilder("user")
+ *     &#64;UriBuilder("/user/{id}")
+ *     Uri buildUserUri(&#64;Path("id") String userId);
+ * </code></pre>
+ * <p>
+ * Calling {@code foo.buildUserUri(42)} yields {@code /user/42}. But the same result
+ * can be achieved changing the placeholder name to the method parameter name and omitting
+ * the {@link #value()} of the <code>&#64;Path</code>:
+ * </p>
+ * <pre><code>
+ *     &#64;UriBuilder("/user/{userId}")
+ *     Uri buildUserUri(&#64;Path String userId);
+ * </code></pre>
+ * <p>
+ * If the named placeholder is not found in the base path an order of the method parameters
+ * becomes important as it defines the order of the path segments. Example:
+ * </p>
+ * <pre><code>
+ *     &#64;UriBuilder("/user")
  *     public Uri buildFetchUserDetailsUri(&#64;Path String group, &#64;Path long userId);
  * </code></pre>
  * Calling {@code foo.buildFetchUserDetailsUri("friends", 42)} yields {@code /user/friends/42}
@@ -36,28 +54,29 @@ import java.lang.annotation.Target;
  * Values are URL encoded by default. Disable with {@code encoded = true}.
  * </p>
  * <pre><code>
- *    &#64;UriBuilder("user")
+ *    &#64;UriBuilder("/user/{name}")
  *    Uri buildEncodedUri(&#64;Path String name);
  *
- *    &#64;UriBuilder("user")
- *    Uri buildNotEncoded(&#64;Path, encoded=true) String name);
+ *    &#64;UriBuilder("/user/{name}")
+ *    Uri buildNotEncoded(&#64;Path(encoded=true) String name);
  * </code></pre>
  * <p>
  * Calling foo.buildEncodedUri("John+Doe") yields /user/John%2BDoe whereas
  * foo.buildNotEncoded("John+Doe") yields /user/John+Doe.
  * </p>
  * <p>
- * <b>IMPORTANT:</b> Path parameters may not be <code>null</code>.
+ * <b>IMPORTANT:</b> Path parameters may not be <code>null</code> and must be explicitly marked
+ * as <code>&#64;NonNull</code> (or they must have a non nullable type in kotlin).
  * </p>
  * <p>
  * When a method of a {@code Uri} data class is annotated with <code>&#64;Path</code> it
- * means the method will obtain the value from the <code>N<sup>th</sup></code> path segment
- * of the {@code Uri}. An order of the getter methods defined in the {@code Uri} data interface
- * is important as it defines which path segment index must be taken for the getter value.
- * Example:
+ * means the method will obtain the value from the position of the named placeholder in
+ * <code>&#64;UriData</code> value. If the placeholder name is not found the parser will
+ * fall back to the ordered segments which is <b>highly not recommended</b> as it may
+ * cause to an unpredictable result. Example:
  * </p>
  * <pre><code>
- *      &#64;UriData
+ *      &#64;UriData("/&#42;/{group}/{userId}")
  *      public interface UserData {
  *
  *          &#64;Path
@@ -80,4 +99,27 @@ public @interface Path {
      * is already URL encoded. Default is <code>false</code>.
      */
     boolean encoded() default false;
+
+    /**
+     * <p>
+     * Specifies the {@code Uri} path segment name.
+     * </p><p>
+     * If not specified, the method parameter name will be used. If &#64;Path is used
+     * with a getter method of a uri data interface and the segment name is not specified,
+     * the getter name will be taken without the {@code get}, {@code is} or {@code are}
+     * prefix and the first letter will be lowered. For example:
+     * </p>
+     * <pre><code>
+     * &#64;Path
+     * String getName();
+     * </code></pre>
+     * Becomes "name"
+     *
+     * <pre><code>
+     * &#64;Path
+     * String isEnabled();
+     * </code></pre>
+     * Becomes "enabled"
+     */
+    String value() default "";
 }

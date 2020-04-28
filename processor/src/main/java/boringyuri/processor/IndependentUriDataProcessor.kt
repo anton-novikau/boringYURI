@@ -17,6 +17,7 @@ package boringyuri.processor
 
 import boringyuri.api.Param
 import boringyuri.api.Path
+import boringyuri.api.UriData
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
@@ -48,6 +49,7 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
 
     private companion object {
         val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+            ClassName.get(UriData::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),
             ClassName.get(TypeAdapter::class.java)

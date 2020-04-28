@@ -72,7 +72,7 @@ import java.lang.annotation.Target;
  * yields {@code "friends"} whereas {@code userData.getUserId()} yields {@code 42}.
  * </p>
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 public @interface Path {
     /**

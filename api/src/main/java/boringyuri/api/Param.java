@@ -61,7 +61,7 @@ import java.lang.annotation.Target;
  * @see boringyuri.api.Path
  * @see boringyuri.api.adapter.TypeAdapter
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 public @interface Param {
     /**

@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  * @see UriBuilder
  * @see WithUriData
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface UriFactory {
     /**

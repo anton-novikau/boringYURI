@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  * @see UriFactory
  * @see WithUriData
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 public @interface UriBuilder {
     /**

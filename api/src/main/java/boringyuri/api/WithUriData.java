@@ -84,7 +84,7 @@ import java.lang.annotation.Target;
  *
  * @see UriData
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 public @interface WithUriData {
 }

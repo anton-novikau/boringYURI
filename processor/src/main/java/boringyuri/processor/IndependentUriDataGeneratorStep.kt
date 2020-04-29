@@ -20,8 +20,12 @@ import boringyuri.api.Path
 import boringyuri.api.UriData
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createFieldSpec
-import boringyuri.processor.uripart.*
+import boringyuri.processor.uripart.MethodReadPathSegment
+import boringyuri.processor.uripart.MethodReadQueryParameter
+import boringyuri.processor.uripart.ReadQueryParameter
+import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
+import boringyuri.processor.util.ProcessorOptions
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.SetMultimap
 import com.squareup.javapoet.ClassName
@@ -113,12 +117,15 @@ class IndependentUriDataGeneratorStep(
                 val segmentIndex = if (pathSegment is TemplatePathSegment) {
                     pathSegment.segmentIndex
                 } else {
-                    logger.warn(
-                        method,
-                        "Template {$pathName} is not found " +
-                                "in @${UriData::class.simpleName}(\"$basePath\"). " +
-                                "Fallback to ordered segments may cause an unpredictable result."
+                    ProcessorOptions.warnOrderedSegmentsUsage(
+                        logger,
+                        session,
+                        pathName,
+                        basePath,
+                        UriData::class,
+                        method
                     )
+
                     // non-named path segment will be added to the end of the map
                     segments.size
                 }

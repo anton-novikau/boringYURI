@@ -25,9 +25,13 @@ import boringyuri.api.constant.LongParam
 import boringyuri.api.constant.StringParam
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createFieldSpec
-import boringyuri.processor.uripart.*
+import boringyuri.processor.uripart.ReadQueryParameter
+import boringyuri.processor.uripart.TemplatePathSegment
+import boringyuri.processor.uripart.VariableReadPathSegment
+import boringyuri.processor.uripart.VariableReadQueryParameter
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.CommonTypeName
+import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.buildGetterName
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.SetMultimap
@@ -109,12 +113,15 @@ class AssociatedUriDataGeneratorStep(
                 val segmentIndex = if (pathSegment is TemplatePathSegment) {
                     pathSegment.segmentIndex
                 } else {
-                    logger.warn(
-                        param,
-                        "Template {$pathName} is not found " +
-                                "in @${UriBuilder::class.simpleName}(\"$basePath\"). " +
-                                "Fallback to ordered segments may causes an unpredictable result."
+                    ProcessorOptions.warnOrderedSegmentsUsage(
+                        logger,
+                        session,
+                        pathName,
+                        basePath,
+                        UriBuilder::class,
+                        param
                     )
+
                     // non-named path segment will be added to the end of the map
                     segments.size
                 }

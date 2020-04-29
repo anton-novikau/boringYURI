@@ -23,6 +23,7 @@ import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.util.AnnotationHandler
+import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import com.squareup.javapoet.ClassName
@@ -30,6 +31,7 @@ import com.squareup.javapoet.TypeName
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
+import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
@@ -37,6 +39,7 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
+@SupportedOptions(ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING)
 class IndependentUriDataProcessor : BoringAnnotationProcessor() {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {

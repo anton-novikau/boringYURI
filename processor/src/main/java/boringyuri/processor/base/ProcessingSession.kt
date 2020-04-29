@@ -36,4 +36,5 @@ open class ProcessingSession(private val processingEnv: ProcessingEnvironment) {
 
     val filer: Filer by lazy { processingEnv.filer }
 
+    fun getOption(key: String): String? = processingEnv.options[key]
 }

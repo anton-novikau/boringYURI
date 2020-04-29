@@ -29,6 +29,7 @@ import boringyuri.processor.ext.createParamSpec
 import boringyuri.processor.uripart.*
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.TypeConverter
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.SetMultimap
@@ -149,11 +150,13 @@ class UriFactoryGeneratorStep internal constructor(
 
                 val pathName = pathAnnotation.value.ifEmpty { spec.name }
                 if (segments[pathName] !is TemplatePathSegment) {
-                    logger.warn(
-                        param,
-                        "Template {$pathName} is not found " +
-                                "in @${UriBuilder::class.simpleName}(\"$basePath\"). " +
-                                "Fallback to ordered segments may cause an unpredictable result."
+                    ProcessorOptions.warnOrderedSegmentsUsage(
+                        logger,
+                        session,
+                        pathName,
+                        basePath,
+                        UriBuilder::class,
+                        param
                     )
                 }
                 // Previously saved VariableNameSegment helps to preserve

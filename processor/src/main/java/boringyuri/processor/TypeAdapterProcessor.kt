@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package boringyuri.processor
 
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriData
-import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeName
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
@@ -38,28 +32,12 @@ import javax.lang.model.SourceVersion
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
-@SupportedOptions(
-    ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING,
-    ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
-)
-class IndependentUriDataProcessor : BoringAnnotationProcessor() {
+@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
+@SupportedOptions(ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY)
+class TypeAdapterProcessor : BoringAnnotationProcessor() {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
-
-        return ImmutableSet.of<BoringProcessingStep>(
-            IndependentUriDataGeneratorStep(session, annotationHandler)
-        )
-    }
-
-    private companion object {
-        val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
-            ClassName.get(UriData::class.java),
-            ClassName.get(Path::class.java),
-            ClassName.get(Param::class.java),
-            ClassName.get(TypeAdapter::class.java)
-        )
+        return ImmutableSet.of(TypeAdapterFactoryGeneratorStep(session))
     }
 
 }

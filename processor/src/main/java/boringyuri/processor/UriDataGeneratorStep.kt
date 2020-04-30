@@ -22,6 +22,7 @@ import boringyuri.processor.uripart.ReadQueryParameter
 import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import boringyuri.processor.util.TypeConverter
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
@@ -45,7 +46,7 @@ abstract class UriDataGeneratorStep protected constructor(
         Modifier.PRIVATE
     ).build()
 
-    private val typeConverter = TypeConverter(logger)
+    private val typeConverter = TypeConverter(logger, getTypeAdapterFactory(session))
 
     protected fun obtainBasePathSegments(
         basePath: String,

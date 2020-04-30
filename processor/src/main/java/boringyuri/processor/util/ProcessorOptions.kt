@@ -16,7 +16,9 @@
 
 package boringyuri.processor.util
 
+import boringyuri.api.adapter.BoringTypeAdapter
 import boringyuri.processor.base.ProcessingSession
+import com.squareup.javapoet.ClassName
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
@@ -31,6 +33,14 @@ object ProcessorOptions {
      */
     const val OPT_ORDERED_SEGMENTS_WARNING = "boringyuri.suppress_warning.ordered_segments"
 
+    /**
+     * Option to specify the [BoringTypeAdapter] factory class and to enable instance caching
+     * for the created adapters. It must be a fully qualified name of the factory class.
+     *
+     * Type: [String]
+     */
+    const val OPT_TYPE_ADAPTER_FACTORY = "boringyuri.type_adapter_factory"
+
     fun warnOrderedSegmentsUsage(
         logger: Logger,
         session: ProcessingSession,
@@ -39,12 +49,17 @@ object ProcessorOptions {
         annotation: KClass<out Annotation>,
         originatingElement: Element? = null
     ) {
-        if (session.getOption(OPT_ORDERED_SEGMENTS_WARNING)?.toBoolean() != true) {
-            logger.warn(
-                originatingElement,
-                "Template {$pathSegment} is not found in @${annotation.simpleName}(\"$basePath\"). " +
+        if (session.getBooleanOptionOrDefault(OPT_ORDERED_SEGMENTS_WARNING, false)) {
+            val annotationName = annotation.simpleName
+
+            logger.warn(originatingElement,
+                "Template {$pathSegment} is not found in @$annotationName(\"$basePath\"). " +
                         "Fallback to ordered segments may cause an unpredictable result."
             )
         }
+    }
+
+    fun getTypeAdapterFactory(session: ProcessingSession): ClassName? {
+        return session.getOption(OPT_TYPE_ADAPTER_FACTORY)?.let { ClassName.bestGuess(it) }
     }
 }

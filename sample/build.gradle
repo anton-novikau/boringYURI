@@ -65,6 +65,9 @@ kapt {
     javacOptions {
         option("-Xmaxerrs", 1000) // max count of AP errors
     }
+    arguments {
+        arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
+    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

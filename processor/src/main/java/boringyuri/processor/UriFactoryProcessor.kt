@@ -38,7 +38,10 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
-@SupportedOptions(ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING)
+@SupportedOptions(
+    ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING,
+    ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
+)
 class UriFactoryProcessor : BoringAnnotationProcessor() {
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)

@@ -16,22 +16,25 @@
 
 package boringyuri.processor.util
 
-import boringyuri.api.adapter.BoringTypeAdapter
 import boringyuri.processor.base.AbortProcessingException
 import boringyuri.processor.util.CommonTypeName.*
+import com.google.auto.common.MoreTypes
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
 import javax.lang.model.type.TypeMirror
 
 
-class TypeConverter(private val logger: Logger) {
+class TypeConverter(
+    private val logger: Logger,
+    private val typeAdapterFactory: ClassName? = null
+) {
 
     fun buildSerializeBlock(
         param: ParameterSpec,
         typeAdapter: TypeMirror?,
         originatingElement: Element? = null
     ): CodeBlock = if (typeAdapter != null) {
-        CodeBlock.of("new \$T().serialize(\$N)", TypeName.get(typeAdapter), param)
+        CodeBlock.of("\$L.serialize(\$N)", buildCreateTypeAdapterBlock(typeAdapter), param)
     } else if (param.type == STRING) {
         CodeBlock.of("\$N", param)
     } else if (param.type.isPrimitive
@@ -49,15 +52,12 @@ class TypeConverter(private val logger: Logger) {
     ): CodeBlock {
         val deserializeBlock = CodeBlock.builder()
         val adapterName = "typeAdapter"
-        val adapterType = ParameterizedTypeName.get(
-            ClassName.get(BoringTypeAdapter::class.java),
-            field.type
-        )
+        val adapterType = ParameterizedTypeName.get(TYPE_ADAPTER, field.type)
         deserializeBlock.addStatement(
-            "\$T \$L = new \$T()",
+            "\$T \$L = \$L",
             adapterType,
             adapterName,
-            TypeName.get(typeAdapter)
+            buildCreateTypeAdapterBlock(typeAdapter)
         )
         deserializeBlock.addStatement(
             "\$N = \$L.deserialize(\$L)",
@@ -196,5 +196,14 @@ class TypeConverter(private val logger: Logger) {
             .addStatement("\$N = \$L", field, defaultAssignmentBlock)
             .endControlFlow()
             .build()
+    }
+
+    private fun buildCreateTypeAdapterBlock(typeAdapter: TypeMirror): CodeBlock {
+        return if (typeAdapterFactory == null) {
+            CodeBlock.of("new \$T()", TypeName.get(typeAdapter))
+        } else {
+            val typeAdapterName = MoreTypes.asTypeElement(typeAdapter).simpleName
+            CodeBlock.of("\$T.create\$L()", typeAdapterFactory, typeAdapterName.toString())
+        }
     }
 }

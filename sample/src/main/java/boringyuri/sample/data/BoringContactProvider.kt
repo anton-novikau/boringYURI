@@ -19,7 +19,6 @@ package boringyuri.sample.data
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import boringyuri.sample.uri.ContactPhotoUriData
@@ -65,7 +64,7 @@ class BoringContactProvider : ContentProvider() {
         val uriData = ContactPhotoUriData(uri)
         val photoFile = File(it.getExternalFilesDir(uriData.group), uriData.contactId.toString())
 
-        // pre-process 'photoFile' bitmap to have a desired with and height
+        // pre-process 'photoFile' bitmap to have a desired width and height
         // based on 'uriData.desiredDimens'
 
         ParcelFileDescriptor.open(photoFile, ParcelFileDescriptor.MODE_READ_ONLY)

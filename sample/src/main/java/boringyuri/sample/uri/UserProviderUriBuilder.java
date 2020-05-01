@@ -55,4 +55,10 @@ public interface UserProviderUriBuilder {
     @NonNull
     @UriBuilder("/user/{id}/photo")
     Uri buildUserPhotoUri(@Path("id") int userId);
+
+    @NonNull
+    static UserProviderUriBuilder create() {
+        return new UserProviderUriBuilderImpl();
+    }
+
 }

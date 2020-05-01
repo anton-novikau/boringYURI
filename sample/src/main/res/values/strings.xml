@@ -15,5 +15,7 @@
   -->
 
 <resources>
-    <string name="app_name">BoringYuriSample</string>
+    <string name="app_name">Boring Sample</string>
+
+    <string name="boring_greeting">Built boring URI is:</string>
 </resources>

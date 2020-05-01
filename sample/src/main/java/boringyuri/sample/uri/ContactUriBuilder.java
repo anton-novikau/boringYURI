@@ -30,7 +30,6 @@ import boringyuri.api.UriFactory;
 import boringyuri.api.WithUriData;
 import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.Address;
-import boringyuri.sample.data.BoringContactProvider;
 import boringyuri.sample.data.adapter.RectTypeAdapter;
 
 @UriFactory(
@@ -57,4 +56,10 @@ public interface ContactUriBuilder {
             @NonNull @Param String firstName,
             @Nullable @Param String lastName,
             @Nullable @Param("address") Address homeAddress);
+
+    @NonNull
+    static ContactUriBuilder create() {
+        return new ContactUriBuilderImpl();
+    }
+
 }

@@ -152,7 +152,6 @@ class UriFactoryGeneratorStep internal constructor(
                 val pathName = pathAnnotation.value.ifEmpty { spec.name }
                 if (segments[pathName] !is TemplatePathSegment) {
                     ProcessorOptions.warnOrderedSegmentsUsage(
-                        logger,
                         session,
                         pathName,
                         basePath,
@@ -237,6 +236,7 @@ class UriFactoryGeneratorStep internal constructor(
         containerMetadata: List<BuilderMetadata>
     ): TypeSpec {
         val classContent = TypeSpec.classBuilder(containerImplName)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addSuperinterface(ClassName.get(containerElement))
 
         val containerAnnotation = containerElement.getAnnotation(UriFactory::class.java)
@@ -365,11 +365,11 @@ class UriFactoryGeneratorStep internal constructor(
         val parameters: List<QueryParameter>
     )
 
-    private companion object {
+    companion object {
         const val CONTAINER_IMPL_SUFFIX = "Impl"
-        const val URI_BUILDER_NAME = "builder"
+        private const val URI_BUILDER_NAME = "builder"
 
-        val PATH_TEMPLATE_REGEX = "^\\{([a-zA-Z0-9_-]+)}$".toRegex()
+        private val PATH_TEMPLATE_REGEX = "^\\{([a-zA-Z0-9_-]+)}$".toRegex()
     }
 
 }

@@ -22,7 +22,7 @@ import com.squareup.javapoet.ClassName
 import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
-object ProcessorOptions {
+internal object ProcessorOptions {
     /**
      * Option to turn off the ordered segments warning:
      *
@@ -42,7 +42,6 @@ object ProcessorOptions {
     const val OPT_TYPE_ADAPTER_FACTORY = "boringyuri.type_adapter_factory"
 
     fun warnOrderedSegmentsUsage(
-        logger: Logger,
         session: ProcessingSession,
         pathSegment: String,
         basePath: String,
@@ -52,7 +51,7 @@ object ProcessorOptions {
         if (session.getBooleanOptionOrDefault(OPT_ORDERED_SEGMENTS_WARNING, false)) {
             val annotationName = annotation.simpleName
 
-            logger.warn(originatingElement,
+            session.logger.warn(originatingElement,
                 "Template {$pathSegment} is not found in @$annotationName(\"$basePath\"). " +
                         "Fallback to ordered segments may cause an unpredictable result."
             )
@@ -60,6 +59,11 @@ object ProcessorOptions {
     }
 
     fun getTypeAdapterFactory(session: ProcessingSession): ClassName? {
-        return session.getOption(OPT_TYPE_ADAPTER_FACTORY)?.let { ClassName.bestGuess(it) }
+        return try {
+            session.getOption(OPT_TYPE_ADAPTER_FACTORY)?.let { ClassName.bestGuess(it) }
+        } catch (e: IllegalArgumentException) {
+            session.logger.warn(null, "Invalid class name in '$OPT_TYPE_ADAPTER_FACTORY' option.")
+            null
+        }
     }
 }

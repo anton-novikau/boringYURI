@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
+package boringyuri.dagger.util;
+
+import androidx.annotation.NonNull;
+
+import com.squareup.javapoet.ClassName;
+
+public interface DaggerTypeName {
+
+    @NonNull
+    ClassName MODULE = ClassName.get("dagger", "Module");
+    @NonNull
+    ClassName PROVIDES = ClassName.get("dagger", "Provides");
+
+}

@@ -118,7 +118,6 @@ class IndependentUriDataGeneratorStep(
                     pathSegment.segmentIndex
                 } else {
                     ProcessorOptions.warnOrderedSegmentsUsage(
-                        logger,
                         session,
                         pathName,
                         basePath,

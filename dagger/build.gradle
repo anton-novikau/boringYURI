@@ -42,12 +42,12 @@ artifacts {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    compileOnly project(':api')
+    compileOnly project(":processor")
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    implementation project(':api')
     implementation "com.squareup:javapoet:$javaPoetVersion"
-    implementation "org.apache.commons:commons-text:$commonsTextVersion"
-
     implementation "com.google.auto:auto-common:$autoCommonVersion"
     compileOnly "com.google.auto.service:auto-service:$autoServiceVersion"
     kapt "com.google.auto.service:auto-service:$autoServiceVersion"
@@ -66,10 +66,10 @@ publishing {
             artifact javadocJar
 
             groupId GROUP_ID
-            artifactId ARTIFACT_ID_PROCESSOR
+            artifactId ARTIFACT_ID_DAGGER
             version VERSION
 
-            configurePom(Boring(MavenPublication), ARTIFACT_ID_PROCESSOR)
+            configurePom(Boring(MavenPublication), ARTIFACT_ID_DAGGER)
         }
     }
 }
@@ -84,7 +84,7 @@ bintray {
     pkg {
         repo = REPO_ID
         userOrg = DEVELOPER_ID
-        name = ARTIFACT_ID_PROCESSOR
+        name = ARTIFACT_ID_DAGGER
         vcsUrl = VCS_URL
         websiteUrl = WEBSITE
         licenses = [LICENSE]

@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data.adapter;
+
+import androidx.annotation.NonNull;
+
+import boringyuri.api.adapter.BoringTypeAdapter;
+import boringyuri.dagger.sample.data.User;
+
+public class UserTypeAdapter implements BoringTypeAdapter<User> {
+
+    @NonNull
+    @Override
+    public String serialize(@NonNull User user) {
+        return user.getId() + ";" + user.getName();
+    }
+
+    @NonNull
+    @Override
+    public User deserialize(@NonNull String serialized) {
+        String[] userData = serialized.split(";");
+
+        return new User(Integer.parseInt(userData[0]), userData[1]);
+    }
+
+}

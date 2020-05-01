@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample
+
+import boringyuri.dagger.sample.di.DaggerAppComponent
+import dagger.android.AndroidInjector
+import dagger.android.DaggerApplication
+
+
+class App : DaggerApplication() {
+
+    private val appInjector by lazy { DaggerAppComponent.factory().create(this) }
+
+    override fun applicationInjector(): AndroidInjector<out DaggerApplication> = appInjector
+}

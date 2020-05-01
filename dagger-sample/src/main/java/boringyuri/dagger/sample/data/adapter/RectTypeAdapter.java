@@ -14,9 +14,26 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data.adapter;
+
+import android.graphics.Rect;
+
+import androidx.annotation.NonNull;
+
+import java.util.Objects;
+
+import boringyuri.api.adapter.BoringTypeAdapter;
+
+public class RectTypeAdapter implements BoringTypeAdapter<Rect> {
+    @NonNull
+    @Override
+    public String serialize(@NonNull Rect rect) {
+        return rect.flattenToString();
+    }
+
+    @NonNull
+    @Override
+    public Rect deserialize(@NonNull String serialized) {
+        return Objects.requireNonNull(Rect.unflattenFromString(serialized));
+    }
+}

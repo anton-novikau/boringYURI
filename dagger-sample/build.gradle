@@ -1,0 +1,85 @@
+/*
+ * Copyright 2020 Anton Novikau
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion project.compile_sdk_version
+    buildToolsVersion project.buildToolsVersion
+
+    defaultConfig {
+        applicationId "boringyuri.dagger.sample"
+        minSdkVersion project.min_sdk_version
+        targetSdkVersion project.target_sdk_version
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    implementation "androidx.core:core-ktx:$ktxVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+
+    // code generators
+    implementation project(':api')  // implementation 'org.boringyuri:boringyuri-api:1.0.0'
+    kapt project(':processor')      // kapt 'org.boringyuri:boringyuri-processor:1.0.0'
+    kapt project(':dagger')         // kapt 'org.boringyuri:boringyuri-dagger:1.1.0'
+
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation "com.google.dagger:dagger-android:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
+
+    // unit tests
+    testImplementation "junit:junit:$junitVersion"
+}
+
+kapt {
+    useBuildCache = true
+    javacOptions {
+        option("-Xmaxerrs", 1000) // max count of AP errors
+    }
+    arguments {
+        arg("boringyuri.type_adapter_factory", "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory")
+        arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8" // in order to compile Kotlin to java 8 bytecode
+    }
+}

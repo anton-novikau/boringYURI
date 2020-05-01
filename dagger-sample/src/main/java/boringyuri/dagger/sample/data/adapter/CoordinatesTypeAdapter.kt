@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package boringyuri.dagger.sample.data.adapter
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+import boringyuri.api.adapter.BoringTypeAdapter
+
+class CoordinatesTypeAdapter : BoringTypeAdapter<Pair<Long, Long>> {
+    override fun serialize(original: Pair<Long, Long>): String {
+        return "${original.first},${original.second}"
+    }
+
+    override fun deserialize(serialized: String): Pair<Long, Long> {
+        return serialized.split(",").let {
+            Pair(it[0].toLong(), it[1].toLong())
+        }
+    }
+}

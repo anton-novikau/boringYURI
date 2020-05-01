@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.di
+
+import boringyuri.dagger.sample.MainActivity
+import boringyuri.dagger.sample.di.scope.ActivityScope
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+
+@Module
+abstract class AppModule {
+
+    @ContributesAndroidInjector
+    @ActivityScope
+    abstract fun contributeMainActivity(): MainActivity
+
+}

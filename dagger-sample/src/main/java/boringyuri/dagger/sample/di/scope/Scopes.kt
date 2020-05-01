@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.di.scope
+
+import javax.inject.Scope
+
+
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ActivityScope
+
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+annotation class FragmentScope

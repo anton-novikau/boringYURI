@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data.adapter
+
+import boringyuri.api.adapter.BoringTypeAdapter
+import boringyuri.dagger.sample.data.Address
+
+class AddressTypeAdapter : BoringTypeAdapter<Address> {
+    override fun serialize(address: Address): String {
+        return "${address.city};${address.street};${address.zipCode}"
+    }
+
+    override fun deserialize(address: String): Address {
+        val addressData = address.split(";")
+
+        return Address(
+            addressData[0],
+            addressData.getOrNull(1),
+            addressData.getOrNull(2)
+        )
+    }
+}

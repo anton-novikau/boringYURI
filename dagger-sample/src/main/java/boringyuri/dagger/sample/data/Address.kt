@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data
+
+import boringyuri.api.adapter.TypeAdapter
+import boringyuri.dagger.sample.data.adapter.AddressTypeAdapter
+
+@TypeAdapter(AddressTypeAdapter::class)
+class Address constructor(val city: String, val street: String?, val zipCode: String? = null)

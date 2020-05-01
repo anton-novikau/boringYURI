@@ -14,9 +14,32 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data
+
+import android.net.Uri
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriData
+
+@UriData("/*/user/{id}/{title}")
+interface ContactDetailsData {
+    @Path
+    fun getId(): Long
+
+    @Param
+    fun getFirstName(): String
+
+    @Param
+    fun getLastName(): String?
+
+    @Path
+    fun getTitle(): String
+
+    @Param("address")
+    fun getHomeAddress(): Address
+
+    companion object {
+        @JvmStatic
+        fun create(uri: Uri): ContactDetailsData = ContactDetailsDataImpl(uri)
+    }
+}

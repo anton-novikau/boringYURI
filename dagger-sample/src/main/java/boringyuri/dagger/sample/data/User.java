@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+package boringyuri.dagger.sample.data;
+
+import boringyuri.api.adapter.TypeAdapter;
+import boringyuri.dagger.sample.data.adapter.UserTypeAdapter;
+
+@TypeAdapter(UserTypeAdapter.class)
+public class User {
+
+    private final int mId;
+
+    private final String mName;
+
+    public User(int id, String name) {
+        mId = id;
+        mName = name;
+    }
+
+    public int getId() {
+        return mId;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+}

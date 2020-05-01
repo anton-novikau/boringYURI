@@ -33,6 +33,9 @@ buildscript {
     ext.kotlinVersion = '1.3.72'
     ext.ktxVersion = '1.2.0'
 
+    // dagger
+    ext.daggerVersion = '2.25'
+
     // annotation processor
     ext.autoServiceVersion = '1.0-rc6'
     ext.autoCommonVersion = '0.10'

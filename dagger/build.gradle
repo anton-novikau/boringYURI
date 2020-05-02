@@ -19,7 +19,7 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
-apply from: rootProject.file('pom.gradle')
+apply from: rootProject.file('gradle/pom.gradle')
 
 group = GROUP_ID
 version = VERSION
@@ -96,4 +96,4 @@ bintray {
 }
 
 project.ext.publicationName = 'maven'
-apply from: rootProject.file('artifactory.gradle')
+apply from: rootProject.file('gradle/artifactory.gradle')

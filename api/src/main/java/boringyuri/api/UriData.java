@@ -104,7 +104,7 @@ public @interface UriData {
      * <code>&#64;Path</code> segments into an appropriate getter method.
      *</p>
      * <p>
-     * If the same data class is used for two or more different {@code Uri}s
+     * If the same data class is used for two or more different {@code Uri}s,
      * the wildcard <code>&#42;</code> can be used to replace the constant path
      * segment that varies in these {@code Uri}s. Example:
      * </p>
@@ -127,7 +127,7 @@ public @interface UriData {
      *     public interface UserData {
      *
      *          &#64;Path
-     *          long getId()
+     *          long getId();
      *
      *     }
      * </code></pre>
@@ -135,7 +135,7 @@ public @interface UriData {
      * Here the path segment <code>id</code> <b>can</b> be parsed from
      * <code>content://com.example.provider/42</code> using the {@code UriData}
      * class, but <b>can not</b> be parsed from
-     * <code>content://com.example.provider/user/42</code>
+     * <code>content://com.example.provider/user/42</code>.
      * </p>
      * <p>If the path doesn't start with a '/', the parser will prepend the
      * given path with a '/'.</p>

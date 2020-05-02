@@ -33,19 +33,19 @@ import java.lang.annotation.Target;
  *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
  *     interface UserProviderUriBuilder {
  *
- *          &#64;UriBuilder("user/regular")
+ *          &#64;UriBuilder("user/colleague")
  *          Uri buildRegularUserUri(@Param String phoneNumber, @Param String name);
  *
- *          &#64;UriBuilder("user/admin")
+ *          &#64;UriBuilder("user/friend")
  *          Uri buildAdminUserUri(@Param String phoneNumber, @Param String name);
  *
  *     }
  * </code></pre>
  * <p>
  * Calling {@code uriBuilder.buildRegularUserUri("10020042", "John Doe")} will produce
- * {@code content://com.example.provider/user/regular?phoneNumber="10020042"&name="John%20Doe"}
+ * {@code content://com.example.provider/user/colleague?phoneNumber="10020042"&name="John%20Doe"}
  * whereas {@code uriBuilder.buildAdminUserUri("20030042", "Jane Doe")} will produce
- * {@code content://com.example.provider/user/admin?phoneNumber="20030042"&name="Jane%20Doe"}
+ * {@code content://com.example.provider/user/friend?phoneNumber="20030042"&name="Jane%20Doe"}
  * </p>
  *
  * @see UriBuilder

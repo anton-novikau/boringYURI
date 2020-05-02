@@ -79,7 +79,7 @@ import java.lang.annotation.Target;
  * </p>
  * <p>
  * All method parameter annotations are copied to the getter methods and if the nullability is
- * defined for the parameter it will be validated when when it is parsed from the {@code Uri}.
+ * defined for the parameter it will be validated when it is parsed from the {@code Uri}.
  * </p>
  *
  * @see UriData

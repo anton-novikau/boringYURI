@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * primitive, primitive wrapper, {@code String} or {@code Uri}) or the type require some
  * non standard type serialization/deserialization.
  * </p>
- * <p>Here are some examples of how this annotation is used:</p>
+ * <p>Here are some examples of how this annotation can be used:</p>
  * <pre><code>
  *      &#64;TypeAdapter(UserTypeAdapter.class)
  *      public class User {

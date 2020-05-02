@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *
  * @see boringyuri.api.Param
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 @Repeatable(StringParams.class)
 public @interface StringParam {

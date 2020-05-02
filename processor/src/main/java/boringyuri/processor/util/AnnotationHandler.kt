@@ -56,8 +56,11 @@ class AnnotationHandler @JvmOverloads constructor(
     }
 
     fun isNullable(type: TypeMirror, element: Element): Boolean {
-        val variableType = TypeName.get(type)
-        if (variableType.isPrimitive) {
+        return isNullable(TypeName.get(type), element)
+    }
+
+    fun isNullable(type: TypeName, element: Element): Boolean {
+        if (type.isPrimitive) {
             return false
         }
 

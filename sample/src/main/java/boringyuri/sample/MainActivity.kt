@@ -18,11 +18,25 @@ package boringyuri.sample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.widget.TextView
+import boringyuri.sample.uri.UserProviderUriBuilder
 
 class MainActivity : AppCompatActivity() {
+
+    private val uriBuilder = UserProviderUriBuilder.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val userPhotoUri = uriBuilder.buildUserPhotoUri(42)
+
+        Log.d(TAG, "onCreate(): user Uri = $userPhotoUri")
+        findViewById<TextView>(R.id.uri).text = userPhotoUri.toString()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }

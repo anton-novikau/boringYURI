@@ -36,4 +36,31 @@ open class ProcessingSession(private val processingEnv: ProcessingEnvironment) {
 
     val filer: Filer by lazy { processingEnv.filer }
 
+    fun getOption(key: String): String? = processingEnv.options[key]
+
+    fun getOptionOrDefault(
+        key: String,
+        defaultValue: String
+    ): String = getOption(key) ?: defaultValue
+
+    fun getBooleanOption(key: String): Boolean? = processingEnv.options[key]?.toBoolean()
+
+    fun getBooleanOptionOrDefault(
+        key: String,
+        defaultValue: Boolean
+    ): Boolean = getBooleanOption(key) ?: defaultValue
+
+    fun getIntOption(key: String): Int? = processingEnv.options[key]?.toIntOrNull()
+
+    fun getIntOptionOrDefault(
+        key: String,
+        defaultValue: Int
+    ): Int = getIntOption(key) ?: defaultValue
+
+    fun getFloatOption(key: String): Float? = processingEnv.options[key]?.toFloatOrNull()
+
+    fun getFloatOptionOrDefault(
+        key: String,
+        defaultValue: Float
+    ): Float = getFloatOption(key) ?: defaultValue
 }

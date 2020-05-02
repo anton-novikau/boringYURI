@@ -67,35 +67,78 @@ import java.lang.annotation.Target;
  * similar to the one described for {@link WithUriData}:
  * </p>
  * <pre><code>
- *     public final class UserDataImpl {
+ *     public final class UserDataImpl implements UserData {
  *         &#64;NonNull
- *         private final Uri mDataUri;
+ *         private final Uri dataUri;
  *
  *         ...
  *
- *         private String mPhoneNumber;
+ *         private String phoneNumber;
  *
- *         private String mName;
+ *         private String name;
  *
  *         public UserDataImpl(&#64;NonNull Uri uri) {
- *             mDataUri = uri;
+ *             dataUri = uri;
  *         }
  *
  *         public String getPhoneNumber() {
  *             ...
- *             return mPhoneNumber;
+ *             return phoneNumber;
  *         }
  *
  *         public String getName() {
  *             ...
- *             return mName;
+ *             return name;
  *         }
  *     }
  * </code></pre>
  *
  * @see WithUriData
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
 public @interface UriData {
+    /**
+     * <p>
+     * Relative {@code Uri} path that can be used as a reference to parse
+     * <code>&#64;Path</code> segments into an appropriate getter method.
+     *</p>
+     * <p>
+     * If the same data class is used for two or more different {@code Uri}s,
+     * the wildcard <code>&#42;</code> can be used to replace the constant path
+     * segment that varies in these {@code Uri}s. Example:
+     * </p>
+     * <pre><code>
+     *     &#64;UriData("/user/&#42;/{id}")
+     *     public interface UserData {
+     *          ....
+     *     }
+     * </code></pre>
+     * <p>
+     * Which means that the same {@code UserData} implementation can be used to
+     * parse the data from <code>/user/friend/42</code> and from
+     * <code>/user/colleague/24</code>.
+     * </p>
+     * <p>If the path is empty it means the first variable path segment will
+     * be expected to be in the very first position after the authority of
+     * the {@code Uri}. Example:</p>
+     * <pre><code>
+     *     &#64;UriData
+     *     public interface UserData {
+     *
+     *          &#64;Path
+     *          long getId();
+     *
+     *     }
+     * </code></pre>
+     * <p>
+     * Here the path segment <code>id</code> <b>can</b> be parsed from
+     * <code>content://com.example.provider/42</code> using the {@code UriData}
+     * class, but <b>can not</b> be parsed from
+     * <code>content://com.example.provider/user/42</code>.
+     * </p>
+     * <p>If the path doesn't start with a '/', the parser will prepend the
+     * given path with a '/'.</p>
+     */
+    String value() default "";
 }

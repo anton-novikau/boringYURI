@@ -26,7 +26,7 @@ import boringyuri.api.UriBuilder;
 import boringyuri.api.UriFactory;
 import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.User;
-import boringyuri.sample.data.adapter.UserTypeAdapter;
+import boringyuri.sample.data.adapter.AdminTypeAdapter;
 
 @UriFactory(scheme = "https", authority="example.com")
 public interface UserProviderUriBuilder {
@@ -38,13 +38,27 @@ public interface UserProviderUriBuilder {
             @Param("phone_number") String phoneNumber);
 
     @NonNull
-    @UriBuilder("/user")
+    @UriBuilder("/user/{userId}")
     Uri buildUserUri(@Path int userId);
 
     @NonNull
     @UriBuilder("/user")
-    Uri buildUserUri(
+    Uri buildUserUri(@Param("data") @NonNull User user);
+
+    @NonNull
+    @UriBuilder("/admin")
+    Uri buildAdminUri(
             @Param("data")
-            @TypeAdapter(UserTypeAdapter.class)
+            @TypeAdapter(AdminTypeAdapter.class)
             @NonNull User user);
+
+    @NonNull
+    @UriBuilder("/user/{id}/photo")
+    Uri buildUserPhotoUri(@Path("id") int userId);
+
+    @NonNull
+    static UserProviderUriBuilder create() {
+        return new UserProviderUriBuilderImpl();
+    }
+
 }

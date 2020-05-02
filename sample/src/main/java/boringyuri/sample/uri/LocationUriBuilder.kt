@@ -47,4 +47,10 @@ interface LocationUriBuilder {
     fun buildGeocodeUri(
         @Param @TypeAdapter(CoordinatesTypeAdapter::class) latlng: Pair<Long, Long>,
         @Param address: Address): Uri
+
+    companion object {
+        @JvmStatic
+        fun create(): LocationUriBuilder = LocationUriBuilderImpl()
+    }
+
 }

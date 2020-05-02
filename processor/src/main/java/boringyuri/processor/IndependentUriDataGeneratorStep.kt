@@ -18,25 +18,27 @@ package boringyuri.processor
 import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
-import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.ext.createFieldSpec
+import boringyuri.processor.uripart.MethodReadPathSegment
+import boringyuri.processor.uripart.MethodReadQueryParameter
+import boringyuri.processor.uripart.ReadQueryParameter
+import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.Logger
+import boringyuri.processor.util.ProcessorOptions
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.SetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
-import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.*
-import javax.lang.model.type.DeclaredType
 import javax.lang.model.util.ElementFilter
 
 class IndependentUriDataGeneratorStep(
     session: ProcessingSession,
-    private val annotationHandler: AnnotationHandler
-) : UriDataGeneratorStep(session) {
+    annotationHandler: AnnotationHandler
+) : UriDataGeneratorStep(session, annotationHandler) {
 
     override fun annotations(): Set<Class<out Annotation>> {
         return ImmutableSet.of(UriData::class.java)
@@ -49,7 +51,7 @@ class IndependentUriDataGeneratorStep(
         val deferred = hashSetOf<Element>()
         for (annotatedClass in annotatedClasses) {
             if (annotatedClass.kind != ElementKind.INTERFACE) {
-                session.logger.warn(
+                logger.warn(
                     annotatedClass,
                     "@%s can only be applied to interface",
                     UriData::class.java.simpleName
@@ -57,7 +59,19 @@ class IndependentUriDataGeneratorStep(
                 continue
             }
 
-            val generated = generateUriDataClass(annotatedClass)
+            val modifiers = annotatedClass.modifiers
+            if (modifiers.contains(Modifier.PRIVATE)) {
+                logger.warn(
+                    annotatedClass,
+                    "@%s can not be applied to a private interface",
+                    UriData::class.simpleName
+                )
+                continue
+            }
+
+            val uriMetadata = obtainUriMetadata(annotatedClass)
+
+            val generated = generateUriDataClass(annotatedClass, uriMetadata)
             if (!generated) {
                 deferred.add(annotatedClass)
             }
@@ -66,128 +80,140 @@ class IndependentUriDataGeneratorStep(
         return deferred
     }
 
-    private fun generateUriDataClass(uriDataInterface: TypeElement): Boolean {
-        val packageElement = session.elementUtils.getPackageOf(uriDataInterface)
+    private fun obtainUriMetadata(sourceElement: TypeElement): UriMetadata {
+        val uriDataAnnotation: UriData = sourceElement.getAnnotation(UriData::class.java)
+
+        val basePath = uriDataAnnotation.value
+        // Base path may contain constant segments, wildcard segments and templates
+        // for method parameters. We will replace the templates with the path parameters
+        // on the next step. All constants and wildcards will be filtered out on obtaining
+        // the base path segments.
+        val segments = obtainBasePathSegments(basePath, sourceElement)
+        val fieldSpecs = arrayListOf<FieldSpec>()
+        val queryParams = arrayListOf<ReadQueryParameter>()
+
+        for (element in sourceElement.enclosedElements) {
+            val method = toExecutableElementOrNull(element) ?: continue
+
+            val methodName = method.simpleName.toString()
+            val paramName = StringUtils.uncapitalize(
+                GETTER_PATTERN.find(methodName)?.run { groupValues[1] } ?: methodName
+            )
+
+            val field = method.createFieldSpec(
+                paramName,
+                annotationHandler
+            ).also { fieldSpecs.add(it) }
+            val nullable = annotationHandler.isNullable(method.returnType, method)
+
+            val pathAnnotation: Path? = method.getAnnotation(Path::class.java)
+            if (pathAnnotation != null) {
+                if (nullable) {
+                    logger.error(method, "Path segment '$paramName' must be explicitly non-null.")
+                }
+
+                val pathName = pathAnnotation.value.ifEmpty { paramName }
+                val pathSegment = segments[pathName]
+                val segmentIndex = if (pathSegment is TemplatePathSegment) {
+                    pathSegment.segmentIndex
+                } else {
+                    ProcessorOptions.warnOrderedSegmentsUsage(
+                        session,
+                        pathName,
+                        basePath,
+                        UriData::class,
+                        method
+                    )
+
+                    // non-named path segment will be added to the end of the map
+                    segments.size
+                }
+                // Previously saved VariableNameSegment helps to preserve
+                // the segment position of the expected Uri path.
+                segments[pathName] = MethodReadPathSegment(
+                    segmentIndex,
+                    pathName,
+                    field,
+                    uriField,
+                    method
+                )
+            } else {
+                val paramAnnotation: Param = method.getAnnotation(Param::class.java)
+                val queryParamName = paramAnnotation.value.ifEmpty { paramName }
+                queryParams.add(
+                    MethodReadQueryParameter(queryParamName, field, uriField, nullable, method)
+                )
+            }
+        }
+
+        return UriMetadata(fieldSpecs, segments.values.toList(), queryParams)
+    }
+
+    private fun toExecutableElementOrNull(element: Element): ExecutableElement? {
+        if (ElementKind.METHOD != element.kind) {
+            return null  // skip non-method members
+        }
+
+        val modifiers = element.modifiers
+        if (modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.DEFAULT)) {
+            return null  // skip static or default methods
+        }
+
+        val methodElement = element as ExecutableElement
+        if (element.getAnnotation(Path::class.java) == null
+            && element.getAnnotation(Param::class.java) == null) {
+            logger.error(
+                methodElement,
+                "'${methodElement.simpleName}' must have either @%s or @%s",
+                Path::class.simpleName,
+                Param::class.simpleName
+            )
+            return null // skip unsupported method
+        }
+
+        val returnType = TypeName.get(methodElement.returnType)
+        if (TypeName.VOID == returnType) {
+            logger.error(
+                element,
+                "@%s and @%s can be applied only to getter methods",
+                Path::class.simpleName,
+                Param::class.simpleName
+            )
+            return null  // skip unsupported method
+        }
+
+        if (methodElement.parameters.isNotEmpty()) {
+            val parameters = methodElement.parameters.joinToString { it.simpleName }
+            logger.warn(element, "Method parameters [$parameters] will be ignored")
+        }
+
+        return methodElement
+    }
+
+    private fun generateUriDataClass(
+        sourceElement: TypeElement,
+        uriMetadata: UriMetadata
+    ): Boolean {
+        val packageElement = elementUtils.getPackageOf(sourceElement)
         val packageName = packageElement.qualifiedName.toString()
-        val simpleClassName = uriDataInterface.simpleName.toString() + CONTAINER_IMPL_SUFFIX
+        val simpleClassName = sourceElement.simpleName.toString() + CONTAINER_IMPL_SUFFIX
         val className = ClassName.get(packageName, simpleClassName)
 
         val content = generateUriDataClassContent(
             className,
-            TypeSourceElement(uriDataInterface, annotationHandler, session.logger)
+            sourceElement,
+            uriMetadata,
+            TypeName.get(sourceElement.asType())
         )
 
-        writeSourceFile(className, content, uriDataInterface)
+        writeSourceFile(className, content, sourceElement)
 
         return true
     }
 
-    private class TypeSourceElement internal constructor(
-        private val element: TypeElement,
-        private val annotationHandler: AnnotationHandler,
-        private val logger: Logger
-    ) : SourceElement {
-
-        override fun superInterface(): TypeName = TypeName.get(element.asType())
-
-        override fun asElement(): Element = element
-
-        override fun obtainParamElements(): List<ParameterElement> {
-            val methods = arrayListOf<ParameterElement>()
-            val enclosedElements = element.enclosedElements
-            for (element in enclosedElements) {
-                if (ElementKind.METHOD != element.kind) {
-                    continue  // skip non-method members
-                }
-
-                val modifiers = element.modifiers
-                if (modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.DEFAULT)) {
-                    continue  // skip static or default methods
-                }
-
-                val methodElement = element as ExecutableElement
-                val returnType = TypeName.get(methodElement.returnType)
-                if (TypeName.VOID == returnType) {
-                    if (element.getAnnotation(Path::class.java) != null
-                        || element.getAnnotation(Param::class.java) != null
-                    ) {
-                        logger.warn(
-                            element,
-                            "@%s and @%s can be applied only to getter methods",
-                            Path::class.java.simpleName,
-                            Param::class.java.simpleName
-                        )
-                    }
-                    continue  // skip unsupported method
-                }
-
-                methods.add(ExecutableParameterElement(methodElement, annotationHandler))
-            }
-
-            return methods
-        }
-
-    }
-
-    private class ExecutableParameterElement internal constructor(
-        private val element: ExecutableElement,
-        private val annotationHandler: AnnotationHandler
-    ) : ParameterElement {
-
-        override fun asElement(): Element = element
-
-        override val paramName by lazy { obtainParamName() }
-
-        override val fieldSpec by lazy { createFieldSpec() }
-
-        override val typeAdapter by lazy { obtainTypeAdapter() }
-
-        override val isNullable: Boolean
-            get() = annotationHandler.isNullable(element.returnType, element)
-
-        override fun createMethodSignature(): MethodSpec.Builder {
-            return MethodSpec.methodBuilder(element.simpleName.toString())
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(annotationHandler.toAnnotationSpec(element.annotationMirrors))
-                .returns(fieldSpec.type)
-        }
-
-        private fun obtainParamName(): String {
-            val methodName = element.simpleName.toString()
-            val matcher = GETTER_PATTERN.matcher(methodName)
-
-            return StringUtils.uncapitalize(
-                if (matcher.matches()) matcher.group(1) else methodName
-            )
-        }
-
-        private fun createFieldSpec(): FieldSpec {
-            val fieldName = FIELD_PREFIX + StringUtils.capitalize(paramName)
-            val returnType = TypeName.get(element.returnType)
-
-            return FieldSpec.builder(returnType, fieldName, Modifier.PRIVATE)
-                .addAnnotations(annotationHandler.toAnnotationSpec(element.annotationMirrors))
-                .build()
-        }
-
-        private fun obtainTypeAdapter(): TypeAdapter? {
-            val adapter = element.getAnnotation(TypeAdapter::class.java)
-            if (adapter != null) {
-                return adapter
-            }
-
-            val returnType = element.returnType
-
-            return if (returnType is DeclaredType) {
-                returnType.asElement().getAnnotation(TypeAdapter::class.java)
-            } else null
-        }
-
-    }
-
     private companion object {
         const val CONTAINER_IMPL_SUFFIX = "Impl"
-        val GETTER_PATTERN = "^(?:get|is|has|are)([A-Z][a-zA-Z0-9]+)$".toRegex().toPattern()
+        val GETTER_PATTERN = "^(?:get|is|has|are)([A-Z][a-zA-Z0-9]+)$".toRegex()
     }
 
 }

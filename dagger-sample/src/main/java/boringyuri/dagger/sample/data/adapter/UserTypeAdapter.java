@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package boringyuri.sample.data.adapter;
+package boringyuri.dagger.sample.data.adapter;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 
 import boringyuri.api.adapter.BoringTypeAdapter;
-import boringyuri.api.adapter.TypeAdapter;
+import boringyuri.dagger.sample.data.User;
 
-public class PairStringIntTypeAdapter implements BoringTypeAdapter<Pair<String, Integer>> {
+public class UserTypeAdapter implements BoringTypeAdapter<User> {
+
     @NonNull
     @Override
-    public String serialize(@NonNull Pair<String, Integer> original) {
-        return original.first + "," + original.second;
+    public String serialize(@NonNull User user) {
+        return user.getId() + ";" + user.getName();
     }
 
     @NonNull
     @Override
-    public Pair<String, Integer> deserialize(@NonNull String serialized) {
-        String[] parts = serialized.split(",");
+    public User deserialize(@NonNull String serialized) {
+        String[] userData = serialized.split(";");
 
-        return Pair.create(parts[0], Integer.valueOf(parts[1]));
+        return new User(Integer.parseInt(userData[0]), userData[1]);
     }
+
 }

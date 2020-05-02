@@ -64,7 +64,7 @@ class UserUriBuilderImpl implements UserUriBuilder {
                 .scheme("https")
                 .authority("example.com");
 
-        builder.encodedPath("/user");
+        builder.appendEncodedPath("user");
         if (name != null) {
             builder.appendQueryParameter("name", name);
         }
@@ -102,8 +102,8 @@ You need to annotate the appropriate method parameter with `@Path`:
 interface UserUriBuilder {
 
     @NonNull
-    @UriBuilder("/user")
-    Uri buildUserUri(@Path int userId);
+    @UriBuilder("/user/{id}")
+    Uri buildUserUri(@Path("id") int userId);
 
 }
 ```
@@ -118,15 +118,36 @@ class UserUriBuilderImpl implements UserUriBuilder {
                 .scheme("https")
                 .authority("example.com");
 
-        builder.encodedPath("/user");
+        builder.appendEncodedPath("user");
         builder.appendPath(String.valueOf(userId));
 
         return builder.build();
     }
 }
 ```
-`@Path` can be used with as many method parameters as you need, but you should preserve the
-order as it's the order of the path segments in the `Uri`, i.e. for the builder method:
+`@Path` can be used with as many method parameters as you need. You should just provide a path
+segment name in the `@UriBuilder` base path. The segment name can be specified either in a
+ `value()` parameter of `@Path` or a method parameter name can be used. The order of the path
+method parameters doesn't matter so you're free do define them as you like:
+
+```java
+    @UriBuilder("/user/{group}/{id}")
+    Uri buildUserUri(@Path("id") int userId, @Path String group);
+```
+
+In the example above `id` is explicitly named path segment, `group` is implicitly named
+(i.e. method parameter name is used) and the order of the method parameters differs from the order
+of the segments in the base path. So calling `builder.buildUserUri(42, "students")` will give you
+`https://example.com/user/students/42`.
+
+**IMPORTANT:** if you use code obfuscation it is highly recommended to specify the segment name in
+`@Path` or `@Param` annotations explicitly or add the files that contain these annotation in
+ProGuard (or R8) keep list. Otherwise, when the obfuscator change the method parameter names,
+you'll have an unexpected result.
+
+Path segment name is not obligatory, but you should preserve the order as it's the order of
+the path method parameter as they appear in the `Uri` in exactly the same order as defined in
+the method signature, i.e. for the builder method:
 
 ```java
     @UriBuilder("/user")
@@ -143,9 +164,13 @@ But calling the builder with the parameters switched:
     Uri buildUserUri(@Path int userId, @Path String group);
 ```
 
-Will give you `https://example.com/user/42/students`
+Will give you `https://example.com/user/42/students`.
 
-**IMPORTANT:** `@Path` method parameters **can not be nullable**.
+**NOTE:** relying on the method parameters order is highly not recommended as it gives less
+flexibility and there is a bigger chance to make a mistake. Use the named path segments instead.
+
+**IMPORTANT:** `@Path` method parameters **can not be nullable**. They must be explicitly
+annotated with `@NonNull` in Java or must have a non-nullable type in Kotlin.
 
 ### Types
 
@@ -220,7 +245,7 @@ interface UserUriBuilder {
 ```
 
 And calling `builder.buildUserUri(new User(42, "John Doe))` will give you
-`https://example.com/user?data="42;John%20Doe"`
+`https://example.com/user?data="42%3BJohn%20Doe"`, where `%3B` is a url encoded semicolon `;`.
 
 #### Platform or Library specific types
 
@@ -262,7 +287,7 @@ class CoordinatesTypeAdapter implements BoringTypeAdapter<Pair<Double, Double>> 
 Calling `builder.buildGeocodeUri(Pair.create(53.893009, 27.567444))` will give you
 `https://maps.example.com/maps/api/geocode?latlng=53.893009,27.567444`
 
-**NOTE:** Specifying `@TypeAdapter` at use will override the standard type conversion (eg. if you
+**NOTE:** specifying `@TypeAdapter` at use will override the standard type conversion (eg. if you
 need a different decimal format for a number).  
 
 ### Constant query parameters
@@ -298,7 +323,7 @@ https://maps.example.com/maps/api/staticmap?lat=53.893009&lng=27.567444&sensor=t
 https://maps.example.com/maps/api/staticmap?lat=37.773972&lng=-122.431297&sensor=true&zoom=2.5
 ```
 
-**NOTE:** One `Uri` builder method may have many constant query parameters of the same type.
+**NOTE:** one `Uri` builder method may have many constant query parameters of the same type.
 
 ### Deserialize data from Uri
 
@@ -310,7 +335,7 @@ have its own  `ContentProvider`, so it becomes a receiver of the `Uri`.
 @UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority = "boringyuri.sample.provider")
 interface ContactUriBuilder {
 
-    @UriBuilder("file/photo")
+    @UriBuilder("/file/photo/{group}/{contactId}")
     @WithUriData
     Uri buildContactPhotoUri(
             @Path String group,
@@ -404,14 +429,14 @@ with getters for each of the path segments or query parameters that you need to 
  and add `@UriData` to the interface:
 
 ```java
-@UriData
+@UriData("/file/photo/{group}/{id}")
 interface ContactPhotoUriData {
 
     @NonNull
     @Path
     String getGroup();
 
-    @Path
+    @Path("id")
     long getContactId();
 
     @Nullable
@@ -424,6 +449,40 @@ interface ContactPhotoUriData {
 
 For this interface you'll have a generated implementation similar to the one for `@WithUriData`
 with the only difference that it also implements `ContactPhotoUriData`.
+
+**NOTE:** `@UriData` may have a base `Uri` path with placeholders for segments, similar to the one
+in `@UriBuilder`. If the same data class is used for two or more different `Uri`s, the wildcard
+`*` can be used to replace the constant path segment that varies in these `Uri`s. Example:
+
+```java
+@UriData("/user/*/{id}")
+public interface UserData {
+    ....
+}
+```
+Which means that the same `UserData` implementation can be used to parse data from
+`/user/friend/42` and from `/user/colleague/24`.
+
+If the base path is empty in `@UriData`, it means the first variable path segment will be expected
+to be in the very first position after the authority of the `Uri`. Example:
+
+```java
+@UriData
+public interface UserData {
+
+    @Path
+    long getId();
+      
+}
+```
+    
+Here the path segment `id` can be parsed from `content://com.example.provider/42` using
+the `UriData` class, but can not be parsed from `content://com.example.provider/user/42`.
+
+**NOTE:** when the base path is not defined in `@UriData`, the order of the getter methods will
+be used to parse the specific segments. Relying on the method order is **highly not recommended**
+as it may give an unpredictable result and it's easier to make a mistake. So named path segments
+are always more preferable.
 
 **IMPORTANT:** the cost of the "independence" is that you have to manage manually the type
 consistency of the builder method parameters and the getters of the data class (if you have the
@@ -449,8 +508,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.0.0"
-  annotationProcessor "org.boringyuri:boringyuri-processor:1.0.0"
+  implementation "org.boringyuri:boringyuri-api:1.1.0"
+  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.0"
 }
 ```
 
@@ -460,8 +519,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.0.0"
-  kapt "org.boringyuri:boringyuri-processor:1.0.0"
+  implementation "org.boringyuri:boringyuri-api:1.1.0"
+  kapt "org.boringyuri:boringyuri-processor:1.1.0"
 }
 ```
 Snapshots of the development version are available in [JFrog's snapshots repository][4].
@@ -473,6 +532,48 @@ repositories {
   maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
 ```
+
+## Configuration
+
+`Boring Yuri`'s annotation processors support the following configuration options:
+
+ * `boringyuri.type_adapter_factory` – option to specify the `BoringTypeAdapter` factory class
+  (it must be a fully qualified name) and to enable instance caching for the created adapters.
+  Enabling this option allows to use the memory more efficiently and to create every instance of
+  the specific type adapter only once. When the option is turned off, every instance of the adapter
+  is created at use which gives to garbage collector more work.
+ * `boringyuri.suppress_warning.ordered_segments` – every time you use ordered path segments
+  instead of named path segments, you'll see the a compilation warning message `Template
+  {path name} is not found in @UriBuilder("/base/path"). Fallback to ordered segments may
+  cause an unpredictable result`. This message here is to warn that the ordered path approach
+  is not recommended and you'd better switch to the named path segments. But if you're aware of
+  what you're doing, you may turn the message off setting the option to `true`.
+
+To enable any of the options above you need to include the following in your app module
+`build.gradle` file:
+
+With Java only:
+
+```groovy
+android {
+    javaCompileOptions {
+        annotationProcessorOptions {
+            arguments = ["option_name", "option_value"]
+        }
+    }
+}
+```
+
+With Kotlin:
+
+```groovy
+kapt {
+    arguments {
+        arg("option_name", "option_value")
+    }
+}
+```
+
 ## License
 
 ```

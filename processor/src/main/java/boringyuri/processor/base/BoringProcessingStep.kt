@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils
 import java.io.IOException
 import javax.lang.model.element.Element
 
-
 abstract class BoringProcessingStep(
     protected val session: ProcessingSession
 ) : BasicAnnotationProcessor.ProcessingStep {
@@ -33,6 +32,10 @@ abstract class BoringProcessingStep(
     abstract override fun process(
         elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
     ): Set<Element>
+
+    protected val logger = session.logger
+    protected val typeUtils = session.typeUtils
+    protected val elementUtils = session.elementUtils
 
     open fun onProcessingOver() {
         // NO-OP

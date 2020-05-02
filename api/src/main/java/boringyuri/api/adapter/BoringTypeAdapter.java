@@ -94,18 +94,18 @@ import androidx.annotation.NonNull;
  *     </li>
  * </ol>
  *
- * @param <T> Type to convert into String and back into the object of the type T
+ * @param <T> Type to convert into String and back into the object.
  */
 public interface BoringTypeAdapter<T> {
     /**
      * Converts {@code original} object of the specified type {@code T} to {@code String}.
      */
     @NonNull
-    String serialize(@NonNull T original);
+    String serialize(@NonNull T value);
 
     /**
      * Converts the given {@code String} back to the object of the specified type {@code T}.
      */
     @NonNull
-    T deserialize(@NonNull String serialized);
+    T deserialize(@NonNull String value);
 }

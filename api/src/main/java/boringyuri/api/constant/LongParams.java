@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * method with two or more different constant integer or long integer query parameters.
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface LongParams {
     LongParam[] value();
 }

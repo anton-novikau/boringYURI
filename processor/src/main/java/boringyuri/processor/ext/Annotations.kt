@@ -20,7 +20,6 @@ import boringyuri.api.adapter.TypeAdapter
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 
-
 fun TypeAdapter.valueMirror(): TypeMirror? = try {
     value
     null // never happens in these annotation processors

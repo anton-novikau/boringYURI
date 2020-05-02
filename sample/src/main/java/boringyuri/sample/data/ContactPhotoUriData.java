@@ -27,13 +27,13 @@ import boringyuri.api.UriData;
 import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.adapter.RectTypeAdapter;
 
-@UriData
+@UriData("/*/{group_name}/*/{contact_id}")
 public interface ContactPhotoUriData {
     @NonNull
-    @Path
+    @Path("group_name")
     String getGroup();
 
-    @Path
+    @Path("contact_id")
     long getContactId();
 
     @Nullable

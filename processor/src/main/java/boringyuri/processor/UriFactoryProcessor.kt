@@ -15,16 +15,14 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriBuilder
-import boringyuri.api.WithUriData
+import boringyuri.api.*
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.api.constant.*
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.util.AnnotationHandler
+import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import com.squareup.javapoet.ClassName
@@ -32,6 +30,7 @@ import com.squareup.javapoet.TypeName
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
 import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
+import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
@@ -39,18 +38,23 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
-class MediaUriProcessor : BoringAnnotationProcessor() {
+@SupportedOptions(
+    ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING,
+    ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
+)
+class UriFactoryProcessor : BoringAnnotationProcessor() {
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return ImmutableSet.of(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-            MediaUriGeneratorStep(session, annotationHandler)
+            UriFactoryGeneratorStep(session, annotationHandler)
         )
     }
 
     private companion object {
         val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+            ClassName.get(UriFactory::class.java),
             ClassName.get(UriBuilder::class.java),
             ClassName.get(WithUriData::class.java),
             ClassName.get(TypeAdapter::class.java),

@@ -53,9 +53,9 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
 
     // code generators
-    implementation project(':api')  // implementation 'org.boringyuri:boringyuri-api:1.0.0'
-    kapt project(':processor')      // kapt 'org.boringyuri:boringyuri-processor:1.0.0'
-    kapt project(':dagger')         // kapt 'org.boringyuri:boringyuri-dagger:1.1.0'
+    implementation project(':api')  // implementation "org.boringyuri:boringyuri-api:$VERSION"
+    kapt project(':processor')      // kapt "org.boringyuri:boringyuri-processor:$VERSION"
+    kapt project(':dagger')         // kapt "org.boringyuri:boringyuri-dagger:$VERSION"
 
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"

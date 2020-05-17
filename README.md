@@ -606,8 +606,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.0"
-  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.0"
+  implementation "org.boringyuri:boringyuri-api:1.1.1"
+  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.1"
 }
 ```
 
@@ -617,8 +617,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.0"
-  kapt "org.boringyuri:boringyuri-processor:1.1.0"
+  implementation "org.boringyuri:boringyuri-api:1.1.1"
+  kapt "org.boringyuri:boringyuri-processor:1.1.1"
 }
 ```
 Snapshots of the development version are available in [JFrog's snapshots repository][4].

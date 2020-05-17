@@ -52,6 +52,7 @@ class VariableWriteQueryParameter(
     private val methodParam: ParameterSpec,
     private val parameter: VariableElement,
     private val nullable: Boolean,
+    private val defaultValue: String?,
     private val builderName: String
 ) : QueryParameter {
 
@@ -78,6 +79,15 @@ class VariableWriteQueryParameter(
         )
 
         if (nullable) {
+            if (defaultValue != null) {
+                appendQueryBlock.nextControlFlow("else")
+                appendQueryBlock.addStatement(
+                    "\$L.appendQueryParameter(\$S, \$S)",
+                    builderName,
+                    name,
+                    defaultValue
+                )
+            }
             appendQueryBlock.endControlFlow()
         }
 
@@ -91,13 +101,14 @@ class VariableReadQueryParameter(
     paramField: FieldSpec,
     uriField: FieldSpec,
     nullable: Boolean,
+    private val defaultValue: String?,
     private val parameterElement: VariableElement
-) : BaseReadQueryParameter(name, paramField, uriField, nullable, parameterElement) {
+) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue, parameterElement) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
     ): MethodSpec.Builder {
-        return parameterElement.createMethodSignature(annotationHandler)
+        return parameterElement.createMethodSignature(defaultValue, annotationHandler)
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
@@ -111,13 +122,14 @@ class MethodReadQueryParameter(
     paramField: FieldSpec,
     uriField: FieldSpec,
     nullable: Boolean,
+    private val defaultValue: String?,
     private val parameterElement: ExecutableElement
-) : BaseReadQueryParameter(name, paramField, uriField, nullable, parameterElement) {
+) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue, parameterElement) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
     ): MethodSpec.Builder {
-        return parameterElement.createMethodSignature(annotationHandler)
+        return parameterElement.createMethodSignature(defaultValue, annotationHandler)
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
@@ -131,6 +143,7 @@ abstract class BaseReadQueryParameter(
     override val paramField: FieldSpec,
     private val uriField: FieldSpec,
     private val nullable: Boolean,
+    private val defaultValue: String?,
     private val originatingElement: Element
 ) : ReadQueryParameter {
 
@@ -149,7 +162,7 @@ abstract class BaseReadQueryParameter(
             name
         )
 
-        if (!paramField.type.isPrimitive && !nullable) {
+        if (!nullable && defaultValue == null) {
             statement.beginControlFlow("if (\$L == null)", localVarName)
             statement.addStatement(
                 "throw new \$T(\$S + \$N)",
@@ -158,10 +171,32 @@ abstract class BaseReadQueryParameter(
                 uriField
             )
             statement.endControlFlow()
-        }
-        if (nullable) {
+        } else {
             statement.beginControlFlow("if (\$L == null)", localVarName)
-            statement.addStatement("\$N = null", paramField)
+            when {
+                defaultValue == null -> {
+                    statement.addStatement("\$N = null", paramField)
+                }
+                typeAdapter != null -> {
+                    statement.add(
+                        typeConverter.buildCustomDeserializeBlock(
+                            CodeBlock.of("\$S", defaultValue).toString(),
+                            paramField,
+                            typeAdapter
+                        )
+                    )
+                }
+                else -> {
+                    statement.addStatement("\$N = \$L",
+                        paramField,
+                        typeConverter.buildStandardDeserializeBlockForDefault(
+                            defaultValue,
+                            paramField.type,
+                            originatingElement
+                        )
+                    )
+                }
+            }
             statement.nextControlFlow("else")
         }
 
@@ -176,13 +211,14 @@ abstract class BaseReadQueryParameter(
                 localVarName,
                 paramField,
                 nullable,
+                defaultValue,
                 originatingElement
             )
         }
 
         statement.add(deserializeBlock)
 
-        if (nullable) {
+        if (nullable || defaultValue != null) {
             statement.endControlFlow()
         }
 

@@ -27,8 +27,12 @@ class AnnotationHandler @JvmOverloads constructor(
     private val internalAnnotations: Set<TypeName> = emptySet()
 ) {
 
-    fun toAnnotationSpec(annotations: List<AnnotationMirror>): Set<AnnotationSpec> {
-        val annotationSpecs = LinkedHashSet<AnnotationSpec>(annotations.size)
+    fun toAnnotationSpec(
+        annotations: List<AnnotationMirror>,
+        ensureNonNull: Boolean = false
+    ): List<AnnotationSpec> {
+        val annotationSpecs = ArrayList<AnnotationSpec>(annotations.size)
+        var isNonNullPresent = false
         for (annotation in annotations) {
             val annotationTypeName = ClassName.get(annotation.annotationType)
             if (internalAnnotations.contains(annotationTypeName)) {
@@ -39,17 +43,30 @@ class AnnotationHandler @JvmOverloads constructor(
             }
 
             // replace JetBrains @Nullable and @NotNull with the appropriate androidx annotations
-            when {
-                JB_NON_NULL == annotationTypeName -> {
+            when(annotationTypeName) {
+                JB_NON_NULL, NON_NULL -> {
+                    isNonNullPresent = true
                     annotationSpecs.add(AnnotationSpec.builder(NON_NULL).build())
                 }
-                JB_NULLABLE == annotationTypeName -> {
-                    annotationSpecs.add(AnnotationSpec.builder(NULLABLE).build())
+                JB_NULLABLE, NULLABLE -> {
+                    if (ensureNonNull) {
+                        // we'll replace @Nullable with @NonNull so it's present then
+                        isNonNullPresent = true
+                    }
+                    // replace @Nullable with @NonNull if requested to ensure that it present
+                    annotationSpecs.add(
+                        AnnotationSpec.builder(if (ensureNonNull) NON_NULL else NULLABLE).build()
+                    )
                 }
                 else -> {
                     annotationSpecs.add(AnnotationSpec.get(annotation))
                 }
             }
+        }
+
+        if (ensureNonNull && !isNonNullPresent) {
+            // add @NonNull if the list of annotations doesn't contain it
+            annotationSpecs.add(AnnotationSpec.builder(NON_NULL).build())
         }
 
         return annotationSpecs

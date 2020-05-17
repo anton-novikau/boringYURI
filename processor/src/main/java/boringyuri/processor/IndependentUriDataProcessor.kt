@@ -15,6 +15,7 @@
  */
 package boringyuri.processor
 
+import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
@@ -58,6 +59,7 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
             ClassName.get(UriData::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),
+            ClassName.get(DefaultValue::class.java),
             ClassName.get(TypeAdapter::class.java)
         )
     }

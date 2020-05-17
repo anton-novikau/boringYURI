@@ -17,10 +17,7 @@
 package boringyuri.sample.uri
 
 import android.net.Uri
-import boringyuri.api.Param
-import boringyuri.api.UriBuilder
-import boringyuri.api.UriFactory
-import boringyuri.api.WithUriData
+import boringyuri.api.*
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
@@ -34,8 +31,8 @@ interface LocationUriBuilder {
     @DoubleParam(name = "zoom", value = 2.5)
     @WithUriData
     fun buildStaticMapUri(
-        @Param("lat") latitude: Double,
-        @Param("lng") longitude: Double
+        @Param("lat") @DefaultValue("53.893009") latitude: Double,
+        @Param("lng") @DefaultValue("27.567444") longitude: Double
     ): Uri
 
     @UriBuilder("/maps/api/geocode")

@@ -1,3 +1,7 @@
+## Boring YURI 1.1.1 (2020-05-18)
+
+* Add `@DefaultValue` support for query parameters and path segments. 
+
 ## Boring YURI 1.1.0 (2020-05-03)
 
 * Add support of the named path segments in `Uri` factories and `Uri` data classes.

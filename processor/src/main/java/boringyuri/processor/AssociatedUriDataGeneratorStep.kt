@@ -15,10 +15,7 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriBuilder
-import boringyuri.api.WithUriData
+import boringyuri.api.*
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
@@ -95,17 +92,20 @@ class AssociatedUriDataGeneratorStep(
         // the method templates found on the previous step and create the params list.
         methodParameters.forEach { param ->
             val paramName = param.simpleName.toString()
+            val defaultValue = param.getAnnotation(DefaultValue::class.java)?.value
 
             val field = param.createFieldSpec(
                 paramName,
+                defaultValue,
                 annotationHandler
             ).also { fieldSpecs.add(it) }
             val nullable = annotationHandler.isNullable(field.type, param)
 
             val pathAnnotation = param.getAnnotation(Path::class.java)
             if (pathAnnotation != null) {
-                if (nullable) {
-                    logger.error(param, "Path segment '$paramName' must be explicitly non-null.")
+                if (nullable && defaultValue == null) {
+                    logger.error(param, "Path segment '$paramName' must be explicitly non-null or" +
+                            " or have a @${DefaultValue::class.simpleName}.")
                 }
 
                 val pathName = pathAnnotation.value.ifEmpty { paramName }
@@ -131,6 +131,7 @@ class AssociatedUriDataGeneratorStep(
                     pathName,
                     field,
                     uriField,
+                    defaultValue,
                     param
                 )
             } else {
@@ -143,6 +144,7 @@ class AssociatedUriDataGeneratorStep(
                             field,
                             uriField,
                             nullable,
+                            defaultValue,
                             param
                         )
                     )

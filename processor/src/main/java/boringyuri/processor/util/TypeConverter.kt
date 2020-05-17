@@ -69,52 +69,95 @@ class TypeConverter(
         return deserializeBlock.build()
     }
 
+    fun buildStandardDeserializeBlockForDefault(
+        value: String,
+        type: TypeName,
+        originatingElement: Element?
+    ): CodeBlock {
+        if (value.isEmpty() && STRING != type && ANDROID_URI != type) {
+            throw AbortProcessingException(
+                logger,
+                originatingElement,
+                "Default value for $type can not be empty.")
+        }
+
+        return when (type) {
+            ANDROID_URI -> if (value.isEmpty()) {
+                CodeBlock.of("\$T.EMPTY", ANDROID_URI)
+            } else {
+                CodeBlock.of("\$T.parse(\$S)", ANDROID_URI, value)
+            }
+            STRING -> CodeBlock.of("\$S", value)
+            TypeName.BOOLEAN, TypeName.BOOLEAN.box() -> CodeBlock.of("\$L", value.toBoolean())
+            TypeName.CHAR, TypeName.CHAR.box() -> CodeBlock.of("'\$L'", value.toCharArray()[0])
+            TypeName.BYTE, TypeName.BYTE.box() -> CodeBlock.of("(byte) \$L", value.toByte())
+            TypeName.SHORT, TypeName.SHORT.box() -> CodeBlock.of("(short) \$L", value.toShort())
+            TypeName.INT, TypeName.INT.box() -> CodeBlock.of("\$L", value.toInt())
+            TypeName.LONG, TypeName.LONG.box() -> CodeBlock.of("\$LL", value.toLong())
+            TypeName.FLOAT, TypeName.FLOAT.box() -> CodeBlock.of("\$Lf", value.toFloat())
+            TypeName.DOUBLE, TypeName.DOUBLE.box() -> CodeBlock.of("\$L", value.toDouble())
+            else -> throw IllegalStateException("$type is not a standard type for conversion")
+        }
+    }
+
     fun buildStandardDeserializeBlock(
         localVariableName: String,
         field: FieldSpec,
         nullable: Boolean,
+        defaultValue: String?,
         originatingElement: Element? = null
     ): CodeBlock {
         val fieldType = field.type
         val deserializeBlock = CodeBlock.builder()
 
-        if (TypeName.BOOLEAN == fieldType || TypeName.BOOLEAN.box() == fieldType) {
-            deserializeBlock.addStatement(
-                "$1N = \"true\".equalsIgnoreCase($2L) || \"1\".equals($2L)",
-                field,
-                localVariableName
-            )
-        } else if (TypeName.CHAR == fieldType || TypeName.CHAR.box() == fieldType) {
-            deserializeBlock.addStatement(
-                "$1N = $2L.length() > 0 ? $2L.charAt(0) : $3L",
-                field,
-                localVariableName,
-                if (nullable) "null" else "'0'"
-            )
-        } else if (STRING == fieldType) {
-            deserializeBlock.addStatement("\$N = \$L", field, localVariableName)
-        } else if (ANDROID_URI == fieldType) {
-            deserializeBlock.addStatement(
-                "\$N = \$T.parse(\$L)",
-                field,
-                ANDROID_URI,
-                localVariableName
-            )
-        } else if (fieldType.isPrimitive || fieldType.isBoxedPrimitive) {
-            deserializeBlock.add(
-                buildNumberDeserializeBlock(
-                    localVariableName,
+        when (fieldType) {
+            TypeName.BOOLEAN, TypeName.BOOLEAN.box() -> {
+                deserializeBlock.addStatement(
+                    "$1N = \"true\".equalsIgnoreCase($2L) || \"1\".equals($2L)",
                     field,
-                    nullable,
-                    originatingElement
+                    localVariableName
                 )
-            )
-        } else {
-            throw AbortProcessingException(
-                logger,
-                originatingElement,
-                "Type $fieldType is not supported"
-            )
+            }
+            TypeName.CHAR, TypeName.CHAR.box() -> {
+                deserializeBlock.addStatement(
+                    "$1N = $2L.length() > 0 ? $2L.charAt(0) : $3L",
+                    field,
+                    localVariableName,
+                    when {
+                        defaultValue != null -> {
+                            buildStandardDeserializeBlockForDefault(
+                                defaultValue,
+                                fieldType,
+                                originatingElement
+                            )
+                        }
+                        nullable -> "null"
+                        else -> "'0'"
+                    }
+                )
+            }
+            STRING -> {
+                deserializeBlock.addStatement("\$N = \$L", field, localVariableName)
+            }
+            ANDROID_URI -> {
+                deserializeBlock.addStatement(
+                    "\$N = \$T.parse(\$L)",
+                    field,
+                    ANDROID_URI,
+                    localVariableName
+                )
+            }
+            else -> {
+                deserializeBlock.add(
+                    buildNumberDeserializeBlock(
+                        localVariableName,
+                        field,
+                        nullable,
+                        defaultValue,
+                        originatingElement
+                    )
+                )
+            }
         }
 
 
@@ -125,6 +168,7 @@ class TypeConverter(
         localVariableName: String,
         field: FieldSpec,
         nullable: Boolean,
+        defaultValue: String?,
         originatingElement: Element? = null
     ): CodeBlock {
         val fieldType = field.type
@@ -187,7 +231,17 @@ class TypeConverter(
             }
         }
 
-        val defaultAssignmentBlock = if (nullable) CodeBlock.of("null") else defaultValueBlock
+        val defaultAssignmentBlock = when {
+            defaultValue != null -> {
+                buildStandardDeserializeBlockForDefault(
+                    defaultValue,
+                    fieldType,
+                    originatingElement
+                )
+            }
+            nullable -> CodeBlock.of("null")
+            else -> defaultValueBlock
+        }
 
         return CodeBlock.builder()
             .beginControlFlow("try")

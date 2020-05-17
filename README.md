@@ -170,7 +170,10 @@ Will give you `https://example.com/user/42/students`.
 flexibility and there is a bigger chance to make a mistake. Use the named path segments instead.
 
 **IMPORTANT:** `@Path` method parameters **can not be nullable**. They must be explicitly
-annotated with `@NonNull` in Java or must have a non-nullable type in Kotlin.
+annotated with `@NonNull` in Java or must have a non-nullable type in Kotlin. The only exception
+when a `@Path` method parameter can be nullable is when it has a [@DefaultValue](#default-values).
+This technically makes the path segment itself non-nullable, but allows to have a nullable
+parameter in a method signature. 
 
 ### Types
 
@@ -457,7 +460,7 @@ in `@UriBuilder`. If the same data class is used for two or more different `Uri`
 ```java
 @UriData("/user/*/{id}")
 public interface UserData {
-    ....
+    ...
 }
 ```
 Which means that the same `UserData` implementation can be used to parse data from
@@ -488,6 +491,101 @@ are always more preferable.
 consistency of the builder method parameters and the getters of the data class (if you have the
 builders of course). `@WithUriData` does it for you since there is one source of truth: the builder
 method in the factory interface.
+
+### Default values
+
+When a builder method parameter is supposed to be nullable, but you need to provide some fallback
+value when it is `null`, you may use `@DefaultValue`. In this case the receiver will always have
+some non-null value in a query parameter or in a variable path segment.
+
+Example:
+```java
+    @UriBuilder("/user")
+    Uri buildUserUri(@Nullable @Param("id") @DefaultValue("d14bee5") String userId);
+```
+Calling `builder.buildUserUri(null)` gives you `/user?id=d14bee5`, when calling
+`builder.buildUserUri("abc")` gives you `/user?id=abc`.
+
+The `@DefaultValue` also works for reading the data via associated or independent data class. If
+a query parameter wasn't provided in the `Uri` and it's supposed to be `@NonNull`, instead of
+`NullPointerException` the getter will return the specified default value. When a query parameter
+is supposed to be `@Nullable` in the builder, but provided with a `@DefaultValue`, the associated
+getter method becomes `@NonNull`:
+
+```java
+    @UriBuilder("/user")
+    @WithUriData
+    Uri buildUserUri(@Param("id") @DefaultValue("d14bee5") String userId);
+```
+
+For this builder method `UserUriData` class will be generated. And calling
+`new UserUriData(Uri.parse("https://example.com/user")).getUserId()` returns `d14bee5` even if the
+`Uri` doesn't have any query parameters at all. It works exactly the same in independent `Uri`
+data classes.
+
+The `@DefautlValue` can also be used when a query parameter or a path segment have a value that
+is incompatible with the associated getter of a primitive (or a primitive wrapper) type.
+
+For example you have an independent `UserData` with `id` of type `long`:
+```java
+@UriData("/user")
+interface UserData {
+    
+    @Param("id")
+    @DefaultValue("42")
+    long getId();
+
+} 
+```
+
+But for some reason the `Uri` you're trying to process with this data class has `id` of `String`:
+```java
+Uri uri = Uri.parse("https://example.com/user?id=d14bee5");
+UserData data = new UserData(uri);
+
+long id = data.getId(); // id == 42 
+```
+Since `d14bee5` in the `Uri` can not be parsed to `long`, the specified default value will be
+returned. Of course normally this should never happen if your app is both a producer of the `Uri`
+and a receiver of the `Uri`, but when you're a client of some API, it's better to have some
+predictable result when you parse the data.
+
+**NOTE:** `@DefaultValue` allows you to have a `@Nullable` path segment method parameter:
+
+```java
+    @UriBuilder("/user/{id}")
+    Uri buildUserUri(@Nullable @Path("id") @DefaultValue("d14bee5") String userId);
+```
+
+So calling `builder.buildUserUri(null)` gives you `/user/d14bee5`, when calling 
+`builder.buildUserUri("abc")` gives you `/user/abc`.
+
+**IMPORTANT:** The value specified in the `@DefaultValue` must be correctly serialized for
+a specific type of a method parameter or a getter method, otherwise you may have an incorrect
+or unexpected result. For the types that require a
+[custom type conversion](#application-specific-types) the default value must be serialized
+according to the rules of the specified `TypeAdapter`.
+
+If you have a type adapter that serializes latitude and longitude joining them with a comma: 
+```java
+class LocationTypeAdapter implements BoringTypeAdapter<Location> {
+
+    @NonNull
+    @Override
+    public String serialize(@NonNull Location location) {
+        return location.getLatitude() + "," + location.getLongitude();
+    }
+
+    ...
+}
+```
+So for a builder that uses `Location` as method parameter the default value should be like
+`53.893009,27.567444`.
+
+```java
+    @UriBuilder("/maps/api/staticmap")
+    Uri buildStaticMapUri(@Nullable @Param @DefaultValue("53.893009,27.567444") Location location);
+```
 
 ## Installation
 

@@ -40,47 +40,59 @@ fun VariableElement.createParamSpec(annotationHandler: AnnotationHandler): Param
 
 fun VariableElement.createFieldSpec(
     paramName: String,
+    defaultValue: String?,
     annotationHandler: AnnotationHandler
 ): FieldSpec {
     val fieldName = FIELD_PREFIX + StringUtils.capitalize(paramName)
+    val type = TypeName.get(asType())
+    val ensureNonNull = !type.isPrimitive && defaultValue != null
 
-    return FieldSpec.builder(TypeName.get(asType()), fieldName, Modifier.PRIVATE)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors))
+    return FieldSpec.builder(type, fieldName, Modifier.PRIVATE)
+        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .build()
 }
 
 fun ExecutableElement.createFieldSpec(
     paramName: String,
+    defaultValue: String?,
     annotationHandler: AnnotationHandler
 ): FieldSpec {
     val fieldName = FIELD_PREFIX + StringUtils.capitalize(paramName)
+    val type = TypeName.get(returnType)
+    val ensureNonNull = !type.isPrimitive && defaultValue != null
 
-    return FieldSpec.builder(TypeName.get(returnType), fieldName, Modifier.PRIVATE)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors))
+    return FieldSpec.builder(type, fieldName, Modifier.PRIVATE)
+        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .build()
 }
 
 fun VariableElement.createMethodSignature(
+    defaultValue: String?,
     annotationHandler: AnnotationHandler
 ): MethodSpec.Builder {
     val paramName = simpleName.toString()
     val paramType = TypeName.get(asType())
     val methodName = buildGetterName(paramName, paramType)
+    val ensureNonNull = !paramType.isPrimitive && defaultValue != null
 
     return MethodSpec.methodBuilder(methodName)
         .addModifiers(Modifier.PUBLIC)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors))
+        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .returns(paramType)
 }
 
 fun ExecutableElement.createMethodSignature(
+    defaultValue: String?,
     annotationHandler: AnnotationHandler
 ): MethodSpec.Builder {
+    val paramType = TypeName.get(returnType)
+    val ensureNonNull = !paramType.isPrimitive && defaultValue != null
+
     return MethodSpec.methodBuilder(simpleName.toString())
         .addModifiers(Modifier.PUBLIC)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors))
+        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .addParameters(parameters.map { it.createParamSpec(annotationHandler) })
-        .returns(TypeName.get(returnType))
+        .returns(paramType)
 }
 
 fun VariableElement.findTypeAdapter(): TypeAdapter? {

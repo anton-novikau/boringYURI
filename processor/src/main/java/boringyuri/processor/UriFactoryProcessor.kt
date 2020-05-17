@@ -60,6 +60,7 @@ class UriFactoryProcessor : BoringAnnotationProcessor() {
             ClassName.get(TypeAdapter::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),
+            ClassName.get(DefaultValue::class.java),
             ClassName.get(StringParam::class.java),
             ClassName.get(StringParams::class.java),
             ClassName.get(LongParam::class.java),

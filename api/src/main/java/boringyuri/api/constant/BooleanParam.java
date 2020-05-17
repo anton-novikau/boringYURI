@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * <p>Example:</p>
  * <pre><code>
  *     &#64;UriBuilder("contacts")
- *     &#64;BooleanParams(name = "address_book", value= true)
+ *     &#64;BooleanParam(name = "address_book", value= true)
  *     public Uri buildFetchContactsUri();
  * </code></pre>
  * <p>

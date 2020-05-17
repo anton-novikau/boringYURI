@@ -91,6 +91,7 @@ class TemplatePathSegment(
 class VariableWritePathSegment(
     private val segment: VariableElement,
     private val methodParam: ParameterSpec,
+    private val defaultValue: String?,
     private val encoded: Boolean,
     private val builderName: String
 ) : PathSegment {
@@ -98,6 +99,7 @@ class VariableWritePathSegment(
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         val typeAdapter = segment.findTypeAdapter()?.valueMirror()
 
+        val valueBlock = CodeBlock.builder()
         val serializedSegment = typeConverter.buildSerializeBlock(
             methodParam,
             typeAdapter,
@@ -106,10 +108,19 @@ class VariableWritePathSegment(
 
         val appendMethod = if (encoded) "appendEncodedPath" else "appendPath"
 
-        return CodeBlock
-            .builder()
-            .addStatement("\$L.\$L(\$L)", builderName, appendMethod, serializedSegment)
-            .build()
+        if (defaultValue != null) {
+            valueBlock.beginControlFlow("if (\$N != null)", methodParam)
+        }
+
+        valueBlock.addStatement("\$L.\$L(\$L)", builderName, appendMethod, serializedSegment)
+
+        if (defaultValue != null) {
+            valueBlock.nextControlFlow("else")
+            valueBlock.addStatement("\$L.\$L(\$S)", builderName, appendMethod, defaultValue)
+            valueBlock.endControlFlow()
+        }
+
+        return valueBlock.build()
     }
 
 }
@@ -119,18 +130,20 @@ class VariableReadPathSegment(
     segmentName: String,
     segmentField: FieldSpec,
     uriField: FieldSpec,
+    private val defaultValue: String?,
     private val segment: VariableElement
-) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, segment) {
+) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, defaultValue, segment) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
     ): MethodSpec.Builder {
-        return segment.createMethodSignature(annotationHandler)
+        return segment.createMethodSignature(defaultValue, annotationHandler)
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         return createValueBlock(typeConverter, segment.findTypeAdapter()?.valueMirror())
     }
+
 }
 
 class MethodReadPathSegment(
@@ -138,16 +151,18 @@ class MethodReadPathSegment(
     segmentName: String,
     segmentField: FieldSpec,
     uriField: FieldSpec,
+    private val defaultValue: String?,
     private val segment: ExecutableElement
-) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, segment) {
+) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, defaultValue, segment) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
-    ): MethodSpec.Builder = segment.createMethodSignature(annotationHandler)
+    ): MethodSpec.Builder = segment.createMethodSignature(defaultValue, annotationHandler)
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         return createValueBlock(typeConverter, segment.findTypeAdapter()?.valueMirror())
     }
+
 }
 
 abstract class BaseReadPathSegment(
@@ -155,6 +170,7 @@ abstract class BaseReadPathSegment(
     private val segmentName: String,
     override val segmentField: FieldSpec,
     private val uriField: FieldSpec,
+    private val defaultValue: String?,
     private val segment: Element
 ) : ReadPathSegment {
 
@@ -205,6 +221,7 @@ abstract class BaseReadPathSegment(
                 segmentVariableName,
                 segmentField,
                 false,
+                defaultValue,
                 segment
             )
         }

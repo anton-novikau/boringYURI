@@ -15,10 +15,7 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriBuilder
-import boringyuri.api.UriFactory
+import boringyuri.api.*
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
@@ -142,11 +139,13 @@ class UriFactoryGeneratorStep internal constructor(
         methodParameters.forEach { param ->
             val spec = param.createParamSpec(annotationHandler).also { parameterSpecs.add(it) }
             val nullable = annotationHandler.isNullable(spec.type, param)
+            val defaultValue = param.getAnnotation(DefaultValue::class.java)?.value
 
             val pathAnnotation = param.getAnnotation(Path::class.java)
             if (pathAnnotation != null) {
-                if (nullable) {
-                    logger.error(param, "Path segment '${spec.name}' must be explicitly non-null.")
+                if (nullable && defaultValue == null) {
+                    logger.error(param, "Path segment '${spec.name}' must be explicitly non-null" +
+                            " or have a @${DefaultValue::class.simpleName}.")
                 }
 
                 val pathName = pathAnnotation.value.ifEmpty { spec.name }
@@ -164,6 +163,7 @@ class UriFactoryGeneratorStep internal constructor(
                 segments[pathName] = VariableWritePathSegment(
                     param,
                     spec,
+                    defaultValue,
                     pathAnnotation.encoded,
                     URI_BUILDER_NAME
                 )
@@ -176,6 +176,7 @@ class UriFactoryGeneratorStep internal constructor(
                         spec,
                         param,
                         nullable,
+                        defaultValue,
                         URI_BUILDER_NAME
                     ))
                 } else {

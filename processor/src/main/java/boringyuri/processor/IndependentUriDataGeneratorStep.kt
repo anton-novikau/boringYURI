@@ -15,6 +15,7 @@
  */
 package boringyuri.processor
 
+import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
@@ -100,8 +101,10 @@ class IndependentUriDataGeneratorStep(
                 GETTER_PATTERN.find(methodName)?.run { groupValues[1] } ?: methodName
             )
 
+            val defaultValue = method.getAnnotation(DefaultValue::class.java)?.value
             val field = method.createFieldSpec(
                 paramName,
+                defaultValue,
                 annotationHandler
             ).also { fieldSpecs.add(it) }
             val nullable = annotationHandler.isNullable(method.returnType, method)
@@ -109,7 +112,8 @@ class IndependentUriDataGeneratorStep(
             val pathAnnotation: Path? = method.getAnnotation(Path::class.java)
             if (pathAnnotation != null) {
                 if (nullable) {
-                    logger.error(method, "Path segment '$paramName' must be explicitly non-null.")
+                    logger.error(method, "Return type of the path segment getter '$methodName()'" +
+                            " must be explicitly non-null.")
                 }
 
                 val pathName = pathAnnotation.value.ifEmpty { paramName }
@@ -135,13 +139,21 @@ class IndependentUriDataGeneratorStep(
                     pathName,
                     field,
                     uriField,
+                    defaultValue,
                     method
                 )
             } else {
                 val paramAnnotation: Param = method.getAnnotation(Param::class.java)
                 val queryParamName = paramAnnotation.value.ifEmpty { paramName }
                 queryParams.add(
-                    MethodReadQueryParameter(queryParamName, field, uriField, nullable, method)
+                    MethodReadQueryParameter(
+                        queryParamName,
+                        field,
+                        uriField,
+                        nullable,
+                        defaultValue,
+                        method
+                    )
                 )
             }
         }

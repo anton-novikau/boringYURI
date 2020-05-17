@@ -57,7 +57,7 @@ import java.lang.annotation.Target;
  * {@code 27}.
  * <p>
  * The default value must be correctly serialized for a specific type of a method parameter or
- * a getter method, otherwise you may have and incorrect or unexpected result. For types that
+ * a getter method, otherwise you may have an incorrect or unexpected result. For types that
  * require a {@link boringyuri.api.adapter.TypeAdapter} the default value must be serialized
  * according to the rules of the specified {@code TypeAdapter}.
  * </p>

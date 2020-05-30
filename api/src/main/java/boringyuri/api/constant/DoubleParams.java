@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * method with two or more different constant floating point query parameters.
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 public @interface DoubleParams {
     DoubleParam[] value();
 }

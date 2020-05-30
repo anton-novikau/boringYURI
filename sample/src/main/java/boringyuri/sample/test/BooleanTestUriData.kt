@@ -45,4 +45,17 @@ interface BooleanTestUriData {
     @DefaultValue("true")
     fun getNullableWithDefaultParam(): Boolean?
 
+    @Param
+    fun getNullableArrayParam(): Array<Boolean>?
+
+    @Param
+    fun getNonNullArrayParam(): BooleanArray
+
+    @Param
+    @DefaultValue("true")
+    fun getNonNullWithDefaultArrayParam(): BooleanArray
+
+    @Param
+    @DefaultValue("true")
+    fun getNullableWithDefaultArrayParam(): Array<Boolean>?
 }

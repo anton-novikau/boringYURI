@@ -45,4 +45,18 @@ interface ByteTestUriData {
     @DefaultValue("1")
     fun getNullableWithDefaultParam(): Byte?
 
+    @Param
+    fun getNullableArrayParam(): Array<Byte>?
+
+    @Param
+    fun getNonNullArrayParam(): ByteArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNonNullWithDefaultArrayParam(): ByteArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNullableWithDefaultArrayParam(): Array<Byte>?
+
 }

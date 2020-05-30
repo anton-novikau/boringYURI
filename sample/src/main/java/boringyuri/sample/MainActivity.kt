@@ -20,20 +20,31 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-import boringyuri.sample.uri.UserProviderUriBuilder
+import boringyuri.sample.uri.LocationUriBuilder
+import boringyuri.sample.uri.ShowPinsByCoordinatesUriData
 
 class MainActivity : AppCompatActivity() {
 
-    private val uriBuilder = UserProviderUriBuilder.create()
+    private val uriBuilder = LocationUriBuilder.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val userPhotoUri = uriBuilder.buildUserPhotoUri(42)
+        val locationUri = uriBuilder.buildShowPinsByCoordinatesUri(
+            arrayOf(
+                doubleArrayOf(37.773972, -122.431297),
+                doubleArrayOf(53.893009, 27.567444)
+            )
+        )
 
-        Log.d(TAG, "onCreate(): user Uri = $userPhotoUri")
-        findViewById<TextView>(R.id.uri).text = userPhotoUri.toString()
+        Log.d(TAG, "onCreate(): Uri = $locationUri")
+        findViewById<TextView>(R.id.uri).text = locationUri.toString()
+
+        val uriData = ShowPinsByCoordinatesUriData(locationUri)
+        findViewById<TextView>(R.id.data).text = uriData.coordinates.joinToString {
+            it?.contentToString() ?: "null"
+        }
     }
 
     companion object {

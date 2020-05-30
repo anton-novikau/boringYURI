@@ -20,6 +20,8 @@ import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
+import boringyuri.api.adapter.TypeAdapter
+import boringyuri.sample.data.adapter.DoubleArrayTypeAdapter
 
 @UriData("/path/segment/{double}/{double_with_default}")
 interface DoubleTestUriData {
@@ -44,5 +46,37 @@ interface DoubleTestUriData {
     @Param
     @DefaultValue("1.2")
     fun getNullableWithDefaultParam(): Double?
+
+    @Param
+    fun getNullableArrayParam(): Array<Double>?
+
+    @Param
+    fun getNonNullArrayParam(): DoubleArray
+
+    @Param
+    @DefaultValue("1.2")
+    fun getNonNullWithDefaultArrayParam(): DoubleArray
+
+    @Param
+    @DefaultValue("1.2")
+    fun getNullableWithDefaultArrayParam(): Array<Double>?
+
+    @Param
+    @TypeAdapter(DoubleArrayTypeAdapter::class)
+    fun getNullableDoubleArrayParam(): Array<DoubleArray>?
+
+    @Param
+    @TypeAdapter(DoubleArrayTypeAdapter::class)
+    fun getNonNullDoubleArrayParam(): Array<DoubleArray>
+
+    @Param
+    @DefaultValue("1.2;2.3")
+    @TypeAdapter(DoubleArrayTypeAdapter::class)
+    fun getNonNullWithDefaultDoubleArrayParam(): Array<DoubleArray>
+
+    @Param
+    @DefaultValue("1.2;2.3")
+    @TypeAdapter(DoubleArrayTypeAdapter::class)
+    fun getNullableWithDefaultDoubleArrayParam(): Array<DoubleArray>?
 
 }

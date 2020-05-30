@@ -45,4 +45,18 @@ interface IntTestUriData {
     @DefaultValue("1")
     fun getNullableWithDefaultParam(): Int?
 
+    @Param
+    fun getNullableArrayParam(): Array<Int>?
+
+    @Param
+    fun getNonNullArrayParam(): IntArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNonNullWithDefaultArrayParam(): IntArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNullableWithDefaultArrayParam(): Array<Int>?
+
 }

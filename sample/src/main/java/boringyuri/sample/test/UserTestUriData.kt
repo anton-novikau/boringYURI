@@ -38,4 +38,14 @@ interface UserTestUriData {
     @DefaultValue("42;John Doe")
     fun getNonNullWithDefaultParam(): User
 
+    @Param
+    fun getNullableArrayParam(): Array<User>?
+
+    @Param
+    fun getNonNullArrayParam(): Array<User>
+
+    @Param
+    @DefaultValue("42;John Doe")
+    fun getNonNullWithDefaultArrayParam(): Array<User>
+
 }

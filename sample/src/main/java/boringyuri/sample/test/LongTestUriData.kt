@@ -45,4 +45,18 @@ interface LongTestUriData {
     @DefaultValue("1")
     fun getNullableWithDefaultParam(): Long?
 
+    @Param
+    fun getNullableArrayParam(): Array<Long>?
+
+    @Param
+    fun getNonNullArrayParam(): LongArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNonNullWithDefaultArrayParam(): LongArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNullableWithDefaultArrayParam(): Array<Long>?
+
 }

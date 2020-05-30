@@ -36,6 +36,7 @@ import com.squareup.javapoet.*
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.Modifier
 import javax.lang.model.util.ElementFilter
 
 class AssociatedUriDataGeneratorStep(
@@ -195,16 +196,10 @@ class AssociatedUriDataGeneratorStep(
     ) {
         val constParams = sourceElement.getAnnotationsByType(StringParam::class.java) ?: return
 
-        for (constParam in constParams) {
-            val getterName = buildGetterName(constParam.name, CommonTypeName.STRING)
-
-            classContent.addMethod(
-                MethodSpec.methodBuilder(getterName)
-                    .addAnnotation(CommonTypeName.NON_NULL)
-                    .returns(CommonTypeName.STRING)
-                    .addStatement("return \$S", constParam.value)
-                    .build()
-            )
+        constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
+            generateConstParamGetter(classContent, CommonTypeName.STRING, name, params) {
+                CodeBlock.of("\$S", it)
+            }
         }
     }
 
@@ -214,15 +209,8 @@ class AssociatedUriDataGeneratorStep(
     ) {
         val constParams = sourceElement.getAnnotationsByType(BooleanParam::class.java) ?: return
 
-        for (constParam in constParams) {
-            val getterName = buildGetterName(constParam.name, TypeName.BOOLEAN)
-
-            classContent.addMethod(
-                MethodSpec.methodBuilder(getterName)
-                    .returns(TypeName.BOOLEAN)
-                    .addStatement("return \$L", constParam.value)
-                    .build()
-            )
+        constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
+            generateConstParamGetter(classContent, TypeName.BOOLEAN, name, params)
         }
     }
 
@@ -232,15 +220,8 @@ class AssociatedUriDataGeneratorStep(
     ) {
         val constParams = sourceElement.getAnnotationsByType(LongParam::class.java) ?: return
 
-        for (constParam in constParams) {
-            val getterName = buildGetterName(constParam.name, TypeName.LONG)
-
-            classContent.addMethod(
-                MethodSpec.methodBuilder(getterName)
-                    .returns(TypeName.LONG)
-                    .addStatement("return \$L", constParam.value)
-                    .build()
-            )
+        constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
+            generateConstParamGetter(classContent, TypeName.LONG, name, params)
         }
     }
 
@@ -250,16 +231,41 @@ class AssociatedUriDataGeneratorStep(
     ) {
         val constParams = sourceElement.getAnnotationsByType(DoubleParam::class.java) ?: return
 
-        for (constParam in constParams) {
-            val getterName = buildGetterName(constParam.name, TypeName.DOUBLE)
+        constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
+            generateConstParamGetter(classContent, TypeName.DOUBLE, name, params)
+        }
+    }
 
+    private inline fun generateConstParamGetter(
+        classContent: TypeSpec.Builder,
+        type: TypeName,
+        name: String,
+        params: List<Any>,
+        crossinline transform: (value: Any) -> Any = { it }
+    ) {
+        if (params.size == 1) {
+            val getterName = buildGetterName(name, type)
             classContent.addMethod(
                 MethodSpec.methodBuilder(getterName)
-                    .returns(TypeName.DOUBLE)
-                    .addStatement("return \$L", constParam.value)
+                    .apply { if (!type.isPrimitive) addAnnotation(CommonTypeName.NON_NULL) }
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(type)
+                    .addStatement("return \$L", transform(params[0]))
                     .build()
             )
-        }
+        } else if (params.size > 1) {
+            val arrayType = ArrayTypeName.of(type)
+            val getterName = buildGetterName(name, arrayType)
+            classContent.addMethod(
+                MethodSpec.methodBuilder(getterName)
+                    .addAnnotation(CommonTypeName.NON_NULL)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(arrayType)
+                    .addStatement("return new \$T[] { \$L }", type, params.joinToString {
+                        transform(it).toString()
+                    }).build()
+            )
+        } // else never happens
     }
 
     private companion object {

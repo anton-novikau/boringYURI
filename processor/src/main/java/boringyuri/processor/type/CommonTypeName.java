@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.util;
+package boringyuri.processor.type;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +25,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import boringyuri.api.adapter.BoringTypeAdapter;
@@ -60,5 +61,10 @@ public interface CommonTypeName {
     ParameterizedTypeName ANY_TYPE_ADAPTER = ParameterizedTypeName.get(
             TYPE_ADAPTER,
             WildcardTypeName.subtypeOf(TypeName.OBJECT)
+    );
+    @NonNull
+    ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
+            ClassName.get(List.class),
+            STRING
     );
 }

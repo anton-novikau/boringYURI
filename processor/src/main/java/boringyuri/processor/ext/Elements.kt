@@ -24,7 +24,9 @@ import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.util.SimpleTypeVisitor8
 
 private const val FIELD_PREFIX = "m"
 
@@ -101,11 +103,7 @@ fun VariableElement.findTypeAdapter(): TypeAdapter? {
         return adapter
     }
 
-    val type = asType()
-
-    return if (type is DeclaredType) {
-        type.asElement().getAnnotation(TypeAdapter::class.java)
-    } else null
+    return asType().accept(TypeAdapterVisitor(), null)
 }
 
 fun ExecutableElement.findTypeAdapter(): TypeAdapter? {
@@ -114,9 +112,15 @@ fun ExecutableElement.findTypeAdapter(): TypeAdapter? {
         return adapter
     }
 
-    val type = returnType
+    return returnType.accept(TypeAdapterVisitor(), null)
+}
 
-    return if (type is DeclaredType) {
-        type.asElement().getAnnotation(TypeAdapter::class.java)
-    } else null
+private class TypeAdapterVisitor : SimpleTypeVisitor8<TypeAdapter?, Void>() {
+    override fun visitDeclared(t: DeclaredType, p: Void?): TypeAdapter? {
+        return t.asElement().getAnnotation(TypeAdapter::class.java)
+    }
+
+    override fun visitArray(t: ArrayType, p: Void?): TypeAdapter? {
+        return t.componentType.accept(this, null)
+    }
 }

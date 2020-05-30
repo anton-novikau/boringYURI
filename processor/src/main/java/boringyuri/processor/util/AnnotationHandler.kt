@@ -15,7 +15,7 @@
  */
 package boringyuri.processor.util
 
-import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.*
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName

@@ -20,7 +20,7 @@ import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.*
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import com.google.auto.common.MoreTypes
 import com.google.common.collect.ImmutableSet

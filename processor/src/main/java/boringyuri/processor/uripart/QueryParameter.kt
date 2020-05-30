@@ -19,17 +19,16 @@ package boringyuri.processor.uripart
 import boringyuri.processor.ext.createMethodSignature
 import boringyuri.processor.ext.findTypeAdapter
 import boringyuri.processor.ext.valueMirror
+import boringyuri.processor.type.ConversionStrategyFactory
+import boringyuri.processor.type.QueryConversionStrategy
+import boringyuri.processor.type.TypeConverter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.CommonTypeName.STRING
-import boringyuri.processor.util.TypeConverter
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
-import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.VariableElement
-import javax.lang.model.type.TypeMirror
 
 interface QueryParameter {
 
@@ -65,17 +64,19 @@ class VariableWriteQueryParameter(
             appendQueryBlock.beginControlFlow("if (\$N != null)", methodParam)
         }
 
-        val serializedParam = typeConverter.buildSerializeBlock(
-            methodParam,
+        val serializeStrategy = ConversionStrategyFactory.createQueryStrategy(
+            parameter.asType(),
             typeAdapter,
+            typeConverter,
             parameter
         )
 
-        appendQueryBlock.addStatement(
-            "\$L.appendQueryParameter(\$S, \$L)",
-            builderName,
-            name,
-            serializedParam
+        appendQueryBlock.add(
+            serializeStrategy.buildSerializeBlock(
+                builderName,
+                name,
+                methodParam
+            )
         )
 
         if (nullable) {
@@ -103,7 +104,7 @@ class VariableReadQueryParameter(
     nullable: Boolean,
     private val defaultValue: String?,
     private val parameterElement: VariableElement
-) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue, parameterElement) {
+) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
@@ -112,7 +113,14 @@ class VariableReadQueryParameter(
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        return createValueBlock(typeConverter, parameterElement.findTypeAdapter()?.valueMirror())
+        val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
+            parameterElement.asType(),
+            parameterElement.findTypeAdapter()?.valueMirror(),
+            typeConverter,
+            parameterElement
+        )
+
+        return createValueBlock(deserializeStrategy)
     }
 
 }
@@ -124,7 +132,7 @@ class MethodReadQueryParameter(
     nullable: Boolean,
     private val defaultValue: String?,
     private val parameterElement: ExecutableElement
-) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue, parameterElement) {
+) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
@@ -133,7 +141,14 @@ class MethodReadQueryParameter(
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        return createValueBlock(typeConverter, parameterElement.findTypeAdapter()?.valueMirror())
+        val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
+            parameterElement.returnType,
+            parameterElement.findTypeAdapter()?.valueMirror(),
+            typeConverter,
+            parameterElement
+        )
+
+        return createValueBlock(deserializeStrategy)
     }
 
 }
@@ -143,27 +158,18 @@ abstract class BaseReadQueryParameter(
     override val paramField: FieldSpec,
     private val uriField: FieldSpec,
     private val nullable: Boolean,
-    private val defaultValue: String?,
-    private val originatingElement: Element
+    private val defaultValue: String?
 ) : ReadQueryParameter {
 
-    protected fun createValueBlock(
-        typeConverter: TypeConverter,
-        typeAdapter: TypeMirror?
-    ): CodeBlock {
+    protected fun createValueBlock(deserializeStrategy: QueryConversionStrategy): CodeBlock {
         val statement = CodeBlock.builder()
-        val localVarName = "queryParam"
 
-        statement.addStatement(
-            "\$T \$L = \$N.getQueryParameter(\$S)",
-            STRING,
-            localVarName,
-            uriField,
-            name
-        )
+        statement.add(deserializeStrategy.buildReadRawParameterBlock(name, uriField))
 
         if (!nullable && defaultValue == null) {
-            statement.beginControlFlow("if (\$L == null)", localVarName)
+            statement.beginControlFlow(
+                "if (\$L)", deserializeStrategy.buildCheckRawParameterBlock()
+            )
             statement.addStatement(
                 "throw new \$T(\$S + \$N)",
                 NullPointerException::class.java,
@@ -172,51 +178,29 @@ abstract class BaseReadQueryParameter(
             )
             statement.endControlFlow()
         } else {
-            statement.beginControlFlow("if (\$L == null)", localVarName)
-            when {
-                defaultValue == null -> {
-                    statement.addStatement("\$N = null", paramField)
-                }
-                typeAdapter != null -> {
-                    statement.add(
-                        typeConverter.buildCustomDeserializeBlock(
-                            CodeBlock.of("\$S", defaultValue).toString(),
-                            paramField,
-                            typeAdapter
-                        )
+            statement.beginControlFlow(
+                "if (\$L)", deserializeStrategy.buildCheckRawParameterBlock()
+            )
+            if (defaultValue == null) {
+                statement.addStatement("\$N = null", paramField)
+            } else {
+                statement.add(
+                    deserializeStrategy.buildDeserializeDefaultBlock(
+                        defaultValue,
+                        paramField
                     )
-                }
-                else -> {
-                    statement.addStatement("\$N = \$L",
-                        paramField,
-                        typeConverter.buildStandardDeserializeBlockForDefault(
-                            defaultValue,
-                            paramField.type,
-                            originatingElement
-                        )
-                    )
-                }
+                )
             }
             statement.nextControlFlow("else")
         }
 
-        val deserializeBlock = if (typeAdapter != null) {
-            typeConverter.buildCustomDeserializeBlock(
-                localVarName,
-                paramField,
-                typeAdapter
-            )
-        } else {
-            typeConverter.buildStandardDeserializeBlock(
-                localVarName,
+        statement.add(
+            deserializeStrategy.buildDeserializeBlock(
                 paramField,
                 nullable,
-                defaultValue,
-                originatingElement
+                defaultValue
             )
-        }
-
-        statement.add(deserializeBlock)
+        )
 
         if (nullable || defaultValue != null) {
             statement.endControlFlow()

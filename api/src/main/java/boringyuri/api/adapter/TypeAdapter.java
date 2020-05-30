@@ -48,7 +48,7 @@ import java.lang.annotation.Target;
  *      &#64;UriFactory(scheme = "https", authority = "example.com")
  *      public interface ImageApi {
  *
- *          &#64;UriBuilder("select_rect")
+ *          &#64;UriBuilder("/select_rect")
  *          public Uri buildHighlightUri(&#64;Param &#64;TypeAdapter(RectAdapter.class) Rect highlightArea);
  *
  *      }
@@ -64,6 +64,26 @@ import java.lang.annotation.Target;
  *
  *      }
  * </code></pre>
+ *
+ * For parameters of an {@code array} type the <code>&#64;TypeAdapter</code> should be used
+ * for an {@code array} element, not for the {@code array} itself. Example:
+ *
+ * <pre><code>
+ *      &#64;UriFactory(scheme = "https", authority = "example.com")
+ *      public interface ImageApi {
+ *
+ *          &#64;UriBuilder("/select_rect")
+ *          public Uri buildHighlightUri(&#64;Param("highlight") &#64;TypeAdapter(RectAdapter.class) Rect[] highlights);
+ *
+ *          &#64;UriBuilder("/user/details/save")
+ *          public Uri saveDetailsUri(&#64;Param("user") User[] users);
+ *      }
+ * </code></pre>
+ * <p>
+ * In the example above the first method has a <code>&#64;TypeAdapter</code> specified at use
+ * for the type {@code Rect} and the second method uses an array of {@code User}s from the very
+ * first example where the {@code User} is annotated with <code>&#64;TypeAdapter(UserTypeAdapter.class)</code>.
+ * </p>
  *
  * @see boringyuri.api.Path
  * @see boringyuri.api.Param

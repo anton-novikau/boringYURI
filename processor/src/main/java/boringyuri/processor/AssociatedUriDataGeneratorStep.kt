@@ -27,7 +27,7 @@ import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.uripart.VariableReadPathSegment
 import boringyuri.processor.uripart.VariableReadQueryParameter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.CommonTypeName
+import boringyuri.processor.type.CommonTypeName
 import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.buildGetterName
 import com.google.common.collect.ImmutableSet

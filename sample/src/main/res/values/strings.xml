@@ -17,5 +17,6 @@
 <resources>
     <string name="app_name">Boring Sample</string>
 
-    <string name="boring_greeting">Built boring URI is:</string>
+    <string name="uri_label">Built boring URI is:</string>
+    <string name="uri_data_label">Uri data:</string>
 </resources>

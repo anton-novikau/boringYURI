@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package boringyuri.api.constant;
+package boringyuri.processor.util
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+class Counter(initialValue: Int = 0) {
 
-/**
- * Repeatable annotation for {@link LongParam}. It allows annotating the same
- * method with two or more different constant integer or long integer query parameters.
- */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
-public @interface LongParams {
-    LongParam[] value();
+    var value = initialValue
+        private set
+
+    fun increment(): Counter {
+        value += 1
+
+        return this
+    }
+
+    override fun toString() = "$value"
+
 }

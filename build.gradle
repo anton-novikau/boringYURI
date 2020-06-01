@@ -16,7 +16,7 @@
 
 buildscript {
     // android
-    ext.gradlePluginVersion = '4.0.0-rc01'
+    ext.gradlePluginVersion = '4.0.0'
     ext.buildToolsVersion = '29.0.2'
     ext.compile_sdk_version = 29
     ext.min_sdk_version = 17

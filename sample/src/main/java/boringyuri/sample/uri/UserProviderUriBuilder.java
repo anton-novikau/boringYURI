@@ -57,6 +57,17 @@ public interface UserProviderUriBuilder {
     Uri buildUserPhotoUri(@Path("id") int userId);
 
     @NonNull
+    @UriBuilder("/user/save")
+    Uri buildSaveUsersUri(@Param("user") @NonNull User[] users);
+
+    @NonNull
+    @UriBuilder("/admin/save")
+    Uri buildSaveAdminsUri(
+            @Param("user")
+            @TypeAdapter(AdminTypeAdapter.class)
+            @NonNull User[] users);
+
+    @NonNull
     static UserProviderUriBuilder create() {
         return new UserProviderUriBuilderImpl();
     }

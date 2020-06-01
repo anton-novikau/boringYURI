@@ -37,4 +37,14 @@ interface StringTestUriData {
     @DefaultValue("default")
     fun getNonNullWithDefaultParam(): String
 
+    @Param
+    fun getNullableArrayParam(): Array<String>?
+
+    @Param
+    fun getNonNullArrayParam(): Array<String>
+
+    @Param
+    @DefaultValue("default")
+    fun getNonNullWithDefaultArrayParam(): Array<String>
+
 }

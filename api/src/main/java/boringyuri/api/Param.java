@@ -25,13 +25,17 @@ import java.lang.annotation.Target;
  * <p>
  * Query parameter appended to the {@code Uri}.
  * </p><p>
+ * <code>null</code> values are ignored to be added to the {@code Uri} query parameter.
+ * An array annotated with <code>&#64;Param</code> will result a query parameter for every
+ * non-<code>null</code> array element.
+ * </p><p>
  * Values of primitive types, primitive wrapper types, {@code String} or {@code Uri} can be
  * serialized and deserialized with a built-in type converter. For every other type of the
  * method parameter annotated with <code>&#64;Param</code> there should exist a
  * {@link boringyuri.api.adapter.BoringTypeAdapter BoringTypeAdapter} implementation
  * registered with {@link boringyuri.api.adapter.TypeAdapter TypeAdapter}.
  * </p><p>
- * Example:
+ * Examples:
  *
  * <pre><code>
  *     &#64;UriBuilder("user")
@@ -57,6 +61,11 @@ import java.lang.annotation.Target;
  * </code></pre>
  * Calling with {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("id")}
  *
+ * <pre><code>
+ *     &#64;UriBuilder("user")
+ *     public Uri buildFetchUserDetailsUri(&#64;Param("id") int[] ids);
+ * </code></pre>
+ * Calling {@code foo.buildFetchUserDetailsUri(new int[] { 100, 200 })} yields {@code /user?id=100&id=200}
  *
  * @see boringyuri.api.Path
  * @see boringyuri.api.adapter.TypeAdapter

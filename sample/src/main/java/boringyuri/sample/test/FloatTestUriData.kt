@@ -45,4 +45,18 @@ interface FloatTestUriData {
     @DefaultValue("1.2")
     fun getNullableWithDefaultParam(): Float?
 
+    @Param
+    fun getNullableArrayParam(): Array<Float>?
+
+    @Param
+    fun getNonNullArrayParam(): FloatArray
+
+    @Param
+    @DefaultValue("1.2")
+    fun getNonNullWithDefaultArrayParam(): FloatArray
+
+    @Param
+    @DefaultValue("1.2")
+    fun getNullableWithDefaultArrayParam(): Array<Float>?
+
 }

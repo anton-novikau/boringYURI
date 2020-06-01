@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *
  * @see boringyuri.api.Param
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @Repeatable(LongParams.class)
 public @interface LongParam {

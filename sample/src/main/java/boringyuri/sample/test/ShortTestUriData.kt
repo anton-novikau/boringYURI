@@ -45,4 +45,18 @@ interface ShortTestUriData {
     @DefaultValue("1")
     fun getNullableWithDefaultParam(): Short?
 
+    @Param
+    fun getNullableArrayParam(): Array<Short>?
+
+    @Param
+    fun getNonNullArrayParam(): ShortArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNonNullWithDefaultArrayParam(): ShortArray
+
+    @Param
+    @DefaultValue("1")
+    fun getNullableWithDefaultArrayParam(): Array<Short>?
+
 }

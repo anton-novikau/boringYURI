@@ -21,9 +21,9 @@ import boringyuri.processor.ext.createMethodSignature
 import boringyuri.processor.ext.findTypeAdapter
 import boringyuri.processor.ext.valueMirror
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.CommonTypeName.STRING
+import boringyuri.processor.type.CommonTypeName.STRING
 import boringyuri.processor.util.Logger
-import boringyuri.processor.util.TypeConverter
+import boringyuri.processor.type.TypeConverter
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
@@ -212,7 +212,7 @@ abstract class BaseReadPathSegment(
 
         val deserializeBlock = if (typeAdapter != null) {
             typeConverter.buildCustomDeserializeBlock(
-                segmentVariableName,
+                CodeBlock.of("\$L", segmentVariableName),
                 segmentField,
                 typeAdapter
             )

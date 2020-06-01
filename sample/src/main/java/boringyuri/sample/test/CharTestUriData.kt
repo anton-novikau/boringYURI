@@ -45,4 +45,18 @@ interface CharTestUriData {
     @DefaultValue("c")
     fun getNullableWithDefaultParam(): Char?
 
+    @Param
+    fun getNullableArrayParam(): Array<Char>?
+
+    @Param
+    fun getNonNullArrayParam(): CharArray
+
+    @Param
+    @DefaultValue("c")
+    fun getNonNullWithDefaultArrayParam(): CharArray
+
+    @Param
+    @DefaultValue("c")
+    fun getNullableWithDefaultArrayParam(): Array<Char>?
+
 }

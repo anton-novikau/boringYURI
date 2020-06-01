@@ -1,3 +1,9 @@
+## Boring YURI 1.1.2 (2020-06-02)
+
+* Add support of arrays in query parameters ([Issue #12](https://github.com/anton-novikau/boringYURI/issues/12)).
+* Add support of repeated constant query parameters with the same name.
+* Fix getter modifiers for constant query parameters ([Bug #13](https://github.com/anton-novikau/boringYURI/issues/13)).
+
 ## Boring YURI 1.1.1 (2020-05-18)
 
 * Add `@DefaultValue` support for query parameters and path segments. 

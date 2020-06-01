@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.util
+package boringyuri.processor.type
 
 import boringyuri.processor.base.AbortProcessingException
-import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.util.Logger
 import com.google.auto.common.MoreTypes
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
@@ -33,37 +34,50 @@ class TypeConverter(
         param: ParameterSpec,
         typeAdapter: TypeMirror?,
         originatingElement: Element? = null
+    ): CodeBlock = buildSerializeBlock(
+        CodeBlock.of("\$N", param),
+        param.type,
+        typeAdapter,
+        originatingElement
+    )
+
+    fun buildSerializeBlock(
+        param: CodeBlock,
+        paramType: TypeName,
+        typeAdapter: TypeMirror?,
+        originatingElement: Element? = null
     ): CodeBlock = if (typeAdapter != null) {
-        CodeBlock.of("\$L.serialize(\$N)", buildCreateTypeAdapterBlock(typeAdapter), param)
-    } else if (param.type == STRING) {
-        CodeBlock.of("\$N", param)
-    } else if (param.type.isPrimitive
-        || param.type.isBoxedPrimitive
-        || param.type == ANDROID_URI) {
-        CodeBlock.of("\$T.valueOf(\$N)", STRING, param)
+        CodeBlock.of("\$L.serialize(\$L)", buildCreateTypeAdapterBlock(typeAdapter), param)
+    } else if (paramType == STRING) {
+        CodeBlock.of("\$L", param)
+    } else if (paramType.isPrimitive
+        || paramType.isBoxedPrimitive
+        || paramType == ANDROID_URI) {
+        CodeBlock.of("\$T.valueOf(\$L)", STRING, param)
     } else {
-        throw AbortProcessingException(logger, originatingElement, "Unknown type ${param.type}")
+        throw AbortProcessingException(logger, originatingElement, "Unknown type $paramType")
     }
 
     fun buildCustomDeserializeBlock(
-        localVariableName: String,
+        value: CodeBlock,
         field: FieldSpec,
         typeAdapter: TypeMirror
     ): CodeBlock {
+        return buildCustomDeserializeBlock(value, CodeBlock.of("\$N", field), typeAdapter)
+    }
+
+    fun buildCustomDeserializeBlock(
+        value: CodeBlock,
+        field: CodeBlock,
+        typeAdapter: TypeMirror
+    ): CodeBlock {
         val deserializeBlock = CodeBlock.builder()
-        val adapterName = "typeAdapter"
-        val adapterType = ParameterizedTypeName.get(TYPE_ADAPTER, field.type)
+
         deserializeBlock.addStatement(
-            "\$T \$L = \$L",
-            adapterType,
-            adapterName,
-            buildCreateTypeAdapterBlock(typeAdapter)
-        )
-        deserializeBlock.addStatement(
-            "\$N = \$L.deserialize(\$L)",
+            "\$L = \$L.deserialize(\$L)",
             field,
-            adapterName,
-            localVariableName
+            buildCreateTypeAdapterBlock(typeAdapter),
+            value
         )
 
         return deserializeBlock.build()
@@ -101,28 +115,45 @@ class TypeConverter(
     }
 
     fun buildStandardDeserializeBlock(
-        localVariableName: String,
+        value: String,
         field: FieldSpec,
         nullable: Boolean,
         defaultValue: String?,
         originatingElement: Element? = null
     ): CodeBlock {
-        val fieldType = field.type
+        return buildStandardDeserializeBlock(
+            CodeBlock.of("\$L", value),
+            CodeBlock.of("\$N", field),
+            field.type,
+            nullable,
+            defaultValue,
+            originatingElement
+        )
+    }
+
+    fun buildStandardDeserializeBlock(
+        value: CodeBlock,
+        field: CodeBlock,
+        fieldType: TypeName,
+        nullable: Boolean,
+        defaultValue: String?,
+        originatingElement: Element? = null
+    ): CodeBlock {
         val deserializeBlock = CodeBlock.builder()
 
         when (fieldType) {
             TypeName.BOOLEAN, TypeName.BOOLEAN.box() -> {
                 deserializeBlock.addStatement(
-                    "$1N = \"true\".equalsIgnoreCase($2L) || \"1\".equals($2L)",
+                    "$1L = \"true\".equalsIgnoreCase($2L) || \"1\".equals($2L)",
                     field,
-                    localVariableName
+                    value
                 )
             }
             TypeName.CHAR, TypeName.CHAR.box() -> {
                 deserializeBlock.addStatement(
-                    "$1N = $2L.length() > 0 ? $2L.charAt(0) : $3L",
+                    "$1L = $2L.length() > 0 ? $2L.charAt(0) : $3L",
                     field,
-                    localVariableName,
+                    value,
                     when {
                         defaultValue != null -> {
                             buildStandardDeserializeBlockForDefault(
@@ -137,21 +168,22 @@ class TypeConverter(
                 )
             }
             STRING -> {
-                deserializeBlock.addStatement("\$N = \$L", field, localVariableName)
+                deserializeBlock.addStatement("\$L = \$L", field, value)
             }
             ANDROID_URI -> {
                 deserializeBlock.addStatement(
-                    "\$N = \$T.parse(\$L)",
+                    "\$L = \$T.parse(\$L)",
                     field,
                     ANDROID_URI,
-                    localVariableName
+                    value
                 )
             }
             else -> {
                 deserializeBlock.add(
                     buildNumberDeserializeBlock(
-                        localVariableName,
+                        value,
                         field,
+                        fieldType,
                         nullable,
                         defaultValue,
                         originatingElement
@@ -165,61 +197,60 @@ class TypeConverter(
     }
 
     private fun buildNumberDeserializeBlock(
-        localVariableName: String,
-        field: FieldSpec,
+        value: CodeBlock,
+        field: CodeBlock,
+        fieldType: TypeName,
         nullable: Boolean,
         defaultValue: String?,
         originatingElement: Element? = null
     ): CodeBlock {
-        val fieldType = field.type
-
         val (parseBlock, defaultValueBlock) = when (fieldType) {
             TypeName.BYTE, TypeName.BYTE.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseByte(\$L)",
+                    "\$L = \$T.parseByte(\$L)",
                     field,
                     TypeName.BYTE.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("(byte) 0")
             }
             TypeName.SHORT, TypeName.SHORT.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseShort(\$L)",
+                    "\$L = \$T.parseShort(\$L)",
                     field,
                     TypeName.SHORT.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("(short) 0")
             }
             TypeName.INT, TypeName.INT.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseInt(\$L)",
+                    "\$L = \$T.parseInt(\$L)",
                     field,
                     TypeName.INT.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("0")
             }
             TypeName.LONG, TypeName.LONG.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseLong(\$L)",
+                    "\$L = \$T.parseLong(\$L)",
                     field,
                     TypeName.LONG.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("0L")
             }
             TypeName.FLOAT, TypeName.FLOAT.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseFloat(\$L)",
+                    "\$L = \$T.parseFloat(\$L)",
                     field,
                     TypeName.FLOAT.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("0.0f")
             }
             TypeName.DOUBLE, TypeName.DOUBLE.box() -> {
                 CodeBlock.builder().addStatement(
-                    "\$N = \$T.parseDouble(\$L)",
+                    "\$L = \$T.parseDouble(\$L)",
                     field,
                     TypeName.DOUBLE.box(),
-                    localVariableName
+                    value
                 ).build() to CodeBlock.of("0.0")
             }
             else -> {
@@ -247,7 +278,7 @@ class TypeConverter(
             .beginControlFlow("try")
             .add(parseBlock)
             .nextControlFlow("catch (\$T e)", NumberFormatException::class.java)
-            .addStatement("\$N = \$L", field, defaultAssignmentBlock)
+            .addStatement("\$L = \$L", field, defaultAssignmentBlock)
             .endControlFlow()
             .build()
     }

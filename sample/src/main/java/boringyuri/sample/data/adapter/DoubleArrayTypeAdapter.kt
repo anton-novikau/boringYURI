@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package boringyuri.api.constant;
+package boringyuri.sample.data.adapter
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import boringyuri.api.adapter.BoringTypeAdapter
 
-/**
- * Repeatable annotation for {@link LongParam}. It allows annotating the same
- * method with two or more different constant integer or long integer query parameters.
- */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
-public @interface LongParams {
-    LongParam[] value();
+
+class DoubleArrayTypeAdapter : BoringTypeAdapter<DoubleArray> {
+
+    override fun serialize(value: DoubleArray): String {
+        return value.joinToString(separator = ";") { it.toString() }
+    }
+
+    override fun deserialize(value: String): DoubleArray {
+        return value.split(";").let { DoubleArray(it.size) { i -> it[i].toDouble() } }
+    }
 }

@@ -38,4 +38,14 @@ interface UriTestUriData {
     @DefaultValue("https://example.com/uri")
     fun getNonNullWithDefaultParam(): Uri
 
+    @Param
+    fun getNullableArrayParam(): Array<Uri>?
+
+    @Param
+    fun getNonNullArrayParam(): Array<Uri>
+
+    @Param
+    @DefaultValue("https://example.com/uri")
+    fun getNonNullWithDefaultArrayParam(): Array<Uri>
+
 }

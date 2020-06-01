@@ -23,6 +23,7 @@ import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.sample.data.Address
 import boringyuri.sample.data.adapter.CoordinatesTypeAdapter
+import boringyuri.sample.data.adapter.DoubleArrayTypeAdapter
 
 @UriFactory(scheme = "https", authority = "maps.example.com")
 interface LocationUriBuilder {
@@ -43,7 +44,24 @@ interface LocationUriBuilder {
     @BooleanParam(name = "sensor", value = true)
     fun buildGeocodeUri(
         @Param @TypeAdapter(CoordinatesTypeAdapter::class) latlng: Pair<Long, Long>,
-        @Param address: Address): Uri
+        @Param address: Address
+    ): Uri
+
+    @UriBuilder("/maps/api/pins")
+    @DoubleParam(name = "zoom", value = 4.5)
+    @WithUriData
+    fun buildShowPinsUri(
+        @Param @TypeAdapter(CoordinatesTypeAdapter::class) latlng: Array<Pair<Long, Long>>
+    ): Uri
+
+    @UriBuilder("/maps/api/pins")
+    @DoubleParam(name = "zoom", value = 4.5)
+    @WithUriData
+    fun buildShowPinsByCoordinatesUri(
+        @Param("pin")
+        @TypeAdapter(DoubleArrayTypeAdapter::class)
+        @DefaultValue("53.893009;27.567444") coordinates: Array<DoubleArray>?
+    ): Uri
 
     companion object {
         @JvmStatic

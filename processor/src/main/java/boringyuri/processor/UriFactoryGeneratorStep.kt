@@ -25,10 +25,10 @@ import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createParamSpec
 import boringyuri.processor.uripart.*
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.*
 import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
-import boringyuri.processor.util.TypeConverter
+import boringyuri.processor.type.TypeConverter
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.SetMultimap
 import com.squareup.javapoet.ClassName
@@ -46,7 +46,10 @@ class UriFactoryGeneratorStep internal constructor(
     private val annotationHandler: AnnotationHandler
 ) : BoringProcessingStep(session) {
 
-    private val typeConverter = TypeConverter(logger, getTypeAdapterFactory(session))
+    private val typeConverter = TypeConverter(
+        logger,
+        getTypeAdapterFactory(session)
+    )
 
     override fun annotations(): Set<Class<out Annotation>> {
         return ImmutableSet.of<Class<out Annotation>>(

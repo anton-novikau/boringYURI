@@ -173,7 +173,7 @@ flexibility and there is a bigger chance to make a mistake. Use the named path s
 annotated with `@NonNull` in Java or must have a non-nullable type in Kotlin. The only exception
 when a `@Path` method parameter can be nullable is when it has a [@DefaultValue](#default-values).
 This technically makes the path segment itself non-nullable, but allows to have a nullable
-parameter in a method signature. 
+parameter in a method signature.
 
 ### Types
 
@@ -181,7 +181,32 @@ parameter in a method signature.
 segment or a query parameter. But sometimes it's not enough and we have to deal with application
 specific, platform or library types.
 
+#### Arrays
+
+It is allowed to have `@Param` method parameters of an array type. The `Uri` will contain query
+parameters of the provided name for every `non-null` array element:
+
+```java
+@UriFactory(scheme = "https", authority="example.com")
+interface UserUriBuilder {
+
+    @UriBuilder("user")
+    Uri buildFetchUserDetailsUri(@Param("id") int[] ids);
+
+}
+```
+
+So calling `foo.buildFetchUserDetailsUri(new int[] { 42, 24 })` will build
+`https://example.com/user?id=42&id=24`.
+
+**NOTE:** the array rule is not applicable for query parameters of `List`, `Set` or any other
+`Collection` and a [custom type conversion](#platform-or-library-specific-types) must be defined.
+
+**NOTE:** unlike `@Param` method parameters `@Path` of an array type are supposed to have
+a [custom type conversion](#platform-or-library-specific-types) defined.
+
 #### Application specific types
+
 If you want to use the same application specific type conversion for every `Uri`, you need to 
 annotate the class with `@TypeAdapter` specifying a `BoringTypeAdapter` implementation as an
 annotation value so `Boring Yuri` can understand how to convert the object of this type into a
@@ -291,7 +316,28 @@ Calling `builder.buildGeocodeUri(Pair.create(53.893009, 27.567444))` will give y
 `https://maps.example.com/maps/api/geocode?latlng=53.893009,27.567444`
 
 **NOTE:** specifying `@TypeAdapter` at use will override the standard type conversion (eg. if you
-need a different decimal format for a number).  
+need a different decimal format for a number). 
+
+If a **query parameter** is an array of any custom type (application, library or platform specific),
+there must be provided a `@TypeAdapter` for the array component type, not to the array itself:
+
+```java
+@UriFactory(scheme = "https", authority = "maps.example.com")
+interface LocationUriBuilder {
+    
+    @UriBuilder("/maps/api/geocode")
+    Uri buildGeocodeUri(
+            @Param("latlng")
+            @TypeAdapter(CoordinatesTypeAdapter.class) Pair<Double, Double>[] coordinates);
+
+}
+```
+
+In the example above `CoordinatesTypeAdapter` defines the type conversion rules for
+`Pair<Double, Double>`, not to an array of `Pair`s.
+
+For **path segments** though, a `@TypeAdapter` must be defined for the array itself, not just for
+the array component type. 
 
 ### Constant query parameters
 
@@ -314,7 +360,7 @@ interface LocationUriBuilder {
 
 So calling: 
 
-```
+```java
 builder.buildStaticMapUri(53.893009, 27.567444);
 builder.buildStaticMapUri(37.773972, -122.431297);
 ```
@@ -327,6 +373,38 @@ https://maps.example.com/maps/api/staticmap?lat=37.773972&lng=-122.431297&sensor
 ```
 
 **NOTE:** one `Uri` builder method may have many constant query parameters of the same type.
+
+It is allowed to define two or more constant query parameters that have the same name if they are
+of the same type:
+
+```java
+@UriFactory(scheme = "https", authority = "example.com")
+interface LocationUriBuilder {
+    
+    @UriBuilder("/search/api/media")
+    @StringParam(name = "type", value = "photo")
+    @StringParam(name = "type", value = "video")
+    Uri buildMediaSearchUri(@Param("query") String searchQuery);
+
+}
+```
+
+So calling: 
+
+```java
+builder.buildMediaSearchUri("Cute Cats");
+builder.buildMediaSearchUri("Yawning Sloths");
+```
+
+will give `Uri`s for searching both `photo` and `video` by two different search queries:
+
+```
+https://example.com/search/api/media?query=Cute%20Cats&type=photo&type=video
+https://example.com/search/api/media?query=Yawning%20Sloths&type=photo&type=video
+```
+
+**NOTE:** constant query parameters of a builder method **can not** have the same name if they are
+of different types (eg. one is a `@StringParam` and the other is a `@LongParam`).
 
 ### Deserialize data from Uri
 
@@ -410,6 +488,55 @@ class BoringContactProvider extends ContentProvider {
         // here you may use 'group', 'contactId' and 'desiredDimensions' do create
         // a ParcelFileDescriptor for the requested contact photo.
         ...
+    }
+
+}
+```
+
+Constant query parameters defined in the builder method are provided in the generated data class
+as well. But because they can't be changed, there is no actually reading them from the given `Uri`.
+The getter method instead just returns a constant value defined in the specific annotation:
+
+```java
+@UriBuilder("/maps/api/staticmap")
+@WithUriData
+@DoubleParam(name = "zoom", value = 2.5)
+Uri buildStaticMapUri(@Param("lat") double latitude, @Param("lng") double longitude);
+```
+
+For the builder method above there is a data class:
+
+```java
+class StaticMapUriData {
+    ...
+
+    public double getZoom() {
+        return 2.5;
+    }
+
+}
+```  
+
+If there are two or more constant query parameters that have the same name and type, they can be
+obtained from the data class as an array of this type:
+
+```java
+@UriBuilder("/search/api/media")
+@WithUriData
+@StringParam(name = "type", value = "photo")
+@StringParam(name = "type", value = "video")
+Uri buildMediaSearchUri(@Param("query") String searchQuery);
+```  
+
+So for the builder above there'll be a data class:
+
+```java
+class MediaSearchUriData {
+    ...
+
+    @NonNull
+    public String[] getType() {
+        return new String[] { "photo", "video" };
     }
 
 }
@@ -606,8 +733,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.1"
-  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.1"
+  implementation "org.boringyuri:boringyuri-api:1.1.2"
+  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.2"
 }
 ```
 
@@ -617,8 +744,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.1"
-  kapt "org.boringyuri:boringyuri-processor:1.1.1"
+  implementation "org.boringyuri:boringyuri-api:1.1.2"
+  kapt "org.boringyuri:boringyuri-processor:1.1.2"
 }
 ```
 Snapshots of the development version are available in [JFrog's snapshots repository][4].

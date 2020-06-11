@@ -781,9 +781,11 @@ With Java only:
 
 ```groovy
 android {
-    javaCompileOptions {
-        annotationProcessorOptions {
-            arguments = ["option_name", "option_value"]
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["option_name": "option_value"]
+            }
         }
     }
 }

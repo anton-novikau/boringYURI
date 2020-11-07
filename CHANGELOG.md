@@ -1,3 +1,7 @@
+## Boring YURI 1.1.3 (2020-11-08)
+
+* Upgrade the dependencies
+
 ## Boring YURI 1.1.2 (2020-06-02)
 
 * Add support of arrays in query parameters ([Issue #12](https://github.com/anton-novikau/boringYURI/issues/12)).

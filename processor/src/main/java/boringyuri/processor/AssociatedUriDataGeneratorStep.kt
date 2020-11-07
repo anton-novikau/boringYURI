@@ -22,16 +22,16 @@ import boringyuri.api.constant.LongParam
 import boringyuri.api.constant.StringParam
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createFieldSpec
+import boringyuri.processor.type.CommonTypeName
 import boringyuri.processor.uripart.ReadQueryParameter
 import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.uripart.VariableReadPathSegment
 import boringyuri.processor.uripart.VariableReadQueryParameter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.type.CommonTypeName
 import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.buildGetterName
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.*
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Element
@@ -44,13 +44,13 @@ class AssociatedUriDataGeneratorStep(
     annotationHandler: AnnotationHandler
 ) : UriDataGeneratorStep(session, annotationHandler) {
 
-    override fun annotations(): Set<Class<out Annotation>> {
-        return ImmutableSet.of(WithUriData::class.java)
+    override fun annotations(): Set<String> {
+        return ImmutableSet.of(WithUriData::class.java.name)
     }
 
-    override fun process(elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>): Set<Element> {
+    override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {
         val annotatedMethods = ElementFilter.methodsIn(
-            elementsByAnnotation[WithUriData::class.java]
+            elementsByAnnotation[WithUriData::class.java.name]
         )
         val deferred = hashSetOf<Element>()
         for (annotatedMethod in annotatedMethods) {

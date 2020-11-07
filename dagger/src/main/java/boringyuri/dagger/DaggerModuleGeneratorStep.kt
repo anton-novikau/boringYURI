@@ -23,7 +23,7 @@ import boringyuri.processor.UriFactoryGeneratorStep.Companion.CONTAINER_IMPL_SUF
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
@@ -34,14 +34,14 @@ import javax.lang.model.util.ElementFilter
 
 class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingStep(session) {
 
-    override fun annotations(): Set<Class<out Annotation>> {
-        return ImmutableSet.of(UriFactory::class.java)
+    override fun annotations(): Set<String> {
+        return ImmutableSet.of(UriFactory::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
+        elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element> {
-        val factories = ElementFilter.typesIn(elementsByAnnotation[UriFactory::class.java])
+        val factories = ElementFilter.typesIn(elementsByAnnotation[UriFactory::class.java.name])
         val moduleName = ProcessorOptions.getModuleName(session)
 
         return generateBoringDaggerModule(moduleName, factories)

@@ -24,6 +24,7 @@ import boringyuri.processor.type.CommonTypeName.*
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import com.google.auto.common.MoreTypes
 import com.google.common.collect.ImmutableSet
+import com.google.common.collect.ImmutableSetMultimap
 import com.google.common.collect.SetMultimap
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
@@ -34,18 +35,18 @@ class TypeAdapterFactoryGeneratorStep(
     session: ProcessingSession
 ) : BoringProcessingStep(session) {
 
-    override fun annotations(): Set<Class<out Annotation>> {
-        return ImmutableSet.of(TypeAdapter::class.java)
+    override fun annotations(): Set<String> {
+        return ImmutableSet.of(TypeAdapter::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
+        elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element> {
         // Stop processing Type Adapters if the factory class is not specified.
         // Every adapter instance will be created at use without caching.
         val typeAdapterFactory = getTypeAdapterFactory(session) ?: return emptySet()
 
-        val adaptableElements = elementsByAnnotation[TypeAdapter::class.java]
+        val adaptableElements = elementsByAnnotation[TypeAdapter::class.java.name]
 
         val typeAdapters = adaptableElements.mapNotNull { element ->
             val typeAdapter = element.getAnnotation(TypeAdapter::class.java)?.valueMirror()

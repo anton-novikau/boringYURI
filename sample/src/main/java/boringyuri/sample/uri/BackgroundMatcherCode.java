@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package boringyuri.sample.data
+package boringyuri.sample.uri;
 
-import boringyuri.api.adapter.TypeAdapter
-import boringyuri.sample.data.adapter.AddressTypeAdapter
-
-@TypeAdapter(AddressTypeAdapter::class)
-data class Address constructor(val city: String, val street: String?, val zipCode: String? = null)
+public interface BackgroundMatcherCode {
+    int COLOR = 100;
+    int ORIGINAL = 101;
+    int CROPPED = 102;
+}

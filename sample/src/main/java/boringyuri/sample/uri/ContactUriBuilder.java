@@ -23,11 +23,14 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import boringyuri.api.MatcherCode;
+import boringyuri.api.MatchesTo;
 import boringyuri.api.Param;
 import boringyuri.api.Path;
 import boringyuri.api.UriBuilder;
 import boringyuri.api.UriFactory;
 import boringyuri.api.WithUriData;
+import boringyuri.api.WithUriMatcher;
 import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.Address;
 import boringyuri.sample.data.adapter.RectTypeAdapter;
@@ -36,14 +39,23 @@ import boringyuri.sample.data.adapter.RectTypeAdapter;
         scheme = ContentResolver.SCHEME_CONTENT,
         authority = "boringyuri.sample.provider"
 )
+@WithUriMatcher("ContactUriMatcher")
 public interface ContactUriBuilder {
+    class Contract {
+        private static final String CONTACT_DATA = "CONTACT_DATA";
+        private static final String CONTACT_PHOTO = "CONTACT_PHOTO";
+        private static final String VCARD = "vcard";
+    }
+
     @NonNull
     @UriBuilder("/data/{contactId}")
+    @MatchesTo(Contract.CONTACT_DATA)
     Uri buildContactDataUri(@Path long contactId);
 
     @NonNull
     @UriBuilder("/file/photo/{group}/{contactId}")
     @WithUriData
+    @MatchesTo(Contract.CONTACT_PHOTO)
     Uri buildContactPhotoUri(
             @Path @NonNull String group,
             @Path long contactId,
@@ -51,6 +63,8 @@ public interface ContactUriBuilder {
 
     @NonNull
     @UriBuilder("/file/vcard/{contactId}")
+    @WithUriData
+    @MatchesTo(Contract.VCARD)
     Uri buildVCardUri(
             @Path long contactId,
             @NonNull @Param String firstName,

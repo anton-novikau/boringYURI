@@ -21,6 +21,7 @@ import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.buildGetterName
 import com.squareup.javapoet.*
 import org.apache.commons.lang3.StringUtils
+import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.VariableElement
@@ -29,6 +30,14 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.util.SimpleTypeVisitor8
 
 private const val FIELD_PREFIX = "m"
+
+inline fun <reified T : Annotation> Element.getAnnotation(): T? = getAnnotation(T::class.java)
+
+inline fun <reified T : Annotation> Element.requireAnnotation(): T {
+    return requireNotNull(getAnnotation(T::class.java)) {
+        "Annotation @${T::class.simpleName} is missing in $simpleName"
+    }
+}
 
 fun VariableElement.createParamSpec(annotationHandler: AnnotationHandler): ParameterSpec {
     val paramType = ClassName.get(asType())

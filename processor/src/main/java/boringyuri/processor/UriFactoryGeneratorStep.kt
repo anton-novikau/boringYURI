@@ -66,7 +66,7 @@ class UriFactoryGeneratorStep internal constructor(
             if (container.kind != ElementKind.INTERFACE) {
                 logger.warn(
                     container,
-                    "@%s can only be applied to interface",
+                    "@%s can only be applied to an interface",
                     UriFactory::class.simpleName
                 )
                 continue
@@ -373,5 +373,4 @@ class UriFactoryGeneratorStep internal constructor(
 
         private val PATH_TEMPLATE_REGEX = "^\\{([a-zA-Z0-9_-]+)}$".toRegex()
     }
-
 }

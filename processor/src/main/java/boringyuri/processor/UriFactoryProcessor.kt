@@ -48,14 +48,18 @@ class UriFactoryProcessor : BoringAnnotationProcessor() {
 
         return ImmutableSet.of(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-            UriFactoryGeneratorStep(session, annotationHandler)
+            UriFactoryGeneratorStep(session, annotationHandler),
+            UriMatcherGeneratorStep(session)
         )
     }
 
-    private companion object {
-        val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+    companion object {
+        private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
             ClassName.get(UriFactory::class.java),
+            ClassName.get(WithUriMatcher::class.java),
             ClassName.get(UriBuilder::class.java),
+            ClassName.get(MatchesTo::class.java),
+            ClassName.get(MatcherCode::class.java),
             ClassName.get(WithUriData::class.java),
             ClassName.get(TypeAdapter::class.java),
             ClassName.get(Path::class.java),

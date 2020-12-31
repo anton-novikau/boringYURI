@@ -25,7 +25,6 @@ import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import com.google.auto.common.MoreTypes
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
-import com.google.common.collect.SetMultimap
 import com.squareup.javapoet.*
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
@@ -34,6 +33,8 @@ import javax.lang.model.element.Modifier
 class TypeAdapterFactoryGeneratorStep(
     session: ProcessingSession
 ) : BoringProcessingStep(session) {
+
+    private val typeAdapters = LinkedHashMap<ClassName, Element>()
 
     override fun annotations(): Set<String> {
         return ImmutableSet.of(TypeAdapter::class.java.name)
@@ -48,14 +49,27 @@ class TypeAdapterFactoryGeneratorStep(
 
         val adaptableElements = elementsByAnnotation[TypeAdapter::class.java.name]
 
-        val typeAdapters = adaptableElements.mapNotNull { element ->
+        if (typeAdapters.isNotEmpty()) {
+            adaptableElements.forEach {
+                logger.error(
+                    it,
+                    "%s is already created. Can't add %s to it.",
+                    typeAdapterFactory.simpleName(),
+                    it.simpleName
+                )
+            }
+
+            return emptySet() // early exit
+        }
+
+        adaptableElements.mapNotNull { element ->
             val typeAdapter = element.getAnnotation(TypeAdapter::class.java)?.valueMirror()
 
             // Map TypeAdapter class name to originating element to be able to
             // log an error or postpone element processing to the next step
             // in case it's possible.
             typeAdapter?.let { ClassName.get(MoreTypes.asTypeElement(it)) to element }
-        }.associate { it }
+        }.associateTo(typeAdapters) { it }
 
         return generateTypeAdapterFactory(typeAdapterFactory, typeAdapters)
     }

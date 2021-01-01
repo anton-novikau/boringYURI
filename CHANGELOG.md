@@ -1,6 +1,8 @@
-## Boring YURI 1.1.3 (2020-11-08)
+## Boring YURI 1.1.3 (2021-01-03)
 
-* Upgrade the dependencies
+* Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated
+  ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
+* Upgrade the dependencies.
 
 ## Boring YURI 1.1.2 (2020-06-02)
 
@@ -32,3 +34,4 @@
 
 [1]: https://developer.android.com/reference/android/net/Uri
 [2]: https://github.com/google/dagger/
+[3]: https://developer.android.com/reference/android/content/UriMatcher

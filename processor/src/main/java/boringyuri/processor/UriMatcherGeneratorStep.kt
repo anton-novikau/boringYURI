@@ -413,7 +413,7 @@ class UriMatcherGeneratorStep(
     )
 
     companion object {
-        private const val DEFAULT_MATCHER_SUFFIX = "UriMatcher"
+        private const val DEFAULT_MATCHER_SUFFIX = "_UriMatcher"
         private const val MATCHER_CODE_NAME = "MatcherCode"
         private const val PATH_SEPARATOR = "/"
         private const val WILDCARD_ANY = "*"

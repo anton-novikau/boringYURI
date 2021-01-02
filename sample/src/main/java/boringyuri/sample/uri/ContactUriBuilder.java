@@ -23,14 +23,13 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import boringyuri.api.MatcherCode;
-import boringyuri.api.MatchesTo;
+import boringyuri.api.matcher.MatchesTo;
 import boringyuri.api.Param;
 import boringyuri.api.Path;
 import boringyuri.api.UriBuilder;
 import boringyuri.api.UriFactory;
 import boringyuri.api.WithUriData;
-import boringyuri.api.WithUriMatcher;
+import boringyuri.api.matcher.WithUriMatcher;
 import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.Address;
 import boringyuri.sample.data.adapter.RectTypeAdapter;

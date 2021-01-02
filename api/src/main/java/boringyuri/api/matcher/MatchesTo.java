@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package boringyuri.api;
+package boringyuri.api.matcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,8 +23,9 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * The annotation to map a {@code Uri} produced by the {@link UriBuilder} to an integer code
- * in a {@code UriMatcher}, so it can be easily distinguished from the other {@code Uri}s.
+ * The annotation to map a {@code Uri} produced by the {@link boringyuri.api.UriBuilder} to
+ * an integer code in a {@code UriMatcher}, so it can be easily distinguished from the
+ * other {@code Uri}s.
  * </p>
  * <pre><code>
  *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
@@ -60,7 +61,8 @@ import java.lang.annotation.Target;
  * unlike the value in {@link MatcherCode} that is completely maintained by the developer.
  * </p>
  * <p>
- * The repeated names inside one {@link UriFactory} match two {@code Uri}s to the same integer.
+ * The repeated names inside one {@link boringyuri.api.UriFactory} match two {@code Uri}s to
+ * the same integer.
  * </p>
  * <pre><code>
  *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
@@ -114,8 +116,8 @@ import java.lang.annotation.Target;
  *     where BackgroundUriMatcher.MatcherCode.CODE_COLOR != ColorUriMatcher.MatcherCode.CODE_COLOR
  * </code></pre>
  * <p>
- * It can be used only in combination with {@link UriBuilder} set on a builder method and
- * {@link WithUriMatcher} set on a {@code Uri} factory interface.
+ * It can be used only in combination with {@link boringyuri.api.UriBuilder} set on a builder
+ * method and {@link WithUriMatcher} set on a {@code Uri} factory interface.
  * </p>
  *
  * @see MatcherCode
@@ -128,7 +130,7 @@ public @interface MatchesTo {
     /**
      * <p>
      * The name of an integer constant field that will be used as a code to match a {@code Uri}
-     * built by the annotated {@link UriBuilder} method.
+     * built by the annotated {@link boringyuri.api.UriBuilder} method.
      * </p>
      * <p>
      * The {@code value} must contain only valid java field symbols which are alphanumerics and

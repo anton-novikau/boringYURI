@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package boringyuri.api;
+package boringyuri.api.matcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * An annotation that indicates that the given {@link UriFactory} needs also a {@code UriMatcher}
- * to be generated.
+ * An annotation that indicates that the given {@link boringyuri.api.UriFactory} needs also
+ * a {@code UriMatcher} to be generated.
  * </p>
  * <p>
  * Example:

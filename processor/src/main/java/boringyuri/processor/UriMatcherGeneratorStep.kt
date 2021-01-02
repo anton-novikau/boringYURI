@@ -17,6 +17,9 @@
 package boringyuri.processor
 
 import boringyuri.api.*
+import boringyuri.api.matcher.MatcherCode
+import boringyuri.api.matcher.MatchesTo
+import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.base.AbortProcessingException
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession

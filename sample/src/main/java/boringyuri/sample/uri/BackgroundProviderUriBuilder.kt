@@ -20,6 +20,8 @@ import android.content.ContentResolver
 import android.net.Uri
 import androidx.annotation.ColorInt
 import boringyuri.api.*
+import boringyuri.api.matcher.MatcherCode
+import boringyuri.api.matcher.WithUriMatcher
 
 @UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority = "boringyuri.sample.backgrounds")
 @WithUriMatcher("boringyuri.sample.uri.matcher.BackgroundUriMatcher")

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package boringyuri.api;
+package boringyuri.api.matcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,8 +23,9 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * The annotation to map a {@code Uri} produced by the {@link UriBuilder} to an integer code
- * in a {@code UriMatcher}, so it can be easily distinguished from the other {@code Uri}s.
+ * The annotation to map a {@code Uri} produced by the {@link boringyuri.api.UriBuilder} to
+ * an integer code in a {@code UriMatcher}, so it can be easily distinguished from the
+ * other {@code Uri}s.
  * </p>
  * <pre><code>
  *     &#64;UriFactory(scheme = "content", authority="com.example.provider")
@@ -65,8 +66,8 @@ import java.lang.annotation.Target;
  * is guaranteed by the library.
  * </p>
  * <p>
- * It can be used only in combination with {@link UriBuilder} set on a builder method and
- * {@link WithUriMatcher} set on a {@code Uri} factory interface.
+ * It can be used only in combination with {@link boringyuri.api.UriBuilder} set on a builder
+ * method and {@link WithUriMatcher} set on a {@code Uri} factory interface.
  * </p>
  *
  * @see MatchesTo
@@ -77,8 +78,8 @@ import java.lang.annotation.Target;
 public @interface MatcherCode {
 
     /**
-     * The matcher code value to be mapped to a {@code Uri} produced by the {@link UriBuilder}
-     * method.
+     * The matcher code value to be mapped to a {@code Uri} produced by the
+     * {@link boringyuri.api.UriBuilder} method.
      */
     int value();
 

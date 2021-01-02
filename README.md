@@ -650,7 +650,7 @@ For this builder method `UserUriData` class will be generated. And calling
 `Uri` doesn't have any query parameters at all. It works exactly the same in independent `Uri`
 data classes.
 
-The `@DefautlValue` can also be used when a query parameter or a path segment have a value that
+The `@DefaultValue` can also be used when a query parameter or a path segment have a value that
 is incompatible with the associated getter of a primitive (or a primitive wrapper) type.
 
 For example you have an independent `UserData` with `id` of type `long`:
@@ -713,6 +713,209 @@ So for a builder that uses `Location` as method parameter the default value shou
     @UriBuilder("/maps/api/staticmap")
     Uri buildStaticMapUri(@Nullable @Param @DefaultValue("53.893009,27.567444") Location location);
 ```
+
+## Matching URIs in Android ContentProvider
+
+Quite often in Android we use `Uri` to deal with [ContentProvider][5]. And in `ContentProvider` it
+is widely used a utility called [UriMatcher][6]. This utility does a fast search among the set
+of the `Uri`s handled by the same `ContentProvider` and returns an integer code when the `Uri` is
+matched.
+
+Creating a `UriMatcher` and setting it up is quite a boring routine that includes defining an
+integer constants for every `Uri` that can be handled by the specific `ContentProvider` and adding
+all possible matches of the `Uri`s with these `UriMatcher` codes:
+
+```java
+public static final int PHOTO_CODE = 100;
+public static final int THUMB_CODE = 200;
+public static final int BACKGROUND_CODE = 300;
+
+UriMatcher matcher = new UriMatcher(NO_MATCH);
+matcher.addURI("boringyuri.sample.provider", "file/photo/*/#", PHOTO_CODE);
+matcher.addURI("boringyuri.sample.provider", "file/thumb/*", THUMB_CODE);
+matcher.addURI("boringyuri.sample.provider", "file/background/#/#", BACKGROUND_CODE);
+```
+
+So now in the `ContentProvider` you may understand which file is requested to open, for example:
+
+```java
+class BoringFileProvider extends ContentProvider {
+    ...
+
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        switch (matcher.match(uri) {
+            case PHOTO_CODE:
+                // find a photo file for the requested Uri and return it as a file descriptor
+                ...
+                break
+            case THUMB_CODE:
+                // find a thumbnail file for the requested Uri and return it as a file descriptor
+                ...
+                break
+            case BACKGROUND_CODE:
+                // find a background file for the requested Uri and return it as a file descriptor
+                ...
+                break
+        }
+    }
+}
+```
+
+`Boring Yuri` can automate creating and setting up a `UriMatcher` for every `@UriFactory` with
+a bunch of annotations: `@WithUriMatcher`, `@MatcherCode` and `@MatchesTo`. `@WithUriMatcher`
+indicates the given `@UriFactory` requires a `UriMatcher`. `@MatcherCode` and `@MatchesTo` create
+a mapping of the `Uri` to the matcher code:
+
+```java
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("UserProviderUriMatcher")
+interface UserProviderUriBuilder {
+    class Contract {
+        public static final int REGULAR_USER = 100;
+        public static final int ADMIN_USER = 200;
+    }
+
+    @UriBuilder("/user/colleague/{id}")
+    @MatcherCode(Contract.REGULAR_USER)
+    Uri buildRegularUserUri(@Path("id") long id);
+
+    @UriBuilder("/user/admin/{id}")
+    @MatcherCode(Contract.ADMIN_USER)
+    Uri buildAdminUserUri(@Path("id") long id);
+}
+```
+
+This setup will create you a `UserProviderUriMatcher` that has all the `Uri`s with the
+`@MatcherCode` annotations  mapped to the code values in it. Variable path segments from
+the `@UriBuilder` are replaced with either `#` or `*`, depending on the method parameter type.
+
+```java
+addURI("boringyuri.sample.provider", "user/colleague/#", 100);
+addURI("boringyuri.sample.provider", "user/admin/#", 200);
+```
+
+If the `ContentProvider` handles a lot of `Uri`s, sometimes it is difficult to maintain a large
+number of the matcher codes, so it is easy to make a mistake defining two different constants with
+the same value. To prevent the matcher codes collision it is recommended to use `@MatchesTo` instead
+of `@MatcherCode`. In `@MatchesTo` you can provide just the matcher code's constant name and
+`Boring Yuri` will create a constant with a unique value so it will never collide with another
+matcher code.
+
+```java
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("UserProviderUriMatcher")
+interface UserProviderUriBuilder {
+    @UriBuilder("/user/colleague/{id}")
+    @MatchesTo("REGULAR_USER")
+    Uri buildRegularUserUri(@Path("id") long id);
+
+    @UriBuilder("/user/admin/{id}")
+    @MatchesTo("ADMIN_USER")
+    Uri buildAdminUserUri(@Path("id") long id);
+}
+```
+
+The generated constant will be added as a nested class of `UserProviderUriMatcher`:
+
+```java
+class UserProviderUriMatcher extends UriMatcher {
+    ...    
+    
+    public static class MatcherCode {
+        public static final int REGULAR_USER = 1;
+        public static final int ADMIN_USER = 2;
+
+        ...
+    }
+}
+```
+
+If the name is repeated in a single factory, it means the two `Uri`s will be mapped to the same
+matcher code:
+
+```java
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("UserProviderUriMatcher")
+interface UserProviderUriBuilder {
+
+    @UriBuilder("/user/colleague/{id}")
+    @MatchesTo("CODE_USER")
+    Uri buildRegularUserUri(@Path("id") long id);
+  
+    @UriBuilder("/user/admin/{id}")
+    @MatchesTo("CODE_USER")
+    Uri buildAdminUserUri(@Path("id") long id);
+}
+```
+
+So both `Uri`s built with `buildRegularUserUri()` and `buildAdminUserUri()` will have the same
+matcher code:
+
+```java
+Uri colleagueUri = builder.buildRegularUserUri(100);
+Uri adminUri = builder.buildAdminUserUri(200);
+
+matcher.match(colleagueUri) == matcher.match(adminUri) == MatcherCode.CODE_USER
+```
+
+If the matcher code name is duplicated in two different factories, they are going to be two
+different constants:
+
+```java
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("BackgroundUriMatcher")
+interface BackgroundUriBuilder {
+
+    @UriBuilder("/background/color/{color}")
+    @MatchesTo("CODE_COLOR")
+    Uri buildColorBackgroundUri(@Path int color);
+
+}
+  
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("ColorUriMatcher")
+interface ColorUriBuilder {
+
+    @UriBuilder("/color/{red}/{green}/{blue}")
+    @MatchesTo("CODE_COLOR")
+    Uri buildColorUri(@Path int red, @Path int green, @Path int blue);
+
+}
+```
+
+In this case two matcher codes with the same name `CODE_COLOR` will belong to different
+`UriMatcher`s, so their values won't be the same:
+
+```java
+class BackgroundUriMatcher extends UriMatcher {
+    ...    
+
+    public static class MatcherCode {
+        public static final int CODE_COLOR = 1;
+        ...                    
+    }     
+}
+
+class ColorUriMatcher extends UriMatcher {
+    ...    
+
+    public static class MatcherCode {
+        public static final int CODE_COLOR = 2;
+        ...                    
+    }     
+}
+
+Uri backgroundUri = backgroundBuilder.buildColorBackgroundUri(0xffff0000);
+Uri colorUri = colorBuilder.buildColorUri(255, 0, 0);
+
+backgroundMatcher.match(backgroundUri) != colorMatcher.match(colorUri)
+```
+
+**IMPORTANT:** The value in `@MatchesTo` annotation may contain only valid symbols for a java
+variable as it's going to be used as a name of the constant, so it may only start with a letter
+and may contain only alphanumerics and underscores. The given `String` will be upper cased in
+order to comply with the java code style for static constants.  
 
 ## Installation
 
@@ -823,3 +1026,5 @@ limitations under the License.
 [2]: https://github.com/square/retrofit
 [3]: https://github.com/google/gson
 [4]: https://oss.jfrog.org/oss-snapshot-local/
+[5]: https://developer.android.com/reference/android/content/ContentProvider
+[6]: https://developer.android.com/reference/android/content/UriMatcher

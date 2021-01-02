@@ -73,7 +73,7 @@ public @interface WithUriMatcher {
      * <p>
      * If the {@code UriMatcher}'s name is not provided it will be generated based on the factory's
      * class name adding the default class name suffix. The package name will be the same as the
-     * the factory's package.
+     * factory's package.
      * </p>
      */
     String value() default "";

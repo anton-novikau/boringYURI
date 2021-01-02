@@ -87,4 +87,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 public @interface WithUriData {
+    /**
+     * <p>
+     * A name of the generated data class. It can be a fully qualified name or a simple name
+     * (in this case the factory's package will be used).
+     * </p>
+     * <p>
+     * If the data class name is not provided it will be generated based on the builder method
+     * name trimming "build" if present and adding the default class name suffix. The package name
+     * will be the same as the factory's package.
+     * </p>
+     */
+    String value() default "";
 }

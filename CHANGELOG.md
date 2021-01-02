@@ -2,6 +2,7 @@
 
 * Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated
   ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
+* Add ability to provide a custom name to a `Uri` data class associated with the builder method.
 * Upgrade the dependencies.
 
 ## Boring YURI 1.1.2 (2020-06-02)

@@ -30,7 +30,7 @@ interface LocationUriBuilder {
     @UriBuilder("/maps/api/staticmap")
     @BooleanParam(name = "sensor", value = true)
     @DoubleParam(name = "zoom", value = 2.5)
-    @WithUriData
+    @WithUriData("StaticMapData")
     fun buildStaticMapUri(
         @Param("lat") @DefaultValue("53.893009") latitude: Double,
         @Param("lng") @DefaultValue("27.567444") longitude: Double

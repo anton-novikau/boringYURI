@@ -39,6 +39,10 @@ inline fun <reified T : Annotation> Element.requireAnnotation(): T {
     }
 }
 
+inline fun <reified T : Annotation> Element.getAnnotationsByType(): Array<T>? {
+    return getAnnotationsByType(T::class.java)
+}
+
 fun VariableElement.createParamSpec(annotationHandler: AnnotationHandler): ParameterSpec {
     val paramType = ClassName.get(asType())
     val paramName = simpleName.toString()

@@ -37,5 +37,6 @@ interface BackgroundProviderUriBuilder {
 
     @UriBuilder("/bg/thumbnail/{id}")
     @MatcherCode(BackgroundMatcherCode.CROPPED)
+    @WithUriData("boringyuri.sample.data.CroppedBackgroundData")
     fun buildCroppedBackgroundUri(@Path("id") backgroundId: String, @Param orientation: Int): Uri
 }

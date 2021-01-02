@@ -274,7 +274,9 @@ class UriMatcherGeneratorStep(
         uriMatcherContent.addMethod(ensureInitializedMethod)
         uriMatcherContent.addMethod(initMatcherMethod)
 
-        uriMatcherContent.addType(generateMatcherCodeClass(metadata))
+        if (metadata.matcherCodes.isNotEmpty()) {
+            uriMatcherContent.addType(generateMatcherCodeClass(metadata))
+        }
 
         return uriMatcherContent.build()
     }
@@ -283,8 +285,8 @@ class UriMatcherGeneratorStep(
         val matcherCodeContent = TypeSpec.classBuilder(metadata.matcherCodeClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
 
-        metadata.matcherCodes.forEach { (_, matcherCode) ->
-            matcherCodeContent.addField(matcherCode)
+        metadata.matcherCodes.forEach { (_, codeField) ->
+            codeField?.let { matcherCodeContent.addField(it) }
         }
 
         matcherCodeContent.addMethod(
@@ -292,6 +294,8 @@ class UriMatcherGeneratorStep(
                 .addModifiers(Modifier.PRIVATE)
                 .build()
         )
+
+        matcherCodeContent.addMethod(generateMatcherCodeToString(metadata.matcherCodes))
 
         return matcherCodeContent.build()
     }
@@ -377,6 +381,28 @@ class UriMatcherGeneratorStep(
         method.endControlFlow()
 
         return method.build()
+    }
+
+    private fun generateMatcherCodeToString(
+        matcherCodes: Collection<MatcherCodeMetadata>
+    ): MethodSpec {
+        val method = MethodSpec.methodBuilder("toString")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addAnnotation(NON_NULL)
+            .returns(STRING)
+
+        val codeParam = ParameterSpec.builder(TypeName.INT, "code").build()
+
+        method.addParameter(codeParam)
+
+        method.beginControlFlow("switch (\$N)", codeParam)
+        matcherCodes.forEach { (_, codeField) ->
+            codeField?.let { method.addStatement("case \$1N: return \"\$1N\"", it) }
+        }
+        method.endControlFlow()
+        method.addStatement("return \$T.toString(\$N)", TypeName.INT.box(), codeParam)
+
+        return method.build();
     }
 
     private fun createMatcherCode(code: Int) = MatcherCodeMetadata(code, null)

@@ -2,6 +2,7 @@
 
 * Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated
   ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
+* Add ability to disable a `Uri` in `UriMatcher` for a specific build type of a product flavor.
 * Add ability to provide a custom name to a `Uri` data class associated with the builder method.
 * Upgrade the dependencies.
 

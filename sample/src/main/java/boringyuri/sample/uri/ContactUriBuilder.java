@@ -31,6 +31,7 @@ import boringyuri.api.UriFactory;
 import boringyuri.api.WithUriData;
 import boringyuri.api.matcher.WithUriMatcher;
 import boringyuri.api.adapter.TypeAdapter;
+import boringyuri.sample.BuildConfig;
 import boringyuri.sample.data.Address;
 import boringyuri.sample.data.adapter.RectTypeAdapter;
 
@@ -44,17 +45,18 @@ public interface ContactUriBuilder {
         private static final String CONTACT_DATA = "CONTACT_DATA";
         private static final String CONTACT_PHOTO = "CONTACT_PHOTO";
         private static final String VCARD = "vcard";
+        private static final String HUAWEI_VCARD = "huawei_vcard";
     }
 
     @NonNull
     @UriBuilder("/data/{contactId}")
-    @MatchesTo(Contract.CONTACT_DATA)
+    @MatchesTo(value = Contract.CONTACT_DATA)
     Uri buildContactDataUri(@Path long contactId);
 
     @NonNull
     @UriBuilder("/file/photo/{group}/{contactId}")
     @WithUriData
-    @MatchesTo(Contract.CONTACT_PHOTO)
+    @MatchesTo(value = Contract.CONTACT_PHOTO)
     Uri buildContactPhotoUri(
             @Path @NonNull String group,
             @Path long contactId,
@@ -69,6 +71,11 @@ public interface ContactUriBuilder {
             @NonNull @Param String firstName,
             @Nullable @Param String lastName,
             @Nullable @Param("address") Address homeAddress);
+
+    @NonNull
+    @UriBuilder("/file/huawei/{contactId}")
+    @MatchesTo(value = Contract.HUAWEI_VCARD, enabled = BuildConfig.NO_PLAY_SERVICES)
+    Uri buildNoPlayServicesVCard(@Path long contactId);
 
     @NonNull
     static ContactUriBuilder create() {

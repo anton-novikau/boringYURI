@@ -28,10 +28,17 @@ android {
         targetSdkVersion project.target_sdk_version
         versionCode 1
         versionName "1.0"
+
+        buildConfigField("boolean", "NO_PLAY_SERVICES", "false")
     }
 
     buildTypes {
+        debug {
+            buildConfigField("boolean", "DEBUG_ONLY", "true")
+        }
         release {
+            buildConfigField("boolean", "DEBUG_ONLY", "false")
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

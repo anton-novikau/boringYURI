@@ -22,6 +22,7 @@ import androidx.annotation.ColorInt
 import boringyuri.api.*
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.WithUriMatcher
+import boringyuri.sample.BuildConfig
 
 @UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority = "boringyuri.sample.backgrounds")
 @WithUriMatcher("boringyuri.sample.uri.matcher.BackgroundUriMatcher")
@@ -39,4 +40,11 @@ interface BackgroundProviderUriBuilder {
     @MatcherCode(BackgroundMatcherCode.CROPPED)
     @WithUriData("boringyuri.sample.data.CroppedBackgroundData")
     fun buildCroppedBackgroundUri(@Path("id") backgroundId: String, @Param orientation: Int): Uri
+
+    @UriBuilder("/bg/debug")
+    // You can't use BuildConfig.DEBUG here because android generates
+    // it as Boolean.parseBoolean("true") which is not a constant value
+    // so it can't be accepted as an annotation parameter.
+    @MatcherCode(BackgroundMatcherCode.DEBUG, enabled = BuildConfig.DEBUG_ONLY)
+    fun buildDebugBackgroundUri(): Uri
 }

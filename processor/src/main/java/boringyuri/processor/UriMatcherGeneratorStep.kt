@@ -160,9 +160,15 @@ class UriMatcherGeneratorStep(
                         }
                     } ?: continue  // skip methods with invalid matcher code names
 
-                    matcherCodes.getOrPut(fieldName) { createMatcherCode(fieldName) }
+                    val enabled = matchesToAnnotation.enabled
+
+                    matcherCodes.getOrPut(fieldName) {
+                        createMatcherCode(fieldName, enabled)
+                    }.let {
+                        if (it.enabled != enabled) it.copy(enabled = enabled) else it
+                    }
                 } else if (matcherCodeAnnotation != null) {
-                    createMatcherCode(matcherCodeAnnotation.value)
+                    createMatcherCode(matcherCodeAnnotation.value, matcherCodeAnnotation.enabled)
                 } else null
 
                 matcherCode?.let { pathMappings.add(pathTemplate to it) }
@@ -288,7 +294,7 @@ class UriMatcherGeneratorStep(
         val matcherCodeContent = TypeSpec.classBuilder(metadata.matcherCodeClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
 
-        metadata.matcherCodes.forEach { (_, codeField) ->
+        metadata.matcherCodes.forEach { (_, _, codeField) ->
             codeField?.let { matcherCodeContent.addField(it) }
         }
 
@@ -309,6 +315,10 @@ class UriMatcherGeneratorStep(
 
         val authority = metadata.authority
         metadata.pathMappings.forEach { (path, matcherCode) ->
+            if (!matcherCode.enabled) {
+                return@forEach // skip disabled matcher codes
+            }
+
             if (matcherCode.field != null) {
                 method.addStatement(
                     "super.addURI(\$S, \$S, \$T.\$N)",
@@ -399,7 +409,7 @@ class UriMatcherGeneratorStep(
         method.addParameter(codeParam)
 
         method.beginControlFlow("switch (\$N)", codeParam)
-        matcherCodes.forEach { (_, codeField) ->
+        matcherCodes.forEach { (_, _, codeField) ->
             codeField?.let { method.addStatement("case \$1N: return \"\$1N\"", it) }
         }
         method.endControlFlow()
@@ -408,9 +418,12 @@ class UriMatcherGeneratorStep(
         return method.build();
     }
 
-    private fun createMatcherCode(code: Int) = MatcherCodeMetadata(code, null)
+    private fun createMatcherCode(
+        code: Int,
+        enabled: Boolean
+    ) = MatcherCodeMetadata(code, enabled, null)
 
-    private fun createMatcherCode(fieldName: String): MatcherCodeMetadata {
+    private fun createMatcherCode(fieldName: String, enabled: Boolean): MatcherCodeMetadata {
         val matcherCode = ++matcherCodeCounter
         val matcherCodeField = FieldSpec.builder(
             TypeName.INT,
@@ -420,7 +433,7 @@ class UriMatcherGeneratorStep(
             Modifier.FINAL
         ).initializer("\$L", matcherCode).build()
 
-        return MatcherCodeMetadata(matcherCode, matcherCodeField)
+        return MatcherCodeMetadata(matcherCode, enabled, matcherCodeField)
     }
 
     private fun isNumber(type: TypeName?) = when (type) {
@@ -438,6 +451,7 @@ class UriMatcherGeneratorStep(
 
     private data class MatcherCodeMetadata(
         val code: Int,
+        val enabled: Boolean,
         val field: FieldSpec?
     )
 

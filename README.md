@@ -917,6 +917,51 @@ variable as it's going to be used as a name of the constant, so it may only star
 and may contain only alphanumerics and underscores. The given `String` will be upper cased in
 order to comply with the java code style for static constants.  
 
+### Disable URI matching based on a build type or a flavor
+
+In some cases there might be needed to have a `Uri` that is available in one build type or product
+flavor, but is not in the other. This can be achieved by using `enabled` property of `@MatcherCode`
+or `@MatchesTo` annotations:
+
+```groovy
+android {
+    ...
+    releaseTypes {
+        ...
+        debug {
+            buildConfigField("boolean", "DEBUG_ONLY", "true")
+            ...
+        }
+        release {
+            buildConfigField("boolean", "DEBUG_ONLY", "false")
+            ...
+        }
+    }
+}
+```
+
+As soon as you have the build type dependant variable defined in the `build.gradle` of your
+application, you may use it in either `@MatcherCode` or `@MatchesTo` applied to a builder method
+that need to be switched off in the `release` build:
+
+```java
+@UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority="boringyuri.sample.provider")
+@WithUriMatcher("BackgroundUriMatcher")
+interface BackgroundUriBuilder {
+    
+    @UriBuilder("/background/debug/{id}")
+    @MatchesTo(value = "CODE_DEBUG_BG", enabled = BuildConfig.DEBUG_ONLY)
+    Uri buildDebugBackgroundUri(@Path("id") int id);
+}
+```
+
+Now the generated `BackgroundUriMatcher` will have `background/debug/#` path mapped to
+`MatcherCode.CODE_DEBUG_BG` only in `debug` builds, but in `release` builds the matcher will
+return `UriMatcher.NO_MATCH` for the `Uri` built with `buildDebugBackgroundUri()`.
+
+**NOTE:** `@MatchesTo` will generate the constant for `enabled == false` case as well, there just
+won't be a mapping defined between the `Uri` and the generated matcher code.
+
 ## Installation
 
 To add `Boring Yuri` to your project, include the following in your app module `build.gradle` file:

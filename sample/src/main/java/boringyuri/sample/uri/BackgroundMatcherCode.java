@@ -20,4 +20,5 @@ public interface BackgroundMatcherCode {
     int COLOR = 100;
     int ORIGINAL = 101;
     int CROPPED = 102;
+    int DEBUG = 103;
 }

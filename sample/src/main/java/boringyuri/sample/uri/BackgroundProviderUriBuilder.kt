@@ -27,17 +27,23 @@ import boringyuri.sample.BuildConfig
 @UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority = "boringyuri.sample.backgrounds")
 @WithUriMatcher("boringyuri.sample.uri.matcher.BackgroundUriMatcher")
 interface BackgroundProviderUriBuilder {
+    object Contract {
+        const val CODE_COLOR = 100
+        const val CODE_ORIGINAL = 101
+        const val CODE_CROPPED = 102
+        const val CODE_DEBUG = 103
+    }
 
     @UriBuilder("/bg/color/{color}")
-    @MatcherCode(BackgroundMatcherCode.COLOR)
+    @MatcherCode(Contract.CODE_COLOR)
     fun buildColorBackgroundUri(@ColorInt @Path color: Int): Uri
 
     @UriBuilder("/bg/original/{id}")
-    @MatcherCode(BackgroundMatcherCode.ORIGINAL)
+    @MatcherCode(Contract.CODE_ORIGINAL)
     fun buildGalleryBackgroundUri(@Path id: Int): Uri
 
     @UriBuilder("/bg/thumbnail/{id}")
-    @MatcherCode(BackgroundMatcherCode.CROPPED)
+    @MatcherCode(Contract.CODE_CROPPED)
     @WithUriData("boringyuri.sample.data.CroppedBackgroundData")
     fun buildCroppedBackgroundUri(@Path("id") backgroundId: String, @Param orientation: Int): Uri
 
@@ -45,6 +51,6 @@ interface BackgroundProviderUriBuilder {
     // You can't use BuildConfig.DEBUG here because android generates
     // it as Boolean.parseBoolean("true") which is not a constant value
     // so it can't be accepted as an annotation parameter.
-    @MatcherCode(BackgroundMatcherCode.DEBUG, enabled = BuildConfig.DEBUG_ONLY)
+    @MatcherCode(Contract.CODE_DEBUG, enabled = BuildConfig.DEBUG_ONLY)
     fun buildDebugBackgroundUri(): Uri
 }

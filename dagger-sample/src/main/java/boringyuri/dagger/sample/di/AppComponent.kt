@@ -13,11 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package boringyuri.dagger.sample.di
 
-package boringyuri.sample.data
+import boringyuri.dagger.sample.App
+import dagger.Component
+import dagger.android.AndroidInjector
+import dagger.android.support.AndroidSupportInjectionModule
+import javax.inject.Singleton
 
-import boringyuri.api.adapter.TypeAdapter
-import boringyuri.sample.data.adapter.AddressTypeAdapter
-
-@TypeAdapter(AddressTypeAdapter::class)
-data class Address constructor(val city: String, val street: String?, val zipCode: String? = null)
+@Singleton
+@Component(modules = [
+    AndroidSupportInjectionModule::class,
+    AppModule::class,
+    BoringYuriModule::class
+])
+interface AppComponent : AndroidInjector<App> {
+    @Component.Factory
+    abstract class Factory : AndroidInjector.Factory<App>
+}

@@ -54,8 +54,8 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
         )
     }
 
-    private companion object {
-        val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+    companion object {
+        private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
             ClassName.get(UriData::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),
@@ -63,5 +63,4 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
             ClassName.get(TypeAdapter::class.java)
         )
     }
-
 }

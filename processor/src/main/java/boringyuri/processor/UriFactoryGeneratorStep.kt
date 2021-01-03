@@ -30,7 +30,7 @@ import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import boringyuri.processor.type.TypeConverter
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
@@ -51,24 +51,22 @@ class UriFactoryGeneratorStep internal constructor(
         getTypeAdapterFactory(session)
     )
 
-    override fun annotations(): Set<Class<out Annotation>> {
-        return ImmutableSet.of<Class<out Annotation>>(
-            UriFactory::class.java
-        )
+    override fun annotations(): Set<String> {
+        return ImmutableSet.of(UriFactory::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
+        elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element> {
         val annotatedContainers = ElementFilter.typesIn(
-            elementsByAnnotation[UriFactory::class.java]
+            elementsByAnnotation[UriFactory::class.java.name]
         )
         val deferred = hashSetOf<Element>()
         for (container in annotatedContainers) {
             if (container.kind != ElementKind.INTERFACE) {
                 logger.warn(
                     container,
-                    "@%s can only be applied to interface",
+                    "@%s can only be applied to an interface",
                     UriFactory::class.simpleName
                 )
                 continue
@@ -375,5 +373,4 @@ class UriFactoryGeneratorStep internal constructor(
 
         private val PATH_TEMPLATE_REGEX = "^\\{([a-zA-Z0-9_-]+)}$".toRegex()
     }
-
 }

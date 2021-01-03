@@ -28,7 +28,7 @@ import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.ProcessorOptions
 import com.google.common.collect.ImmutableSet
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.TypeName
@@ -41,14 +41,14 @@ class IndependentUriDataGeneratorStep(
     annotationHandler: AnnotationHandler
 ) : UriDataGeneratorStep(session, annotationHandler) {
 
-    override fun annotations(): Set<Class<out Annotation>> {
-        return ImmutableSet.of(UriData::class.java)
+    override fun annotations(): Set<String> {
+        return ImmutableSet.of(UriData::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
+        elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element> {
-        val annotatedClasses = ElementFilter.typesIn(elementsByAnnotation[UriData::class.java])
+        val annotatedClasses = ElementFilter.typesIn(elementsByAnnotation[UriData::class.java.name])
         val deferred = hashSetOf<Element>()
         for (annotatedClass in annotatedClasses) {
             if (annotatedClass.kind != ElementKind.INTERFACE) {

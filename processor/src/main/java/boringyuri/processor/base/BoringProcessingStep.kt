@@ -17,7 +17,7 @@
 package boringyuri.processor.base
 
 import com.google.auto.common.BasicAnnotationProcessor
-import com.google.common.collect.SetMultimap
+import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
@@ -27,10 +27,10 @@ import javax.lang.model.element.Element
 
 abstract class BoringProcessingStep(
     protected val session: ProcessingSession
-) : BasicAnnotationProcessor.ProcessingStep {
-    abstract override fun annotations(): Set<Class<out Annotation>>
+) : BasicAnnotationProcessor.Step {
+    abstract override fun annotations(): Set<String>
     abstract override fun process(
-        elementsByAnnotation: SetMultimap<Class<out Annotation>, Element>
+        elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element>
 
     protected val logger = session.logger

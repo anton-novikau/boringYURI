@@ -18,13 +18,20 @@ package boringyuri.sample.data
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import boringyuri.sample.uri.ContactPhotoUriData
+import boringyuri.sample.uri.ContactUriMatcher
+import boringyuri.sample.uri.VCardUriData
 import java.io.File
 
 class BoringContactProvider : ContentProvider() {
+
+    private val uriMatcher = ContactUriMatcher()
+
     override fun onCreate(): Boolean {
         return true
     }
@@ -61,12 +68,52 @@ class BoringContactProvider : ContentProvider() {
     }
 
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? = context?.let {
+        when (uriMatcher.match(uri)) {
+            ContactUriMatcher.MatcherCode.CONTACT_PHOTO -> openContactPhoto(uri, it)
+            ContactUriMatcher.MatcherCode.VCARD -> openContactVCard(uri, it)
+            else -> {
+                Log.d(TAG, "openFile: Unknown or unsupported uri is trying to open: $uri")
+                null
+            }
+        }
+    }
+
+    private fun openContactPhoto(uri: Uri, context: Context): ParcelFileDescriptor? {
+        Log.i(TAG, "openContactPhoto: uri = $uri")
+
         val uriData = ContactPhotoUriData(uri)
-        val photoFile = File(it.getExternalFilesDir(uriData.group), uriData.contactId.toString())
+        val photoFile = File(
+            context.getExternalFilesDir(uriData.group),
+            uriData.contactId.toString()
+        )
+
+        val desiredDimens = uriData.desiredDimens
+        Log.i(TAG, "openContactPhoto: contactId = ${uriData.contactId}, group = ${uriData.group}," +
+                " desiredDimens = ${desiredDimens.width()}x${desiredDimens.height()}")
 
         // pre-process 'photoFile' bitmap to have a desired width and height
         // based on 'uriData.desiredDimens'
 
-        ParcelFileDescriptor.open(photoFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        return ParcelFileDescriptor.open(photoFile, ParcelFileDescriptor.MODE_READ_ONLY)
+    }
+
+    private fun openContactVCard(uri: Uri, context: Context): ParcelFileDescriptor? {
+        Log.i(TAG, "openContactVCard: uri = $uri")
+
+        val vcard = VCardUriData(uri)
+        // obtain vcard data from uri and find an appropriate vcf file if exists
+        val vcardFile = File(
+            context.getExternalFilesDir("vcard"),
+            vcard.contactId.toString()
+        )
+        Log.i(TAG, "openContactVCard: id = ${vcard.contactId}," +
+                " name = ${vcard.firstName} ${vcard.lastName}," +
+                " address = ${vcard.homeAddress}")
+
+        return ParcelFileDescriptor.open(vcardFile, ParcelFileDescriptor.MODE_READ_ONLY)
+    }
+
+    companion object {
+        private const val TAG = "BoringContactProvider"
     }
 }

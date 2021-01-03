@@ -16,7 +16,6 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
@@ -29,10 +28,17 @@ android {
         targetSdkVersion project.target_sdk_version
         versionCode 1
         versionName "1.0"
+
+        buildConfigField("boolean", "NO_PLAY_SERVICES", "false")
     }
 
     buildTypes {
+        debug {
+            buildConfigField("boolean", "DEBUG_ONLY", "true")
+        }
         release {
+            buildConfigField("boolean", "DEBUG_ONLY", "false")
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -49,7 +55,6 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
-    implementation "androidx.core:core-ktx:$ktxVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
 
     // code generators

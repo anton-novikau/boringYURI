@@ -1,3 +1,11 @@
+## Boring YURI 1.1.3 (2021-01-03)
+
+* Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated
+  ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
+* Add ability to disable a `Uri` in `UriMatcher` for a specific build type of a product flavor.
+* Add ability to provide a custom name to a `Uri` data class associated with the builder method.
+* Upgrade the dependencies.
+
 ## Boring YURI 1.1.2 (2020-06-02)
 
 * Add support of arrays in query parameters ([Issue #12](https://github.com/anton-novikau/boringYURI/issues/12)).
@@ -28,3 +36,4 @@
 
 [1]: https://developer.android.com/reference/android/net/Uri
 [2]: https://github.com/google/dagger/
+[3]: https://developer.android.com/reference/android/content/UriMatcher

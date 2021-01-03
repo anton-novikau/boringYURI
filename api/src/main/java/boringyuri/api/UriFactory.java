@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *          &#64;UriBuilder("user/colleague")
  *          Uri buildRegularUserUri(@Param String phoneNumber, @Param String name);
  *
- *          &#64;UriBuilder("user/friend")
+ *          &#64;UriBuilder("user/admin")
  *          Uri buildAdminUserUri(@Param String phoneNumber, @Param String name);
  *
  *     }
@@ -45,7 +45,7 @@ import java.lang.annotation.Target;
  * Calling {@code uriBuilder.buildRegularUserUri("10020042", "John Doe")} will produce
  * {@code content://com.example.provider/user/colleague?phoneNumber="10020042"&name="John%20Doe"}
  * whereas {@code uriBuilder.buildAdminUserUri("20030042", "Jane Doe")} will produce
- * {@code content://com.example.provider/user/friend?phoneNumber="20030042"&name="Jane%20Doe"}
+ * {@code content://com.example.provider/user/admin?phoneNumber="20030042"&name="Jane%20Doe"}
  * </p>
  *
  * @see UriBuilder

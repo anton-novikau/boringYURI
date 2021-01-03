@@ -18,6 +18,9 @@ package boringyuri.processor
 import boringyuri.api.*
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.api.constant.*
+import boringyuri.api.matcher.MatcherCode
+import boringyuri.api.matcher.MatchesTo
+import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
@@ -48,14 +51,18 @@ class UriFactoryProcessor : BoringAnnotationProcessor() {
 
         return ImmutableSet.of(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-            UriFactoryGeneratorStep(session, annotationHandler)
+            UriFactoryGeneratorStep(session, annotationHandler),
+            UriMatcherGeneratorStep(session)
         )
     }
 
-    private companion object {
-        val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+    companion object {
+        private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
             ClassName.get(UriFactory::class.java),
+            ClassName.get(WithUriMatcher::class.java),
             ClassName.get(UriBuilder::class.java),
+            ClassName.get(MatchesTo::class.java),
+            ClassName.get(MatcherCode::class.java),
             ClassName.get(WithUriData::class.java),
             ClassName.get(TypeAdapter::class.java),
             ClassName.get(Path::class.java),

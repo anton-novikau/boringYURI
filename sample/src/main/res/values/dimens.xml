@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2020 Anton Novikau
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,6 @@
   -->
 
 <resources>
-    <string name="app_name">Boring Sample</string>
-
-    <string name="uri_label">Built boring URI is:</string>
-    <string name="uri_data_label">Uri data:</string>
-    <string name="fetch_photo_label">Fetch Photo</string>
-    <string name="fetch_vcard_label">Fetch VCard</string>
-    <string name="check_logs_message">Check if there are logs from BoringContactProvider to see if it actually works.</string>
+    <dimen name="desired_photo_width">200dp</dimen>
+    <dimen name="desired_photo_height">300dp</dimen>
 </resources>

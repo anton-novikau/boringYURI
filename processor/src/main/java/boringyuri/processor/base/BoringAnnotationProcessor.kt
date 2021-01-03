@@ -25,7 +25,7 @@ abstract class BoringAnnotationProcessor : BasicAnnotationProcessor() {
 
     abstract fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep>
 
-    override fun initSteps(): Iterable<ProcessingStep> {
+    override fun steps(): Iterable<Step> {
         return initSteps(ProcessingSession(processingEnv)).also { steps = it }
     }
 

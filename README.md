@@ -140,14 +140,18 @@ In the example above `id` is explicitly named path segment, `group` is implicitl
 of the segments in the base path. So calling `builder.buildUserUri(42, "students")` will give you
 `https://example.com/user/students/42`.
 
-**IMPORTANT:** if you use code obfuscation it is highly recommended to specify the segment name in
-`@Path` or `@Param` annotations explicitly or add the files that contain these annotation in
-ProGuard (or R8) keep list. Otherwise, when the obfuscator change the method parameter names,
-you'll have an unexpected result.
+**IMPORTANT:** if you use code obfuscation and do not provide a name in `@Path` or `@Param`
+annotations explicitly, the name of the path segment or query parameter won't be obfuscated, but
+the method parameter name will. This happens because the obfuscation step is executed after the
+annotation processing step where method parameter names are transformed into the names of the
+query parameters or path segments. It is still highly recommended to specify these names explicitly
+in `@Path` and `@Param` annotations in order to make sure somebody won't refactor the code and
+break the contract with the receiver's side accidentally (eg. back-end may still expect the old
+query parameter names).
 
-Path segment name is not obligatory, but you should preserve the order as it's the order of
-the path method parameter as they appear in the `Uri` in exactly the same order as defined in
-the method signature, i.e. for the builder method:
+Path segment name is not obligatory, but in this case the path method parameters will appear
+in the `Uri` in the exactly same order as they defined in the method signature, i.e. for
+the builder method:
 
 ```java
     @UriBuilder("/user")

@@ -21,13 +21,6 @@ interface AppComponent extends AndroidInjector<MyApplication> {
 }
 ```
 
-**IMPORTANT:** `dagger` component that includes a generated `BoringYuriModule` **can not** be
-a Kotlin interface because kapt generates Java stubs for `dagger` annotation processor and
-the generated module that is added to `@Component` annotation has not created yet. So to get rid
-of the Java stubs generation step we have to make the `Component` a java interface. In this case
-`Boring Yuri`'s dagger processor will be able to produce the module file before the `Component`
-is compiled. There is an open [issue][GH-7] for this.
-
 When you have the generated `dagger` module included in your application component, you may enjoy
 your injectable `Uri` factories:
 
@@ -89,4 +82,3 @@ option:
 
 [1]: https://github.com/google/dagger/
 [2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java
-[GH-7]: https://github.com/anton-novikau/boringYURI/issues/7

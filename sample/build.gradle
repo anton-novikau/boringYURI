@@ -62,6 +62,8 @@ dependencies {
     implementation project(':api')  // implementation "org.boringyuri:boringyuri-api:$VERSION"
     kapt project(':processor')      // kapt "org.boringyuri:boringyuri-processor:$VERSION"
 
+    lintChecks project(path: ':lint_check')
+
     // unit tests
     testImplementation "junit:junit:$junitVersion"
 }

@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compileOnly "com.android.tools.lint:lint-api:27.1.1"
+    compileOnly "com.android.tools.lint:lint-checks:27.1.1"
+    implementation project(':api')  // implementation "org.boringyuri:boringyuri-api:$VERSION"
+
+}
+
+//jar {
+//    manifest {
+//        attributes('Lint-Registry-v2': 'com.android.tools.lint.client.api.IssueRegistry')
+//    }
+//}

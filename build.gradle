@@ -70,9 +70,12 @@ allprojects {
         jcenter()
     }
 
-    tasks.whenTaskAdded {
-        if (it.name.matches("generatePomFileFor([A-Z][a-zA-Z]*)Publication")) {
-            bintrayUpload.dependsOn it
+    // https://stackoverflow.com/questions/64582833/gradle-build-tools-4-1-0-failing-sync-in-android-studio-when-there-is-a-lintchec
+    if (System.getProperty("idea.active") != "true") {
+        tasks.whenTaskAdded {
+            if (it.name.matches("generatePomFileFor([A-Z][a-zA-Z]*)Publication")) {
+                bintrayUpload.dependsOn it
+            }
         }
     }
 }

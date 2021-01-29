@@ -6,9 +6,9 @@ import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UElement
 
 @Suppress("UnstableApiUsage")
-class IssueDetector : Detector(), SourceCodeScanner {
+class IssueDetector : Detector(), Detector.UastScanner {
 
-    override fun applicableAnnotations() = listOf("boringyuri.api.Path")
+    override fun applicableAnnotations() = listOf("boringyuri.api.Path", "boringyuri.api.Param")
 
     override fun visitAnnotationUsage(
         context: JavaContext,
@@ -22,12 +22,21 @@ class IssueDetector : Detector(), SourceCodeScanner {
         allClassAnnotations: List<UAnnotation>,
         allPackageAnnotations: List<UAnnotation>
     ) {
-        val message = String.format(
-            "TEST",
-            getInternalMethodName(method ?: return)
-        )
-        val location = context.getLocation(annotation)
-        context.report(ISSUE, annotation, location, message)
+        val pathAnnotation = annotations.find { it.qualifiedName?.contains("boringyuri.api.Path") == true }
+        val paramAnnotation = annotations.find { it.qualifiedName?.contains("boringyuri.api.Param") == true }
+
+        if (pathAnnotation != null && paramAnnotation != null) {
+            pathAnnotation.also {
+                val message = "You cannot use @Path an @Param together applying to one field"
+                val location = context.getLocation(it)
+                context.report(ISSUE, it, location, message)
+            }
+            paramAnnotation.also {
+                val message = "You cannot use @Path an @Param together applying to one field"
+                val location = context.getLocation(it)
+                context.report(ISSUE, it, location, message)
+            }
+        }
     }
 
     companion object {
@@ -37,16 +46,14 @@ class IssueDetector : Detector(), SourceCodeScanner {
         )
 
         val ISSUE = Issue.create(
-            id = "AndroidLogDetector",
-            briefDescription = "The android Log should not be used",
+            id = "BoringYURILintDetector",
+            briefDescription = "You cannot use @Path an @Param together applying to one field",
             explanation = """
-                For amazing showcasing purposes we should not use the Android Log. We should the
-                AmazingLog instead.
+                You cannot use @Path an @Param together applying to one field
             """.trimIndent(),
             category = Category.CORRECTNESS,
             priority = 9,
             severity = Severity.ERROR,
-            androidSpecific = true,
             implementation = IMPLEMENTATION
         )
     }

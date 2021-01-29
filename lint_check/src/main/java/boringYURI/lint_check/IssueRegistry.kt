@@ -13,8 +13,4 @@ class IssueRegistry : IssueRegistry() {
 
     override val api = CURRENT_API
 
-    companion object {
-
-    }
-
 }

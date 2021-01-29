@@ -67,7 +67,7 @@ public interface ContactUriBuilder {
     @WithUriData
     @MatchesTo(Contract.VCARD)
     Uri buildVCardUri(
-            @Path long contactId,
+            @Path @Param long contactId,
             @NonNull @Param String firstName,
             @Nullable @Param String lastName,
             @Nullable @Param("address") Address homeAddress);

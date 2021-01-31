@@ -8,7 +8,7 @@ import org.jetbrains.uast.UElement
 @Suppress("UnstableApiUsage")
 class IssueDetector : Detector(), Detector.UastScanner {
 
-    override fun applicableAnnotations() = listOf("boringyuri.api.Path", "boringyuri.api.Param")
+    override fun applicableAnnotations() = listOf(PATH_ANNOTATION_NAME, PARAM_ANNOTATION_NAME)
 
     override fun visitAnnotationUsage(
         context: JavaContext,
@@ -22,17 +22,19 @@ class IssueDetector : Detector(), Detector.UastScanner {
         allClassAnnotations: List<UAnnotation>,
         allPackageAnnotations: List<UAnnotation>
     ) {
-        val pathAnnotation = annotations.find { it.qualifiedName?.contains("boringyuri.api.Path") == true }
-        val paramAnnotation = annotations.find { it.qualifiedName?.contains("boringyuri.api.Param") == true }
+        val pathAnnotation =
+            annotations.find { it.qualifiedName?.contains(PATH_ANNOTATION_NAME) == true }
+        val paramAnnotation =
+            annotations.find { it.qualifiedName?.contains(PARAM_ANNOTATION_NAME) == true }
 
         if (pathAnnotation != null && paramAnnotation != null) {
             pathAnnotation.also {
-                val message = "You cannot use @Path an @Param together applying to one field"
+                val message = BRIEF_DESCRIPTION
                 val location = context.getLocation(it)
                 context.report(ISSUE, it, location, message)
             }
             paramAnnotation.also {
-                val message = "You cannot use @Path an @Param together applying to one field"
+                val message = BRIEF_DESCRIPTION
                 val location = context.getLocation(it)
                 context.report(ISSUE, it, location, message)
             }
@@ -45,12 +47,18 @@ class IssueDetector : Detector(), Detector.UastScanner {
             Scope.JAVA_FILE_SCOPE
         )
 
+        private const val PATH_ANNOTATION_NAME = "boringyuri.api.Path"
+        private const val PARAM_ANNOTATION_NAME = "boringyuri.api.Param"
+        private const val DETECTOR_NAME = "BoringYURILintDetector"
+        private const val BRIEF_DESCRIPTION =
+            "You cannot use @Path an @Param together applying to one field"
+        private const val EXPLANATION =
+            "You cannot use @Path an @Param together applying to one field"
+
         val ISSUE = Issue.create(
-            id = "BoringYURILintDetector",
-            briefDescription = "You cannot use @Path an @Param together applying to one field",
-            explanation = """
-                You cannot use @Path an @Param together applying to one field
-            """.trimIndent(),
+            id = DETECTOR_NAME,
+            briefDescription = BRIEF_DESCRIPTION,
+            explanation = EXPLANATION,
             category = Category.CORRECTNESS,
             priority = 9,
             severity = Severity.ERROR,

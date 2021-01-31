@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-include ':lint_check'
-
 rootProject.name='BoringYURI'
 include ':api'
 include ':processor'
 include ':sample'
 include ':dagger'
 include ':dagger-sample'
+include ':lint_check'

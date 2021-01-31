@@ -16,6 +16,9 @@ dependencies {
 
 }
 
+/**
+ * Commented, as it caused java.lang.InstantiationException
+ */
 //jar {
 //    manifest {
 //        attributes('Lint-Registry-v2': 'com.android.tools.lint.client.api.IssueRegistry')

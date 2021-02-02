@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'kotlin'
+    id 'com.android.lint'
 }
 
 java {
@@ -9,18 +10,14 @@ java {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compileOnly "com.android.tools.lint:lint-api:27.1.1"
     compileOnly "com.android.tools.lint:lint-checks:27.1.1"
-    implementation project(':api')  // implementation "org.boringyuri:boringyuri-api:$VERSION"
-
+    compileOnly project(':api')  // implementation "org.boringyuri:boringyuri-api:$VERSION"
 }
 
-/**
- * Commented, as it caused java.lang.InstantiationException
- */
-//jar {
-//    manifest {
-//        attributes('Lint-Registry-v2': 'com.android.tools.lint.client.api.IssueRegistry')
-//    }
-//}
+jar {
+    manifest {
+        attributes('Lint-Registry-v2': 'boringYURI.lint_check.IssueRegistry')
+    }
+}

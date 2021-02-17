@@ -26,10 +26,10 @@ buildscript {
     ext.constraintLayoutVersion = '2.0.4'
     ext.appCompatVersion = '1.2.0'
     ext.annotationVersion = '1.1.0'
-    ext.lifecycleVersion = '2.2.0'
+    ext.lifecycleVersion = '2.3.0'
 
     // kotlin
-    ext.kotlinVersion = '1.4.20'
+    ext.kotlinVersion = '1.4.30'
 
     // dagger
     ext.daggerVersion = '2.30.1'
@@ -42,7 +42,7 @@ buildscript {
     ext.commonsTextVersion = '1.8'
 
     // unit tests
-    ext.junitVersion = '4.13'
+    ext.junitVersion = '4.13.1'
 
     // publishing
     ext.bintrayPluginVersion = '1.8.5'

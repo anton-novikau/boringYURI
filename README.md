@@ -985,8 +985,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.3"
-  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.3"
 }
 ```
 
@@ -996,19 +996,23 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.3"
-  kapt "org.boringyuri:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.1.3"
 }
 ```
-Snapshots of the development version are available in [JFrog's snapshots repository][4].
+Snapshots of the development version are available in [Sonatype's snapshots repository][4].
 Add the repo below to download `SNAPSHOT` releases.
 
 ```groovy
 repositories {
-  jcenter()
-  maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+  mavenCentral()
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 ```
+
+:bangbang: **IMPORTANT:** The library was migrated from `JCenter` to `MavenCentral` and
+the **Group ID**  had to be changed. If you use a version `1.1.3` or lower, please ensure you use
+the correct dependency name as it is described in the example above.
 
 ## Configuration
 
@@ -1074,6 +1078,6 @@ limitations under the License.
 [1]: https://developer.android.com/reference/android/net/Uri
 [2]: https://github.com/square/retrofit
 [3]: https://github.com/google/gson
-[4]: https://oss.jfrog.org/oss-snapshot-local/
+[4]: https://oss.sonatype.org/content/repositories/snapshots/
 [5]: https://developer.android.com/reference/android/content/ContentProvider
 [6]: https://developer.android.com/reference/android/content/UriMatcher

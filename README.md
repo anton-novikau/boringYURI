@@ -1027,8 +1027,16 @@ repositories {
 ```
 
 :bangbang: **IMPORTANT:** The library was migrated from `JCenter` to `MavenCentral` and
-the **Group ID**  had to be changed. If you use a version `1.1.3` or lower, please ensure you use
-the correct dependency name as it is described in the example above.
+the **Group ID**  had to be changed. If you used a version `1.1.3` or below, please ensure you
+have a correct dependency name.
+```diff
+dependencies {
+-  implementation "org.boringyuri:boringyuri-api:${latestVersion}"
++  implementation "com.github.anton-novikau:boringyuri-api:${latestVersion}"
+-  kapt "org.boringyuri:boringyuri-processor:${latestVersion}"
++  kapt "com.github.anton-novikau:boringyuri-processor:${latestVersion}"
+}
+```
 
 ## Configuration
 

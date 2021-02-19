@@ -10,6 +10,22 @@ inspired by popular annotation-based libraries [Retrofit][2] and [Gson][3], but,
 `Boring Yuri` does all the job on the compile time and the purpose of the library has a little
 in common with them.
 
+* [Usage](#usage)
+  * [Basic example](#basic-example)
+  * [Variable path segment](#variable-path-segment)
+  * [Types](#types)
+    * [Arrays](#arrays)
+    * [Application specific types](#application-specific-types)
+    * [Platform or Library specific types](#platform-or-library-specific-types)
+  * [Constant query parameters](#constant-query-parameters)
+  * [Deserialize data from Uri](#deserialize-data-from-uri)
+    * [Independent Uri data class](#independent-uri-data-class)
+  * [Default values](#default-values)
+  * [Matching URIs in Android ContentProvider](#matching-uris-in-android-contentprovider)
+    * [Disable URI matching based on a build type or a flavor](#disable-uri-matching-based-on-a-build-type-or-a-flavor)
+* [Installation](#installation)
+* [Configuration](#configuration)
+
 ## Usage
 ### Basic example
 
@@ -718,7 +734,7 @@ So for a builder that uses `Location` as method parameter the default value shou
     Uri buildStaticMapUri(@Nullable @Param @DefaultValue("53.893009,27.567444") Location location);
 ```
 
-## Matching URIs in Android ContentProvider
+### Matching URIs in Android ContentProvider
 
 Quite often in Android we use `Uri` to deal with [ContentProvider][5]. And in `ContentProvider` it
 is widely used a utility called [UriMatcher][6]. This utility does a fast search among the set
@@ -921,7 +937,7 @@ variable as it's going to be used as a name of the constant, so it may only star
 and may contain only alphanumerics and underscores. The given `String` will be upper cased in
 order to comply with the java code style for static constants.  
 
-### Disable URI matching based on a build type or a flavor
+#### Disable URI matching based on a build type or a flavor
 
 In some cases there might be needed to have a `Uri` that is available in one build type or product
 flavor, but is not in the other. This can be achieved by using `enabled` property of `@MatcherCode`

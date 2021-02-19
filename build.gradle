@@ -26,10 +26,11 @@ buildscript {
     ext.constraintLayoutVersion = '2.0.4'
     ext.appCompatVersion = '1.2.0'
     ext.annotationVersion = '1.1.0'
-    ext.lifecycleVersion = '2.2.0'
+    ext.lifecycleVersion = '2.3.0'
 
     // kotlin
-    ext.kotlinVersion = '1.4.20'
+    ext.kotlinVersion = '1.4.30'
+    ext.dokkaVersion = '1.4.20'
 
     // dagger
     ext.daggerVersion = '2.30.1'
@@ -42,25 +43,22 @@ buildscript {
     ext.commonsTextVersion = '1.8'
 
     // unit tests
-    ext.junitVersion = '4.13'
+    ext.junitVersion = '4.13.1'
 
     // publishing
-    ext.bintrayPluginVersion = '1.8.5'
-    ext.bintrayArtifactoryVersion = '4.7.5'
-    ext.bintrayUser = System.getenv().getOrDefault("BINTRAY_USER", "")
-    ext.bintrayApiKey = System.getenv().getOrDefault("BINTRAY_KEY", "")
-    ext.bintrayDryRun = System.getenv("BINTRAY_DRY_RUN") == "true"
+    ext.publishPluginVersion = '0.14.2'
 
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:${gradlePluginVersion}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintrayPluginVersion"
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$bintrayArtifactoryVersion"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
+        classpath "com.vanniktech:gradle-maven-publish-plugin:$publishPluginVersion"
     }
 }
 
@@ -68,12 +66,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-    }
-
-    tasks.whenTaskAdded {
-        if (it.name.matches("generatePomFileFor([A-Z][a-zA-Z]*)Publication")) {
-            bintrayUpload.dependsOn it
-        }
+        mavenCentral()
     }
 }
 

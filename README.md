@@ -10,6 +10,22 @@ inspired by popular annotation-based libraries [Retrofit][2] and [Gson][3], but,
 `Boring Yuri` does all the job on the compile time and the purpose of the library has a little
 in common with them.
 
+* [Usage](#usage)
+  * [Basic example](#basic-example)
+  * [Variable path segment](#variable-path-segment)
+  * [Types](#types)
+    * [Arrays](#arrays)
+    * [Application specific types](#application-specific-types)
+    * [Platform or Library specific types](#platform-or-library-specific-types)
+  * [Constant query parameters](#constant-query-parameters)
+  * [Deserialize data from Uri](#deserialize-data-from-uri)
+    * [Independent Uri data class](#independent-uri-data-class)
+  * [Default values](#default-values)
+  * [Matching URIs in Android ContentProvider](#matching-uris-in-android-contentprovider)
+    * [Disable URI matching based on a build type or a flavor](#disable-uri-matching-based-on-a-build-type-or-a-flavor)
+* [Installation](#installation)
+* [Configuration](#configuration)
+
 ## Usage
 ### Basic example
 
@@ -718,7 +734,7 @@ So for a builder that uses `Location` as method parameter the default value shou
     Uri buildStaticMapUri(@Nullable @Param @DefaultValue("53.893009,27.567444") Location location);
 ```
 
-## Matching URIs in Android ContentProvider
+### Matching URIs in Android ContentProvider
 
 Quite often in Android we use `Uri` to deal with [ContentProvider][5]. And in `ContentProvider` it
 is widely used a utility called [UriMatcher][6]. This utility does a fast search among the set
@@ -921,7 +937,7 @@ variable as it's going to be used as a name of the constant, so it may only star
 and may contain only alphanumerics and underscores. The given `String` will be upper cased in
 order to comply with the java code style for static constants.  
 
-### Disable URI matching based on a build type or a flavor
+#### Disable URI matching based on a build type or a flavor
 
 In some cases there might be needed to have a `Uri` that is available in one build type or product
 flavor, but is not in the other. This can be achieved by using `enabled` property of `@MatcherCode`
@@ -985,8 +1001,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.3"
-  annotationProcessor "org.boringyuri:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.3"
 }
 ```
 
@@ -996,19 +1012,23 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "org.boringyuri:boringyuri-api:1.1.3"
-  kapt "org.boringyuri:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.1.3"
 }
 ```
-Snapshots of the development version are available in [JFrog's snapshots repository][4].
+Snapshots of the development version are available in [Sonatype's snapshots repository][4].
 Add the repo below to download `SNAPSHOT` releases.
 
 ```groovy
 repositories {
-  jcenter()
-  maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+  mavenCentral()
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 ```
+
+:bangbang: **IMPORTANT:** The library was migrated from `JCenter` to `MavenCentral` and
+the **Group ID**  had to be changed. If you use a version `1.1.3` or lower, please ensure you use
+the correct dependency name as it is described in the example above.
 
 ## Configuration
 
@@ -1074,6 +1094,6 @@ limitations under the License.
 [1]: https://developer.android.com/reference/android/net/Uri
 [2]: https://github.com/square/retrofit
 [3]: https://github.com/google/gson
-[4]: https://oss.jfrog.org/oss-snapshot-local/
+[4]: https://oss.sonatype.org/content/repositories/snapshots/
 [5]: https://developer.android.com/reference/android/content/ContentProvider
 [6]: https://developer.android.com/reference/android/content/UriMatcher

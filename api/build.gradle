@@ -15,12 +15,7 @@
  */
 
 apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-apply from: rootProject.file('gradle/pom.gradle')
-
-group = GROUP_ID
-version = VERSION
+apply plugin: "com.vanniktech.maven.publish"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -30,58 +25,3 @@ dependencies {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-publishing {
-    publications {
-        Boring(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-
-            groupId GROUP_ID
-            artifactId ARTIFACT_ID_API
-            version VERSION
-
-            configurePom(Boring(MavenPublication), ARTIFACT_ID_API)
-        }
-    }
-}
-
-bintray {
-    publications = ['Boring']
-    user = bintrayUser
-    key = bintrayApiKey
-    dryRun = bintrayDryRun
-    publish = true
-
-    pkg {
-        repo = REPO_ID
-        userOrg = DEVELOPER_ID
-        name = ARTIFACT_ID_API
-        vcsUrl = VCS_URL
-        websiteUrl = WEBSITE
-        licenses = [LICENSE]
-        version {
-            name = VERSION
-            desc = DESCRIPTION
-        }
-    }
-}
-
-project.ext.publicationName = 'maven'
-apply from: rootProject.file('gradle/artifactory.gradle')

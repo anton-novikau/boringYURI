@@ -29,7 +29,7 @@ buildscript {
     ext.lifecycleVersion = '2.3.0'
 
     // kotlin
-    ext.kotlinVersion = '1.4.30'
+    ext.kotlinVersion = '1.4.32'
     ext.dokkaVersion = '1.4.20'
 
     // dagger
@@ -43,14 +43,13 @@ buildscript {
     ext.commonsTextVersion = '1.8'
 
     // unit tests
-    ext.junitVersion = '4.13.1'
+    ext.junitVersion = '4.13.2'
 
     // publishing
     ext.publishPluginVersion = '0.14.2'
 
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 
@@ -65,7 +64,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }

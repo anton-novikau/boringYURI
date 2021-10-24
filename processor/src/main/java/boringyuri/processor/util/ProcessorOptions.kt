@@ -48,7 +48,7 @@ internal object ProcessorOptions {
         annotation: KClass<out Annotation>,
         originatingElement: Element? = null
     ) {
-        if (session.getBooleanOptionOrDefault(OPT_ORDERED_SEGMENTS_WARNING, false)) {
+        if (!session.getBooleanOptionOrDefault(OPT_ORDERED_SEGMENTS_WARNING, false)) {
             val annotationName = annotation.simpleName
 
             session.logger.warn(originatingElement,

@@ -23,12 +23,14 @@ import boringyuri.api.constant.StringParam
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createParamSpec
+import boringyuri.processor.ext.getAnnotation
+import boringyuri.processor.ext.requireAnnotation
+import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.TypeConverter
 import boringyuri.processor.uripart.*
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.type.CommonTypeName.*
 import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
-import boringyuri.processor.type.TypeConverter
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
@@ -40,6 +42,7 @@ import javax.lang.model.element.*
 import javax.lang.model.util.ElementFilter
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
+import kotlin.collections.LinkedHashSet
 
 class UriFactoryGeneratorStep internal constructor(
     session: ProcessingSession,
@@ -100,8 +103,7 @@ class UriFactoryGeneratorStep internal constructor(
             }
 
             val builderAnnotation =
-                methodElement.getAnnotation(UriBuilder::class.java)
-                    ?: continue  // skip non-annotated methods
+                methodElement.getAnnotation<UriBuilder>() ?: continue // skip non-annotated methods
 
             val returnType = ClassName.get(methodElement.returnType)
             if (ANDROID_URI != returnType) {
@@ -127,89 +129,123 @@ class UriFactoryGeneratorStep internal constructor(
         builderAnnotation: UriBuilder,
         methodElement: ExecutableElement
     ): Triple<List<ParameterSpec>, List<PathSegment>, List<QueryParameter>> {
-        // Base path may contain constant segments and templates for method parameters.
-        // We will replace the templates with the path parameters in the next step.
-        val segments = obtainBasePathSegments(builderAnnotation, methodElement)
-
-        val basePath = builderAnnotation.value
         val methodParameters = methodElement.parameters
-        val parameterSpecs = arrayListOf<ParameterSpec>()
-        val queryParams = arrayListOf<QueryParameter>()
-        // Iterating over method parameters we'll find all the replacements for
-        // the method templates found on the previous step and create the params list.
-        methodParameters.forEach { param ->
-            val spec = param.createParamSpec(annotationHandler).also { parameterSpecs.add(it) }
-            val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation(DefaultValue::class.java)?.value
+        val parameterSpecs = createParamSpecs(methodParameters)
 
-            val pathAnnotation = param.getAnnotation(Path::class.java)
-            if (pathAnnotation != null) {
-                if (nullable && defaultValue == null) {
-                    logger.error(param, "Path segment '${spec.name}' must be explicitly non-null" +
-                            " or have a @${DefaultValue::class.simpleName}.")
-                }
+        // We find all the possible variable path segments replacements defined
+        // in the method parameters. On the next step we'll try to find the placeholders
+        // where to apply these variable path segments.
+        val variablePathSegments = obtainPathSegments(methodParameters, parameterSpecs)
+        // Iterating over all constant and variable path segments we'll put them in a list
+        // in the exact order as they were defined in the base path of @UriBuilder annotation.
+        val pathSegments = obtainPathSegmentsFromBasePath(builderAnnotation, variablePathSegments)
 
-                val pathName = pathAnnotation.value.ifEmpty { spec.name }
-                if (segments[pathName] !is TemplatePathSegment) {
-                    ProcessorOptions.warnOrderedSegmentsUsage(
-                        session,
-                        pathName,
-                        basePath,
-                        UriBuilder::class,
-                        param
-                    )
-                }
-                // Previously saved VariableNameSegment helps to preserve
-                // the segment position of the expected Uri path.
-                segments[pathName] = VariableWritePathSegment(
-                    param,
-                    spec,
-                    defaultValue,
-                    pathAnnotation.encoded,
-                    URI_BUILDER_NAME
-                )
-            } else {
-                val paramAnnotation = param.getAnnotation(Param::class.java)
-                if (paramAnnotation != null) {
-                    val paramName = paramAnnotation.value.ifEmpty { spec.name }
-                    queryParams.add(VariableWriteQueryParameter(
-                        paramName,
-                        spec,
-                        param,
-                        nullable,
-                        defaultValue,
-                        URI_BUILDER_NAME
-                    ))
-                } else {
-                    logger.warn(param, "Parameter '${spec.name}' is ignored")
-                }
-            }
-        }
+        val queryParams = obtainQueryParams(methodParameters, parameterSpecs)
 
-        return Triple(parameterSpecs, segments.values.toList(), queryParams)
+        return Triple(parameterSpecs.values.toList(), pathSegments, queryParams)
     }
 
-    private fun obtainBasePathSegments(
-        builderAnnotation: UriBuilder,
-        methodElement: ExecutableElement
-    ): MutableMap<String, PathSegment> {
-        var segmentIndex = 0
-        return builderAnnotation.value
-            .ifEmpty { return LinkedHashMap() } // early exit
-            .split("/")
-            .filter { it.isNotEmpty() }
-            .associateTo(LinkedHashMap()) {
-                val template = PATH_TEMPLATE_REGEX.find(it)?.run { groupValues[1] }
-                val segmentName = template ?: it
-                val segment = if (template == null) {
-                    ConstantPathSegment(it, builderAnnotation.encoded, URI_BUILDER_NAME)
-                } else {
-                    TemplatePathSegment(segmentIndex, template, methodElement, logger)
-                }
-                segmentIndex++
+    private fun createParamSpecs(
+        methodParameters: List<VariableElement>
+    ): Map<VariableElement, ParameterSpec> {
+        return methodParameters.associateWithTo(LinkedHashMap()) { parameter ->
+            parameter.createParamSpec(annotationHandler)
+        }
+    }
 
-                segmentName to segment
+    private fun obtainPathSegments(
+        methodParameters: List<VariableElement>,
+        parameterSpecs: Map<VariableElement, ParameterSpec>
+    ): Map<String, VariableWritePathSegment> {
+        return methodParameters.mapNotNull { param ->
+            val pathAnnotation = param.getAnnotation<Path>() ?: return@mapNotNull null
+
+            val spec = parameterSpecs.getValue(param)
+            val nullable = annotationHandler.isNullable(spec.type, param)
+            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+
+            if (nullable && defaultValue == null) {
+                logger.error(param, "Path segment '${spec.name}' must be explicitly non-null" +
+                        " or have a @${DefaultValue::class.simpleName}.")
             }
+
+            val pathName = pathAnnotation.value.ifEmpty { spec.name }
+            val segment = VariableWritePathSegment(
+                param,
+                spec,
+                defaultValue,
+                pathAnnotation.encoded,
+                URI_BUILDER_NAME
+            )
+
+            pathName to segment
+        }.associate { it }
+    }
+
+    private fun obtainQueryParams(
+        methodParameters: List<VariableElement>,
+        parameterSpecs: Map<VariableElement, ParameterSpec>
+    ): List<QueryParameter> {
+        return methodParameters.mapNotNull { param ->
+            val paramAnnotation = param.getAnnotation<Param>() ?: return@mapNotNull null
+
+            val spec = parameterSpecs.getValue(param)
+            val nullable = annotationHandler.isNullable(spec.type, param)
+            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+
+            val paramName = paramAnnotation.value.ifEmpty { spec.name }
+            VariableWriteQueryParameter(
+                paramName,
+                spec,
+                param,
+                nullable,
+                defaultValue,
+                URI_BUILDER_NAME
+            )
+        }
+    }
+
+    private fun obtainPathSegmentsFromBasePath(
+        builderAnnotation: UriBuilder,
+        variablePathSegments: Map<String, VariableWritePathSegment>
+    ): List<PathSegment> {
+        val basePath = builderAnnotation.value
+
+        val notFoundSegments = LinkedHashSet(variablePathSegments.values)
+        val segments = if (basePath.isNotEmpty()) {
+            basePath.split("/")
+                .filter { it.isNotEmpty() }
+                .mapNotNullTo(ArrayList()) {
+                    val template = PATH_TEMPLATE_REGEX.find(it)?.run { groupValues[1] }
+                    val segment = if (template == null) {
+                        ConstantPathSegment(it, builderAnnotation.encoded, URI_BUILDER_NAME)
+                    } else {
+                        variablePathSegments[template]?.also { foundSegment ->
+                            notFoundSegments.remove(foundSegment)
+                        }
+                    }
+
+                    segment
+                }
+        } else ArrayList()
+
+        notFoundSegments.forEach { segment ->
+            val segmentElement = segment.segment
+            val pathAnnotation = segmentElement.requireAnnotation<Path>()
+            val segmentName = pathAnnotation.value.ifEmpty { segmentElement.simpleName.toString() }
+
+            ProcessorOptions.warnOrderedSegmentsUsage(
+                session,
+                segmentName,
+                basePath,
+                UriBuilder::class,
+                segmentElement
+            )
+
+            segments.add(segment)
+        }
+
+        return segments
     }
 
     private fun generateUriBuilderContainerImpl(
@@ -241,7 +277,7 @@ class UriFactoryGeneratorStep internal constructor(
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addSuperinterface(ClassName.get(containerElement))
 
-        val containerAnnotation = containerElement.getAnnotation(UriFactory::class.java)
+        val containerAnnotation = containerElement.requireAnnotation<UriFactory>()
         val scheme = containerAnnotation.scheme
         val authority = containerAnnotation.authority
 

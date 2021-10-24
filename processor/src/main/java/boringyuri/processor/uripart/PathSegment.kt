@@ -89,7 +89,7 @@ class TemplatePathSegment(
 }
 
 class VariableWritePathSegment(
-    private val segment: VariableElement,
+    val segment: VariableElement,
     private val methodParam: ParameterSpec,
     private val defaultValue: String?,
     private val encoded: Boolean,

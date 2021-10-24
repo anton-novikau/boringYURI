@@ -1,3 +1,8 @@
+## Boring YURI 1.1.4 (2021-10-24)
+
+* Fix duplicates handling in `Uri` path segments ([Bug #21](https://github.com/anton-novikau/boringYURI/issues/21)).
+* Deprecate ordered path segments.
+
 ## Boring YURI 1.1.3 (2021-01-03)
 
 * Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated

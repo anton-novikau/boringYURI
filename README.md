@@ -1001,8 +1001,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.4"
 }
 ```
 
@@ -1012,8 +1012,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.3"
-  kapt "com.github.anton-novikau:boringyuri-processor:1.1.3"
+  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.1.4"
 }
 ```
 Snapshots of the development version are available in [Sonatype's snapshots repository][4].
@@ -1047,12 +1047,14 @@ dependencies {
   Enabling this option allows to use the memory more efficiently and to create every instance of
   the specific type adapter only once. When the option is turned off, every instance of the adapter
   is created at use which gives to garbage collector more work.
- * `boringyuri.suppress_warning.ordered_segments` – every time you use ordered path segments
+ * `boringyuri.suppress_warning.ordered_segments` –  :bangbang: **DEPRECATED**. Support of ordered
+  path segments [will be removed](https://github.com/anton-novikau/boringYURI/issues/22) in `1.2.0`.
+  ~~every time you use ordered path segments
   instead of named path segments, you'll see the a compilation warning message `Template
   {path name} is not found in @UriBuilder("/base/path"). Fallback to ordered segments may
   cause an unpredictable result`. This message here is to warn that the ordered path approach
   is not recommended and you'd better switch to the named path segments. But if you're aware of
-  what you're doing, you may turn the message off setting the option to `true`.
+  what you're doing, you may turn the message off setting the option to `true`.~~
 
 To enable any of the options above you need to include the following in your app module
 `build.gradle` file:

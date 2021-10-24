@@ -58,7 +58,7 @@ With Java only:
 ```groovy
 dependencies {
          ...
-  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:1.1.3"
+  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:1.1.4"
 }
 ```
 
@@ -67,7 +67,7 @@ With Kotlin:
 ```groovy
 dependencies {
         ...
-  kapt "com.github.anton-novikau:boringyuri-dagger:1.1.3"
+  kapt "com.github.anton-novikau:boringyuri-dagger:1.1.4"
 }
 ```
 

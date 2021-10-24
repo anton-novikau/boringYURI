@@ -53,7 +53,7 @@ dependencies {
     // code generators
     implementation project(':api')  // implementation "com.github.anton-novikau:boringyuri-api:$VERSION_NAME"
     kapt project(':processor')      // kapt "com.github.anton-novikau:boringyuri-processor:$VERSION_NAME"
-    kapt project(':dagger')         // kapt "com.github.anton-novikau:boringyuri-dagger:$$VERSION_NAME"
+    kapt project(':dagger')         // kapt "com.github.anton-novikau:boringyuri-dagger:$VERSION_NAME"
 
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"

@@ -234,13 +234,7 @@ class UriFactoryGeneratorStep internal constructor(
             val pathAnnotation = segmentElement.requireAnnotation<Path>()
             val segmentName = pathAnnotation.value.ifEmpty { segmentElement.simpleName.toString() }
 
-            ProcessorOptions.warnOrderedSegmentsUsage(
-                session,
-                segmentName,
-                basePath,
-                UriBuilder::class,
-                segmentElement
-            )
+            ProcessorOptions.warnOrderedSegmentsUsage(session, segmentName, segmentElement)
 
             segments.add(segment)
         }

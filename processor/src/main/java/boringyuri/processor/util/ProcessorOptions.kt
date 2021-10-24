@@ -23,15 +23,6 @@ import javax.lang.model.element.Element
 import kotlin.reflect.KClass
 
 internal object ProcessorOptions {
-    /**
-     * Option to turn off the ordered segments warning:
-     *
-     * "Template {path name} is not found in &#64;UriBuilder("/base/path").
-     * Fallback to ordered segments may cause an unpredictable result".
-     *
-     * Type: [Boolean]
-     */
-    const val OPT_ORDERED_SEGMENTS_WARNING = "boringyuri.suppress_warning.ordered_segments"
 
     /**
      * Option to specify the [BoringTypeAdapter] factory class and to enable instance caching
@@ -41,21 +32,17 @@ internal object ProcessorOptions {
      */
     const val OPT_TYPE_ADAPTER_FACTORY = "boringyuri.type_adapter_factory"
 
+    @Deprecated(message = "Will be removed in 1.2.0", replaceWith = ReplaceWith(""))
     fun warnOrderedSegmentsUsage(
         session: ProcessingSession,
         pathSegment: String,
-        basePath: String,
-        annotation: KClass<out Annotation>,
         originatingElement: Element? = null
     ) {
-        if (!session.getBooleanOptionOrDefault(OPT_ORDERED_SEGMENTS_WARNING, false)) {
-            val annotationName = annotation.simpleName
-
-            session.logger.warn(originatingElement,
-                "Template {$pathSegment} is not found in @$annotationName(\"$basePath\"). " +
-                        "Fallback to ordered segments may cause an unpredictable result."
-            )
-        }
+        session.logger.warn(originatingElement,
+            "DEPRECATED. {$pathSegment} is an ordered Uri path segment which will stop working " +
+                    "in BoringYURI 1.2.0. Make sure you migrated your Uri path to the named " +
+                    "path segments approach (eg. /uri/path/{segment}/with/{templates})."
+        )
     }
 
     fun getTypeAdapterFactory(session: ProcessingSession): ClassName? {

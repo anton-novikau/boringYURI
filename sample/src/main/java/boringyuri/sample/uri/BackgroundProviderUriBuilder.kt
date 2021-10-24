@@ -32,6 +32,7 @@ interface BackgroundProviderUriBuilder {
         const val CODE_ORIGINAL = 101
         const val CODE_CROPPED = 102
         const val CODE_DEBUG = 103
+        const val CODE_ORDERED = 104
     }
 
     @UriBuilder("/bg/color/{color}")
@@ -53,4 +54,7 @@ interface BackgroundProviderUriBuilder {
     // so it can't be accepted as an annotation parameter.
     @MatcherCode(Contract.CODE_DEBUG, enabled = BuildConfig.DEBUG_ONLY)
     fun buildDebugBackgroundUri(): Uri
+
+    @UriBuilder("/bg/ordered")
+    fun buildOrderedUri(@Path first: String, @Path second: Int): Uri
 }

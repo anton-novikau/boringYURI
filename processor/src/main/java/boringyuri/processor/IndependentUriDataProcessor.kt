@@ -41,7 +41,6 @@ import javax.lang.model.SourceVersion
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
 @SupportedOptions(
-    ProcessorOptions.OPT_ORDERED_SEGMENTS_WARNING,
     ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
 )
 class IndependentUriDataProcessor : BoringAnnotationProcessor() {

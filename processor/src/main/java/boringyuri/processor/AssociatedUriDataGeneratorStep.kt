@@ -117,13 +117,7 @@ class AssociatedUriDataGeneratorStep(
                 val segmentIndex = if (pathSegment is TemplatePathSegment) {
                     pathSegment.segmentIndex
                 } else {
-                    ProcessorOptions.warnOrderedSegmentsUsage(
-                        session,
-                        pathName,
-                        basePath,
-                        UriBuilder::class,
-                        param
-                    )
+                    ProcessorOptions.warnOrderedSegmentsUsage(session, pathName, param)
 
                     // non-named path segment will be added to the end of the map
                     segments.size

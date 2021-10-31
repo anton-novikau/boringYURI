@@ -31,7 +31,7 @@ import javax.lang.model.SourceVersion
 
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 @SupportedOptions(ProcessorOptions.OPT_DAGGER_BORING_MODULE)
 class DaggerModuleProcessor : BoringAnnotationProcessor() {

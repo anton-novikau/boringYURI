@@ -88,8 +88,11 @@ class BoringContactProvider : ContentProvider() {
         )
 
         val desiredDimens = uriData.desiredDimens
-        Log.i(TAG, "openContactPhoto: contactId = ${uriData.contactId}, group = ${uriData.group}," +
-                " desiredDimens = ${desiredDimens.width()}x${desiredDimens.height()}")
+        Log.i(
+            TAG,
+            "openContactPhoto: contactId = ${uriData.contactId}, group = ${uriData.group}," +
+                    " desiredDimens = ${desiredDimens.width()}x${desiredDimens.height()}"
+        )
 
         // pre-process 'photoFile' bitmap to have a desired width and height
         // based on 'uriData.desiredDimens'
@@ -106,9 +109,12 @@ class BoringContactProvider : ContentProvider() {
             context.getExternalFilesDir("vcard"),
             vcard.contactId.toString()
         )
-        Log.i(TAG, "openContactVCard: id = ${vcard.contactId}," +
-                " name = ${vcard.firstName} ${vcard.lastName}," +
-                " address = ${vcard.homeAddress}")
+        Log.i(
+            TAG,
+            "openContactVCard: id = ${vcard.contactId}," +
+                    " name = ${vcard.firstName} ${vcard.lastName}," +
+                    " address = ${vcard.homeAddress}"
+        )
 
         return ParcelFileDescriptor.open(vcardFile, ParcelFileDescriptor.MODE_READ_ONLY)
     }

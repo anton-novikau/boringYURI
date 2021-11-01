@@ -102,7 +102,7 @@ public @interface UriData {
      * <p>
      * Relative {@code Uri} path that can be used as a reference to parse
      * <code>&#64;Path</code> segments into an appropriate getter method.
-     *</p>
+     * </p>
      * <p>
      * If the same data class is used for two or more different {@code Uri}s,
      * the wildcard <code>&#42;</code> can be used to replace the constant path

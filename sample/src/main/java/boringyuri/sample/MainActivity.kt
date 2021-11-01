@@ -18,11 +18,11 @@ package boringyuri.sample
 
 import android.graphics.Rect
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import boringyuri.sample.data.Address
 import boringyuri.sample.uri.ContactUriBuilder
 import boringyuri.sample.uri.LocationUriBuilder

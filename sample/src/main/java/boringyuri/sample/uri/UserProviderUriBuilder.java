@@ -28,7 +28,7 @@ import boringyuri.api.adapter.TypeAdapter;
 import boringyuri.sample.data.User;
 import boringyuri.sample.data.adapter.AdminTypeAdapter;
 
-@UriFactory(scheme = "https", authority="example.com")
+@UriFactory(scheme = "https", authority = "example.com")
 public interface UserProviderUriBuilder {
 
     @NonNull

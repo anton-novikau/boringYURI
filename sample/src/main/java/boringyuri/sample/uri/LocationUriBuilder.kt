@@ -17,7 +17,11 @@
 package boringyuri.sample.uri
 
 import android.net.Uri
-import boringyuri.api.*
+import boringyuri.api.DefaultValue
+import boringyuri.api.Param
+import boringyuri.api.UriBuilder
+import boringyuri.api.UriFactory
+import boringyuri.api.WithUriData
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam

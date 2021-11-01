@@ -15,9 +15,21 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.*
+import boringyuri.api.DefaultValue
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.UriFactory
+import boringyuri.api.WithUriData
 import boringyuri.api.adapter.TypeAdapter
-import boringyuri.api.constant.*
+import boringyuri.api.constant.BooleanParam
+import boringyuri.api.constant.BooleanParams
+import boringyuri.api.constant.DoubleParam
+import boringyuri.api.constant.DoubleParams
+import boringyuri.api.constant.LongParam
+import boringyuri.api.constant.LongParams
+import boringyuri.api.constant.StringParam
+import boringyuri.api.constant.StringParams
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher

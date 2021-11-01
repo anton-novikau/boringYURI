@@ -19,7 +19,11 @@ package boringyuri.processor.ext
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.buildGetterName
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement

@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 
 import boringyuri.api.DefaultValue;
 import boringyuri.api.Param;
-import boringyuri.api.Path;
 import boringyuri.api.UriBuilder;
 import boringyuri.api.UriFactory;
 import boringyuri.api.WithUriData;

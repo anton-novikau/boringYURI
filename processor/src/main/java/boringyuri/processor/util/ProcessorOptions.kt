@@ -19,8 +19,6 @@ package boringyuri.processor.util
 import boringyuri.api.adapter.BoringTypeAdapter
 import boringyuri.processor.base.ProcessingSession
 import com.squareup.javapoet.ClassName
-import javax.lang.model.element.Element
-import kotlin.reflect.KClass
 
 internal object ProcessorOptions {
 
@@ -31,19 +29,6 @@ internal object ProcessorOptions {
      * Type: [String]
      */
     const val OPT_TYPE_ADAPTER_FACTORY = "boringyuri.type_adapter_factory"
-
-    @Deprecated(message = "Will be removed in 1.2.0", replaceWith = ReplaceWith(""))
-    fun warnOrderedSegmentsUsage(
-        session: ProcessingSession,
-        pathSegment: String,
-        originatingElement: Element? = null
-    ) {
-        session.logger.warn(originatingElement,
-            "DEPRECATED. {$pathSegment} is an ordered Uri path segment which will stop working " +
-                    "in BoringYURI 1.2.0. Make sure you migrated your Uri path to the named " +
-                    "path segments approach (eg. /uri/path/{segment}/with/{templates})."
-        )
-    }
 
     fun getTypeAdapterFactory(session: ProcessingSession): ClassName? {
         return try {

@@ -19,7 +19,11 @@ package boringyuri.sample.uri
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.annotation.ColorInt
-import boringyuri.api.*
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.UriFactory
+import boringyuri.api.WithUriData
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.sample.BuildConfig
@@ -32,7 +36,6 @@ interface BackgroundProviderUriBuilder {
         const val CODE_ORIGINAL = 101
         const val CODE_CROPPED = 102
         const val CODE_DEBUG = 103
-        const val CODE_ORDERED = 104
     }
 
     @UriBuilder("/bg/color/{color}")
@@ -54,7 +57,4 @@ interface BackgroundProviderUriBuilder {
     // so it can't be accepted as an annotation parameter.
     @MatcherCode(Contract.CODE_DEBUG, enabled = BuildConfig.DEBUG_ONLY)
     fun buildDebugBackgroundUri(): Uri
-
-    @UriBuilder("/bg/ordered")
-    fun buildOrderedUri(@Path first: String, @Path second: Int): Uri
 }

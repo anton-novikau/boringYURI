@@ -26,14 +26,17 @@ import boringyuri.processor.uripart.MethodReadQueryParameter
 import boringyuri.processor.uripart.ReadQueryParameter
 import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.TypeName
 import org.apache.commons.lang3.StringUtils
-import javax.lang.model.element.*
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
 import javax.lang.model.util.ElementFilter
 
 class IndependentUriDataGeneratorStep(
@@ -118,24 +121,25 @@ class IndependentUriDataGeneratorStep(
 
                 val pathName = pathAnnotation.value.ifEmpty { paramName }
                 val pathSegment = segments[pathName]
-                val segmentIndex = if (pathSegment is TemplatePathSegment) {
-                    pathSegment.segmentIndex
-                } else {
-                    ProcessorOptions.warnOrderedSegmentsUsage(session, pathName, method)
+                if (pathSegment is TemplatePathSegment) {
 
-                    // non-named path segment will be added to the end of the map
-                    segments.size
+                    // Previously saved VariableNameSegment helps to preserve
+                    // the segment position of the expected Uri path.
+                    segments[pathName] = MethodReadPathSegment(
+                        pathSegment.segmentIndex,
+                        pathName,
+                        field,
+                        uriField,
+                        defaultValue,
+                        method
+                    )
+                } else {
+                    session.logger.error(
+                        method,
+                        "Path segment {$pathName} is not defined in '$basePath'"
+                    )
                 }
-                // Previously saved VariableNameSegment helps to preserve
-                // the segment position of the expected Uri path.
-                segments[pathName] = MethodReadPathSegment(
-                    segmentIndex,
-                    pathName,
-                    field,
-                    uriField,
-                    defaultValue,
-                    method
-                )
+
             } else {
                 val paramAnnotation: Param = method.getAnnotation(Param::class.java)
                 val queryParamName = paramAnnotation.value.ifEmpty { paramName }

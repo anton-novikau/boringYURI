@@ -15,7 +15,11 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.*
+import boringyuri.api.DefaultValue
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.UriFactory
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
@@ -25,11 +29,17 @@ import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createParamSpec
 import boringyuri.processor.ext.getAnnotation
 import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI_BUILDER
+import boringyuri.processor.type.CommonTypeName.OVERRIDE
+import boringyuri.processor.type.CommonTypeName.STRING
 import boringyuri.processor.type.TypeConverter
-import boringyuri.processor.uripart.*
+import boringyuri.processor.uripart.ConstantPathSegment
+import boringyuri.processor.uripart.PathSegment
+import boringyuri.processor.uripart.QueryParameter
+import boringyuri.processor.uripart.VariableWritePathSegment
+import boringyuri.processor.uripart.VariableWriteQueryParameter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
@@ -37,12 +47,13 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
-import java.util.*
-import javax.lang.model.element.*
+import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
 import javax.lang.model.util.ElementFilter
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
-import kotlin.collections.LinkedHashSet
 
 class UriFactoryGeneratorStep internal constructor(
     session: ProcessingSession,
@@ -138,7 +149,11 @@ class UriFactoryGeneratorStep internal constructor(
         val variablePathSegments = obtainPathSegments(methodParameters, parameterSpecs)
         // Iterating over all constant and variable path segments we'll put them in a list
         // in the exact order as they were defined in the base path of @UriBuilder annotation.
-        val pathSegments = obtainPathSegmentsFromBasePath(builderAnnotation, variablePathSegments)
+        val pathSegments = obtainPathSegmentsFromBasePath(
+            builderAnnotation,
+            variablePathSegments,
+            methodElement
+        )
 
         val queryParams = obtainQueryParams(methodParameters, parameterSpecs)
 
@@ -207,11 +222,12 @@ class UriFactoryGeneratorStep internal constructor(
 
     private fun obtainPathSegmentsFromBasePath(
         builderAnnotation: UriBuilder,
-        variablePathSegments: Map<String, VariableWritePathSegment>
+        variablePathSegments: Map<String, VariableWritePathSegment>,
+        originatingElement: Element
     ): List<PathSegment> {
         val basePath = builderAnnotation.value
 
-        val notFoundSegments = LinkedHashSet(variablePathSegments.values)
+        var unprocessedElementsCounter = variablePathSegments.size
         val segments = if (basePath.isNotEmpty()) {
             basePath.split("/")
                 .filter { it.isNotEmpty() }
@@ -220,23 +236,19 @@ class UriFactoryGeneratorStep internal constructor(
                     val segment = if (template == null) {
                         ConstantPathSegment(it, builderAnnotation.encoded, URI_BUILDER_NAME)
                     } else {
-                        variablePathSegments[template]?.also { foundSegment ->
-                            notFoundSegments.remove(foundSegment)
-                        }
+                        variablePathSegments[template]?.also { unprocessedElementsCounter-- }
                     }
 
                     segment
                 }
         } else ArrayList()
 
-        notFoundSegments.forEach { segment ->
-            val segmentElement = segment.segment
-            val pathAnnotation = segmentElement.requireAnnotation<Path>()
-            val segmentName = pathAnnotation.value.ifEmpty { segmentElement.simpleName.toString() }
-
-            ProcessorOptions.warnOrderedSegmentsUsage(session, segmentName, segmentElement)
-
-            segments.add(segment)
+        if (unprocessedElementsCounter > 0) {
+            session.logger.error(
+                originatingElement,
+                "Some of the @${Path::class.simpleName} annotated method parameters " +
+                        "are not found in '$basePath'"
+            )
         }
 
         return segments

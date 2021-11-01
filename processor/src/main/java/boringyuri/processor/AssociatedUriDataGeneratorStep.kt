@@ -15,7 +15,11 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.*
+import boringyuri.api.DefaultValue
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.WithUriData
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
@@ -31,11 +35,16 @@ import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.uripart.VariableReadPathSegment
 import boringyuri.processor.uripart.VariableReadQueryParameter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions
 import boringyuri.processor.util.buildGetterName
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ArrayTypeName
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
@@ -114,24 +123,18 @@ class AssociatedUriDataGeneratorStep(
 
                 val pathName = pathAnnotation.value.ifEmpty { paramName }
                 val pathSegment = segments[pathName]
-                val segmentIndex = if (pathSegment is TemplatePathSegment) {
-                    pathSegment.segmentIndex
-                } else {
-                    ProcessorOptions.warnOrderedSegmentsUsage(session, pathName, param)
-
-                    // non-named path segment will be added to the end of the map
-                    segments.size
+                if (pathSegment is TemplatePathSegment) {
+                    // Previously saved VariableNameSegment helps to preserve
+                    // the segment position of the expected Uri path.
+                    segments[pathName] = VariableReadPathSegment(
+                        pathSegment.segmentIndex,
+                        pathName,
+                        field,
+                        uriField,
+                        defaultValue,
+                        param
+                    )
                 }
-                // Previously saved VariableNameSegment helps to preserve
-                // the segment position of the expected Uri path.
-                segments[pathName] = VariableReadPathSegment(
-                    segmentIndex,
-                    pathName,
-                    field,
-                    uriField,
-                    defaultValue,
-                    param
-                )
             } else {
                 val paramAnnotation = param.getAnnotation<Param>()
                 if (paramAnnotation != null) {

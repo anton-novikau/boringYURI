@@ -20,11 +20,16 @@ import boringyuri.processor.base.AbortProcessingException
 import boringyuri.processor.ext.createMethodSignature
 import boringyuri.processor.ext.findTypeAdapter
 import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.type.CommonTypeName.STRING
-import boringyuri.processor.util.Logger
 import boringyuri.processor.type.TypeConverter
-import com.squareup.javapoet.*
+import boringyuri.processor.util.AnnotationHandler
+import boringyuri.processor.util.Logger
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.VariableElement
@@ -89,7 +94,7 @@ class TemplatePathSegment(
 }
 
 class VariableWritePathSegment(
-    val segment: VariableElement,
+    private val segment: VariableElement,
     private val methodParam: ParameterSpec,
     private val defaultValue: String?,
     private val encoded: Boolean,

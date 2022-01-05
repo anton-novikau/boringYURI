@@ -79,5 +79,6 @@ kapt {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        freeCompilerArgs = ['-Xjvm-default=all']
     }
 }

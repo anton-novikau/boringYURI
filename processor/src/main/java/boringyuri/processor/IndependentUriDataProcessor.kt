@@ -23,6 +23,7 @@ import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.type.CommonTypeName
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
@@ -55,6 +56,7 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
 
     companion object {
         private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+            CommonTypeName.OVERRIDE,
             ClassName.get(UriData::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),

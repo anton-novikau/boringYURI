@@ -21,11 +21,14 @@ import boringyuri.api.Path
 import boringyuri.api.UriData
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.createFieldSpec
+import boringyuri.processor.ext.getAnnotation
+import boringyuri.processor.ext.requireAnnotation
 import boringyuri.processor.uripart.MethodReadPathSegment
 import boringyuri.processor.uripart.MethodReadQueryParameter
 import boringyuri.processor.uripart.ReadQueryParameter
 import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
+import com.google.auto.common.MoreElements
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
@@ -85,7 +88,7 @@ class IndependentUriDataGeneratorStep(
     }
 
     private fun obtainUriMetadata(sourceElement: TypeElement): UriMetadata {
-        val uriDataAnnotation: UriData = sourceElement.getAnnotation(UriData::class.java)
+        val uriDataAnnotation = sourceElement.requireAnnotation<UriData>()
 
         val basePath = uriDataAnnotation.value
         // Base path may contain constant segments, wildcard segments and templates
@@ -96,15 +99,13 @@ class IndependentUriDataGeneratorStep(
         val fieldSpecs = arrayListOf<FieldSpec>()
         val queryParams = arrayListOf<ReadQueryParameter>()
 
-        for (element in sourceElement.enclosedElements) {
-            val method = toExecutableElementOrNull(element) ?: continue
-
+        for (method in collectMethodsToImplement(sourceElement)) {
             val methodName = method.simpleName.toString()
             val paramName = StringUtils.uncapitalize(
                 GETTER_PATTERN.find(methodName)?.run { groupValues[1] } ?: methodName
             )
 
-            val defaultValue = method.getAnnotation(DefaultValue::class.java)?.value
+            val defaultValue = method.getAnnotation<DefaultValue>()?.value
             val field = method.createFieldSpec(
                 paramName,
                 defaultValue,
@@ -112,7 +113,7 @@ class IndependentUriDataGeneratorStep(
             ).also { fieldSpecs.add(it) }
             val nullable = annotationHandler.isNullable(method.returnType, method)
 
-            val pathAnnotation: Path? = method.getAnnotation(Path::class.java)
+            val pathAnnotation = method.getAnnotation<Path>()
             if (pathAnnotation != null) {
                 if (nullable) {
                     logger.error(method, "Return type of the path segment getter '$methodName()'" +
@@ -134,14 +135,14 @@ class IndependentUriDataGeneratorStep(
                         method
                     )
                 } else {
-                    session.logger.error(
+                    logger.error(
                         method,
                         "Path segment {$pathName} is not defined in '$basePath'"
                     )
                 }
 
             } else {
-                val paramAnnotation: Param = method.getAnnotation(Param::class.java)
+                val paramAnnotation = method.requireAnnotation<Param>()
                 val queryParamName = paramAnnotation.value.ifEmpty { paramName }
                 queryParams.add(
                     MethodReadQueryParameter(
@@ -159,45 +160,46 @@ class IndependentUriDataGeneratorStep(
         return UriMetadata(fieldSpecs, segments.values.toList(), queryParams)
     }
 
-    private fun toExecutableElementOrNull(element: Element): ExecutableElement? {
-        if (ElementKind.METHOD != element.kind) {
-            return null  // skip non-method members
-        }
+    private fun collectMethodsToImplement(sourceElement: TypeElement): List<ExecutableElement> {
+        @Suppress("UnstableApiUsage")
+        val allDefinedMethods = MoreElements.getAllMethods(sourceElement, typeUtils, elementUtils)
 
-        val modifiers = element.modifiers
+        return allDefinedMethods.filter { canBeImplemented(it) }
+    }
+
+    private fun canBeImplemented(method: ExecutableElement): Boolean {
+        val modifiers = method.modifiers
         if (modifiers.contains(Modifier.STATIC) || modifiers.contains(Modifier.DEFAULT)) {
-            return null  // skip static or default methods
+            return false  // skip static or default methods
         }
 
-        val methodElement = element as ExecutableElement
-        if (element.getAnnotation(Path::class.java) == null
-            && element.getAnnotation(Param::class.java) == null) {
+        if (method.getAnnotation<Path>() == null && method.getAnnotation<Param>() == null) {
             logger.error(
-                methodElement,
-                "'${methodElement.simpleName}' must have either @%s or @%s",
+                method,
+                "'${method.simpleName}' must have either @%s or @%s",
                 Path::class.simpleName,
                 Param::class.simpleName
             )
-            return null // skip unsupported method
+            return false // skip not annotated method
         }
 
-        val returnType = TypeName.get(methodElement.returnType)
+        val returnType = TypeName.get(method.returnType)
         if (TypeName.VOID == returnType) {
             logger.error(
-                element,
-                "@%s and @%s can be applied only to getter methods",
+                method,
+                "Method annotated with @%s or @%s can not return 'void'",
                 Path::class.simpleName,
                 Param::class.simpleName
             )
-            return null  // skip unsupported method
+            return false  // skip unsupported method
         }
 
-        if (methodElement.parameters.isNotEmpty()) {
-            val parameters = methodElement.parameters.joinToString { it.simpleName }
-            logger.warn(element, "Method parameters [$parameters] will be ignored")
+        if (method.parameters.isNotEmpty()) {
+            val parameters = method.parameters.joinToString { it.simpleName }
+            logger.warn(method, "Method parameters [$parameters] will be ignored")
         }
 
-        return methodElement
+        return true
     }
 
     private fun generateUriDataClass(

@@ -106,13 +106,21 @@ abstract class UriDataGeneratorStep protected constructor(
 
         var uriPartIndex = 0
         uriMetadata.pathSegments.forEach {
-            val method = generateGetterMethodImpl(PathSegmentUriPart(it), 1 shl uriPartIndex)
+            val method = generateGetterMethodImpl(
+                uriPart = PathSegmentUriPart(it),
+                parseFlagValue = 1 shl uriPartIndex,
+                overrides = superInterface != null
+            )
             classContent.addMethod(method)
             uriPartIndex++
         }
 
         uriMetadata.queryParameters.forEach {
-            val method = generateGetterMethodImpl(QueryParameterUriPart(it), 1 shl uriPartIndex)
+            val method = generateGetterMethodImpl(
+                uriPart = QueryParameterUriPart(it),
+                parseFlagValue = 1 shl uriPartIndex,
+                overrides = superInterface != null
+            )
             classContent.addMethod(method)
             uriPartIndex++
         }
@@ -154,10 +162,14 @@ abstract class UriDataGeneratorStep protected constructor(
 
     private fun generateGetterMethodImpl(
         uriPart: UriPart,
-        parseFlagValue: Int
+        parseFlagValue: Int,
+        overrides: Boolean
     ): MethodSpec {
         val field = uriPart.fieldSpec
         val method = uriPart.createMethodSignature(annotationHandler)
+        if (overrides) {
+            method.addAnnotation(OVERRIDE)
+        }
 
         method.beginControlFlow("if ((\$N & \$L) != 0)", parseFlagField, parseFlagValue)
         method.addStatement("return \$N", field)

@@ -1045,7 +1045,7 @@ To add `Boring Yuri` to your project, include the following in your app module `
 ```groovy
 android {
   ...
-  // Boring YURI requires Java 8.
+  // Boring YURI requires at least Java 8 compatibility.
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
@@ -1057,8 +1057,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.4"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.2.0"
 }
 ```
 
@@ -1068,8 +1068,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
-  kapt "com.github.anton-novikau:boringyuri-processor:1.1.4"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.2.0"
 }
 ```
 Snapshots of the development version are available in [Sonatype's snapshots repository][4].

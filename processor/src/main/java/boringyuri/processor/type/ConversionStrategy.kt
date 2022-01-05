@@ -16,7 +16,11 @@
 package boringyuri.processor.type
 
 import boringyuri.processor.util.Counter
-import com.squareup.javapoet.*
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeName
 import javax.lang.model.element.Element
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType

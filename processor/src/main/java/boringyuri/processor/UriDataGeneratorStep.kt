@@ -17,14 +17,23 @@ package boringyuri.processor
 
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.type.CommonTypeName.NON_NULL
+import boringyuri.processor.type.CommonTypeName.OVERRIDE
+import boringyuri.processor.type.CommonTypeName.STRING
+import boringyuri.processor.type.TypeConverter
 import boringyuri.processor.uripart.ReadPathSegment
 import boringyuri.processor.uripart.ReadQueryParameter
 import boringyuri.processor.uripart.TemplatePathSegment
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.type.CommonTypeName.*
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
-import boringyuri.processor.type.TypeConverter
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
@@ -97,13 +106,21 @@ abstract class UriDataGeneratorStep protected constructor(
 
         var uriPartIndex = 0
         uriMetadata.pathSegments.forEach {
-            val method = generateGetterMethodImpl(PathSegmentUriPart(it), 1 shl uriPartIndex)
+            val method = generateGetterMethodImpl(
+                uriPart = PathSegmentUriPart(it),
+                parseFlagValue = 1 shl uriPartIndex,
+                overrides = superInterface != null
+            )
             classContent.addMethod(method)
             uriPartIndex++
         }
 
         uriMetadata.queryParameters.forEach {
-            val method = generateGetterMethodImpl(QueryParameterUriPart(it), 1 shl uriPartIndex)
+            val method = generateGetterMethodImpl(
+                uriPart = QueryParameterUriPart(it),
+                parseFlagValue = 1 shl uriPartIndex,
+                overrides = superInterface != null
+            )
             classContent.addMethod(method)
             uriPartIndex++
         }
@@ -145,10 +162,14 @@ abstract class UriDataGeneratorStep protected constructor(
 
     private fun generateGetterMethodImpl(
         uriPart: UriPart,
-        parseFlagValue: Int
+        parseFlagValue: Int,
+        overrides: Boolean
     ): MethodSpec {
         val field = uriPart.fieldSpec
         val method = uriPart.createMethodSignature(annotationHandler)
+        if (overrides) {
+            method.addAnnotation(OVERRIDE)
+        }
 
         method.beginControlFlow("if ((\$N & \$L) != 0)", parseFlagField, parseFlagValue)
         method.addStatement("return \$N", field)
@@ -227,5 +248,4 @@ abstract class UriDataGeneratorStep protected constructor(
 
         private val PATH_TEMPLATE_REGEX = "^\\{([a-zA-Z0-9_-]+)}$".toRegex()
     }
-
 }

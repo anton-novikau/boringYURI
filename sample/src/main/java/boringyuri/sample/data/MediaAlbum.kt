@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Novikau
+ * Copyright 2022 Anton Novikau
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-apply plugin: 'java-library'
-apply plugin: "com.vanniktech.maven.publish"
+package boringyuri.sample.data
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+import boringyuri.api.Param
+import boringyuri.api.UriData
 
-    api "androidx.annotation:annotation:$annotationVersion"
+@UriData
+interface MediaAlbum {
+    @Param("mediaType")
+    fun getMediaType(): String
+
+    @Param
+    fun getFileSize(): Long
 }
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11

@@ -46,5 +46,6 @@ interface LocationUriBuilder {
     @BooleanParam(name = "sensor", value = true)
     fun buildGeocodeUri(
         @Param @TypeAdapter(CoordinatesTypeAdapter::class) latlng: Pair<Long, Long>,
-        @Param address: Address): Uri
+        @Param address: Address
+    ): Uri
 }

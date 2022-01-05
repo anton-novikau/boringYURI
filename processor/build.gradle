@@ -37,5 +37,11 @@ dependencies {
     kapt "net.ltgt.gradle.incap:incap-processor:$incapVersion"
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+    }
+}

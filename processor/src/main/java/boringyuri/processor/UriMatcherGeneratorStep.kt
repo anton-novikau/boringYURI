@@ -16,7 +16,9 @@
 
 package boringyuri.processor
 
-import boringyuri.api.*
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.UriFactory
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
@@ -25,11 +27,20 @@ import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.getAnnotation
 import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI_MATCHER
+import boringyuri.processor.type.CommonTypeName.NON_NULL
+import boringyuri.processor.type.CommonTypeName.OVERRIDE
+import boringyuri.processor.type.CommonTypeName.STRING
+import boringyuri.processor.type.CommonTypeName.UNSUPPORTED_OPERATION
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
-import com.squareup.javapoet.*
-import java.util.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
@@ -248,7 +259,7 @@ class UriMatcherGeneratorStep(
     ): String? {
         return matchesToAnnotation.value.takeIf {
             it.matches(FIELD_NAME_REGEX)
-        }?.toUpperCase(Locale.ENGLISH)
+        }?.uppercase()
     }
 
     private fun generateUriMatcherContent(
@@ -415,7 +426,7 @@ class UriMatcherGeneratorStep(
         method.endControlFlow()
         method.addStatement("return \$T.toString(\$N)", TypeName.INT.box(), codeParam)
 
-        return method.build();
+        return method.build()
     }
 
     private fun createMatcherCode(

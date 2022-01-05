@@ -23,6 +23,7 @@ import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.type.CommonTypeName
 import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
@@ -38,7 +39,7 @@ import javax.lang.model.SourceVersion
 
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
 @SupportedOptions(
     ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
@@ -55,6 +56,7 @@ class IndependentUriDataProcessor : BoringAnnotationProcessor() {
 
     companion object {
         private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
+            CommonTypeName.OVERRIDE,
             ClassName.get(UriData::class.java),
             ClassName.get(Path::class.java),
             ClassName.get(Param::class.java),

@@ -20,6 +20,7 @@ in common with them.
   * [Constant query parameters](#constant-query-parameters)
   * [Deserialize data from Uri](#deserialize-data-from-uri)
     * [Independent Uri data class](#independent-uri-data-class)
+      * [Inheritance in Uri data](#inheritance-in-uri-data)
   * [Default values](#default-values)
   * [Matching URIs in Android ContentProvider](#matching-uris-in-android-contentprovider)
     * [Disable URI matching based on a build type or a flavor](#disable-uri-matching-based-on-a-build-type-or-a-flavor)
@@ -164,30 +165,6 @@ query parameters or path segments. It is still highly recommended to specify the
 in `@Path` and `@Param` annotations in order to make sure somebody won't refactor the code and
 break the contract with the receiver's side accidentally (eg. back-end may still expect the old
 query parameter names).
-
-Path segment name is not obligatory, but in this case the path method parameters will appear
-in the `Uri` in the exactly same order as they defined in the method signature, i.e. for
-the builder method:
-
-```java
-    @UriBuilder("/user")
-    Uri buildUserUri(@Path String group, @Path int userId);
-```
-
-Calling `builder.buildUserUri("students", 42)` will give you
-`https://example.com/user/students/42`.
- 
-But calling the builder with the parameters switched:
-
-```java
-    @UriBuilder("/user")
-    Uri buildUserUri(@Path int userId, @Path String group);
-```
-
-Will give you `https://example.com/user/42/students`.
-
-**NOTE:** relying on the method parameters order is highly not recommended as it gives less
-flexibility and there is a bigger chance to make a mistake. Use the named path segments instead.
 
 **IMPORTANT:** `@Path` method parameters **can not be nullable**. They must be explicitly
 annotated with `@NonNull` in Java or must have a non-nullable type in Kotlin. The only exception
@@ -629,15 +606,94 @@ public interface UserData {
 Here the path segment `id` can be parsed from `content://com.example.provider/42` using
 the `UriData` class, but can not be parsed from `content://com.example.provider/user/42`.
 
-**NOTE:** when the base path is not defined in `@UriData`, the order of the getter methods will
-be used to parse the specific segments. Relying on the method order is **highly not recommended**
-as it may give an unpredictable result and it's easier to make a mistake. So named path segments
-are always more preferable.
-
 **IMPORTANT:** the cost of the "independence" is that you have to manage manually the type
 consistency of the builder method parameters and the getters of the data class (if you have the
 builders of course). `@WithUriData` does it for you since there is one source of truth: the builder
 method in the factory interface.
+
+##### Inheritance in Uri data
+When two independent `Uri` data classes may have common properties, it is possible to use interface
+inheritance in order to avoid defining same query parameters and path segments in multiple files.
+Besides inheritance can also be used to generate data classes not only for descendants, but also
+for ancestors, so it could be possible to parse the data partially without knowing a concrete
+type of the `Uri` data.
+
+For example we could to have `Uri`s for Images, Video and Sounds. All three types may have `id`,
+`mediaType` and `fileSize`. Some of the properties may be common only for the two types out of three,
+eg. Images and Video may have a `thumbnail` and Sound and Video may have a `duration`. And finally
+some of the properties could exist only for the specific types, eg. Sound may have `genre` and Image
+may have a `description`.
+
+So we may create a base `Uri` data interface `FileData`:
+```java
+@UriData("/*/{id}")
+public interface FileData {
+    @Path
+    long getId();
+
+    @Param
+    String getMediaType();
+
+    @Param
+    long getFileSize();
+}
+```
+Then we create a base interface for Image and Video which is called `MediaData`:
+```java
+@UriData
+public interface MediaData {
+    @Param
+    Uri getThumbnail();
+}
+```
+
+And a base interface for Video and Sound which is called `PlayableData`:
+```java
+@UriData
+public interface PlayableData {
+    @Param
+    long getDuration();
+}
+```
+
+Now we may define the concrete interfaces for Image, Video and Sound:
+```java
+@UriData("/image/{id}")
+public interface ImageData extends MediaData, FileData {
+    @Param("desc")
+    int getDescription();
+}
+
+@UriData("/video/{id}")
+public interface VideoData extends MediaData, PlayableData, FileData {
+
+}
+
+@UriData("/sound/{id}")
+public interface SoundData extends PlayableData, FileData {
+  @Param
+  String getGenre();
+}
+```
+
+Now if we have three `Uri`s for each of the file types:
+```
+1. content://com.example.provider/image/42?mediaType=image%2Fjpeg&fileSize=100&desc=Some%2BDescription&thumbnail=path_to_thumb
+2. content://com.example.provider/video/24?mediaType=video%2Fmp4&fileSize=400&duration=300&thumbnail=path_to_video_thumb
+3. content://com.example.provider/sound/22?mediaType=audio%2Fogg&fileSize=150&duration=400&genre=rock
+```
+
+To obtain all properties for the `Uri` `#1` a generated `ImageDataImpl` can be used. For `#2` and `#3`
+it's `VideoDataImpl` and `SoundDataImpl` respectively. But if we know there is one of these three
+`Uri`s and we don't care about the type specific properties, but we only need to obtain a
+`mimeType` and `id`, we may use `FileDataImpl` and it will work just fine.
+
+**NOTE:** generated classes `SoundDataImpl` and `VideoDataImpl` do not inherit neither
+`PlayableDataImpl` nor `FileDataImpl`, but only the interfaces.
+
+If a parent interface doesn't need to have a generated data class, because it's only used to specify
+common query parameters and path segments, then just omit the `@UriData` and all the property
+getters will be generated in the specific implementation anyway.
 
 ### Default values
 
@@ -989,7 +1045,7 @@ To add `Boring Yuri` to your project, include the following in your app module `
 ```groovy
 android {
   ...
-  // Boring YURI requires Java 8.
+  // Boring YURI requires at least Java 8 compatibility.
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
@@ -1001,8 +1057,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.1.4"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.2.0"
 }
 ```
 
@@ -1012,8 +1068,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.1.4"
-  kapt "com.github.anton-novikau:boringyuri-processor:1.1.4"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.2.0"
 }
 ```
 Snapshots of the development version are available in [Sonatype's snapshots repository][4].
@@ -1047,14 +1103,6 @@ dependencies {
   Enabling this option allows to use the memory more efficiently and to create every instance of
   the specific type adapter only once. When the option is turned off, every instance of the adapter
   is created at use which gives to garbage collector more work.
- * `boringyuri.suppress_warning.ordered_segments` –  :bangbang: **DEPRECATED**. Support of ordered
-  path segments [will be removed](https://github.com/anton-novikau/boringYURI/issues/22) in `1.2.0`.
-  ~~every time you use ordered path segments
-  instead of named path segments, you'll see the a compilation warning message `Template
-  {path name} is not found in @UriBuilder("/base/path"). Fallback to ordered segments may
-  cause an unpredictable result`. This message here is to warn that the ordered path approach
-  is not recommended and you'd better switch to the named path segments. But if you're aware of
-  what you're doing, you may turn the message off setting the option to `true`.~~
 
 To enable any of the options above you need to include the following in your app module
 `build.gradle` file:

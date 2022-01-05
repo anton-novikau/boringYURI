@@ -47,7 +47,7 @@ public @interface UriBuilder {
      * <p>
      * Relative {@code Uri} path. Can contain the placeholders for <code>&#64;Path</code>
      * method parameters that are used as variable segments of the {@code Uri} path.
-     *</p>
+     * </p>
      * <p>If the path doesn't start with a '/', the builder will prepend the
      * given path with a '/'.</p>
      */

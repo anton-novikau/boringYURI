@@ -1,3 +1,9 @@
+## Boring YURI 1.2.0 (2022-01-06)
+* Add support of inheritance in independent `Uri` data classes ([Issue #20](https://github.com/anton-novikau/boringYURI/issues/20)).
+* Remove support of ordered path segments in favor of named path segments ([Issue #22](https://github.com/anton-novikau/boringYURI/issues/22)).
+* Add `@Override` annotations to the generated getter methods in independent `Uri` data classes.
+* Upgrade the dependencies.
+
 ## Boring YURI 1.1.4 (2021-10-24)
 
 * Fix duplicates handling in `Uri` path segments ([Bug #21](https://github.com/anton-novikau/boringYURI/issues/21)).

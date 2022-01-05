@@ -17,10 +17,15 @@
 package boringyuri.processor.type
 
 import boringyuri.processor.base.AbortProcessingException
-import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.type.CommonTypeName.STRING
 import boringyuri.processor.util.Logger
 import com.google.auto.common.MoreTypes
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
 import javax.lang.model.element.Element
 import javax.lang.model.type.TypeMirror
 

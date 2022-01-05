@@ -20,12 +20,21 @@ import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.ANY_TYPE_ADAPTER
+import boringyuri.processor.type.CommonTypeName.CLASS
+import boringyuri.processor.type.CommonTypeName.HASH_MAP
+import boringyuri.processor.type.CommonTypeName.MAP
+import boringyuri.processor.type.CommonTypeName.NON_NULL
 import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
 import com.google.auto.common.MoreTypes
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSetMultimap
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.WildcardTypeName
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
@@ -138,5 +147,4 @@ class TypeAdapterFactoryGeneratorStep(
 
         return method.build()
     }
-
 }

@@ -17,7 +17,6 @@
 package boringyuri.processor.base
 
 import boringyuri.processor.util.Logger
-import java.lang.RuntimeException
 import javax.lang.model.element.Element
 
 class AbortProcessingException(message: String) : RuntimeException(message) {
@@ -27,5 +26,4 @@ class AbortProcessingException(message: String) : RuntimeException(message) {
                 message: String,
                 vararg args: Any?
     ) : this(logger.error(originatingElement, message, *args))
-
 }

@@ -15,7 +15,10 @@
  */
 package boringyuri.processor.util
 
-import boringyuri.processor.type.CommonTypeName.*
+import boringyuri.processor.type.CommonTypeName.JB_NON_NULL
+import boringyuri.processor.type.CommonTypeName.JB_NULLABLE
+import boringyuri.processor.type.CommonTypeName.NON_NULL
+import boringyuri.processor.type.CommonTypeName.NULLABLE
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName

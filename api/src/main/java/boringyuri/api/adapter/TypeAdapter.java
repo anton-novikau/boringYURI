@@ -64,7 +64,7 @@ import java.lang.annotation.Target;
  *
  *      }
  * </code></pre>
- *
+ * <p>
  * For parameters of an {@code array} type the <code>&#64;TypeAdapter</code> should be used
  * for an {@code array} element, not for the {@code array} itself. Example:
  *

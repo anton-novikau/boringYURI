@@ -17,8 +17,10 @@
 package boringyuri.processor
 
 import boringyuri.api.adapter.TypeAdapter
+import boringyuri.processor.base.AbortProcessingException
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.ext.requireAnnotation
 import boringyuri.processor.ext.valueMirror
 import boringyuri.processor.type.CommonTypeName.ANY_TYPE_ADAPTER
 import boringyuri.processor.type.CommonTypeName.CLASS
@@ -37,13 +39,17 @@ import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
 
 
 class TypeAdapterFactoryGeneratorStep(
     session: ProcessingSession
 ) : BoringProcessingStep(session) {
 
-    private val typeAdapters = LinkedHashMap<ClassName, Element>()
+    private val factoryMethods = mutableMapOf<TypeElement, MethodSpec>()
+    private val deferredElements = mutableSetOf<Element>()
+
+    private val cacheConstant by lazy { buildCacheConstant() }
 
     override fun annotations(): Set<String> {
         return ImmutableSet.of(TypeAdapter::class.java.name)
@@ -58,45 +64,79 @@ class TypeAdapterFactoryGeneratorStep(
 
         val adaptableElements = elementsByAnnotation[TypeAdapter::class.java.name]
 
-        if (typeAdapters.isNotEmpty()) {
-            adaptableElements.forEach {
-                logger.error(
-                    it,
-                    "%s is already created. Can't add %s to it.",
-                    typeAdapterFactory.simpleName(),
-                    it.simpleName
-                )
+        for (element in adaptableElements) {
+            val typeAdapter = element.requireAnnotation<TypeAdapter>().valueMirror() ?: continue
+            try {
+                val adapterElement = MoreTypes.asTypeElement(typeAdapter)
+                if (adapterElement != null) {
+                    deferredElements.remove(element)
+                    if (adapterElement !in factoryMethods) {
+                        factoryMethods[adapterElement] = buildAdapterFactoryMethod(
+                            ClassName.get(adapterElement),
+                            cacheConstant
+                        )
+                    }
+                } else {
+                    deferredElements.add(element)
+                }
+            } catch (e: IllegalArgumentException) {
+                deferredElements.add(element)
+            } catch (e: NullPointerException) {
+                deferredElements.add(element)
             }
-
-            return emptySet() // early exit
         }
 
-        adaptableElements.mapNotNull { element ->
-            val typeAdapter = element.getAnnotation(TypeAdapter::class.java)?.valueMirror()
+        if (deferredElements.isEmpty()) {
+            generateTypeAdapterFactory(
+                typeAdapterFactory,
+                cacheConstant,
+                factoryMethods.values
+            )
+        }
 
-            // Map TypeAdapter class name to originating element to be able to
-            // log an error or postpone element processing to the next step
-            // in case it's possible.
-            typeAdapter?.let { ClassName.get(MoreTypes.asTypeElement(it)) to element }
-        }.associateTo(typeAdapters) { it }
+        return ImmutableSet.copyOf(deferredElements)
+    }
 
-        return generateTypeAdapterFactory(typeAdapterFactory, typeAdapters)
+    override fun onProcessingOver() {
+        factoryMethods.clear()
+
+        if (deferredElements.isNotEmpty()) {
+            val missingAdapters = deferredElements.map { it.simpleName.toString() }
+            deferredElements.clear()
+
+            throw AbortProcessingException(
+                logger = logger,
+                message = "Type adapters are missing for $missingAdapters"
+            )
+        }
     }
 
     private fun generateTypeAdapterFactory(
         factoryClassName: ClassName,
-        typeAdapters: Map<ClassName, Element>
-    ): Set<Element> {
+        cacheConstant: FieldSpec,
+        adapterFactoryMethods: Collection<MethodSpec>
+    ) {
+        val adapterFactory = TypeSpec.classBuilder(factoryClassName)
+            .addModifiers(Modifier.PUBLIC)
+            .addField(cacheConstant)
+            .addMethod(
+                MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build()
+            )
+            .addMethods(adapterFactoryMethods)
+            .build()
 
-        val adapterFactory = TypeSpec.classBuilder(factoryClassName).addModifiers(Modifier.PUBLIC)
+        writeSourceFile(factoryClassName, adapterFactory, originatingElement = null)
+    }
 
+    private fun buildCacheConstant(): FieldSpec {
         val cacheKeyType = ParameterizedTypeName.get(
             CLASS,
             WildcardTypeName.subtypeOf(ANY_TYPE_ADAPTER)
         )
         val cacheValueType = ANY_TYPE_ADAPTER
         val cacheType = ParameterizedTypeName.get(MAP, cacheKeyType, cacheValueType)
-        val cacheField = FieldSpec.builder(
+
+        return FieldSpec.builder(
             cacheType,
             "ADAPTER_CACHE",
             Modifier.PRIVATE,
@@ -106,24 +146,11 @@ class TypeAdapterFactoryGeneratorStep(
             "new \$T<>()",
             HASH_MAP
         ).addAnnotation(NON_NULL).build()
-
-        adapterFactory.addField(cacheField)
-        adapterFactory.addMethod(
-            MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build()
-        )
-
-        typeAdapters.forEach { (adapterName, _) ->
-            adapterFactory.addMethod(buildCreateAdapterMethod(adapterName, cacheField))
-        }
-
-        writeSourceFile(factoryClassName, adapterFactory.build(), null)
-
-        return emptySet() // set of deferred elements
     }
 
-    private fun buildCreateAdapterMethod(
+    private fun buildAdapterFactoryMethod(
         adapterName: ClassName,
-        cacheFiled: FieldSpec
+        cacheConstant: FieldSpec
     ): MethodSpec {
         val method = MethodSpec.methodBuilder("create${adapterName.simpleName()}")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -134,13 +161,13 @@ class TypeAdapterFactoryGeneratorStep(
         method.addStatement("\$T \$L = \$N.get(\$T.class)",
             ANY_TYPE_ADAPTER,
             adapterVarName,
-            cacheFiled,
+            cacheConstant,
             adapterName
         )
 
         method.beginControlFlow("if (\$L == null)", adapterVarName)
         method.addStatement("\$L = new \$T()", adapterVarName, adapterName)
-        method.addStatement("\$N.put(\$T.class, \$L)", cacheFiled, adapterName, adapterVarName)
+        method.addStatement("\$N.put(\$T.class, \$L)", cacheConstant, adapterName, adapterVarName)
         method.endControlFlow()
         method.addCode("\n")
         method.addStatement("return (\$T) \$L", adapterName, adapterVarName)

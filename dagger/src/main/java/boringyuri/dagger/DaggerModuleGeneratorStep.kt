@@ -33,7 +33,11 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.ElementFilter
 
+
 class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingStep(session) {
+
+    private val providesFunctions = mutableListOf<MethodSpec>()
+    private val deferredElements = mutableSetOf<Element>()
 
     override fun annotations(): Set<String> {
         return ImmutableSet.of(UriFactory::class.java.name)
@@ -42,37 +46,75 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
     override fun process(
         elementsByAnnotation: ImmutableSetMultimap<String, Element>
     ): Set<Element> {
-        val factories = ElementFilter.typesIn(elementsByAnnotation[UriFactory::class.java.name])
-        val moduleName = ProcessorOptions.getModuleName(session)
+        val expectedFactories = ElementFilter.typesIn(
+            elementsByAnnotation[UriFactory::class.java.name]
+        )
 
-        return generateBoringDaggerModule(moduleName, factories)
+        for (factory in expectedFactories) {
+            val factoryImpl = findFactoryImpl(factory)
+            // if a factory implementation is not compiled or generated on this round,
+            // we put the factory to a deferred list so we could get back to it
+            // in the next processing round.
+            if (factoryImpl == null) {
+                deferredElements.add(factory)
+            } else {
+                deferredElements.remove(factory)
+                providesFunctions.add(buildProvidesMethod(factory, factoryImpl))
+            }
+        }
+
+        // generate dagger module class only when all factory implementations are generated
+        // and compiled by the current processing round.
+        if (deferredElements.isEmpty()) {
+            generateBoringDaggerModule(
+                moduleName = ProcessorOptions.getModuleName(session),
+                providesFunctions = providesFunctions
+            )
+        }
+
+        return ImmutableSet.copyOf(deferredElements)
+    }
+
+    override fun onProcessingOver() {
+        if (deferredElements.isNotEmpty()) {
+            val missingFactories = deferredElements.map { it.simpleName.toString() }
+            logger.warn(
+                e = null,
+                "Some of the Uri factory implementations were not generated: $missingFactories"
+            )
+        }
+        deferredElements.clear()
+        providesFunctions.clear()
+    }
+
+    private fun findFactoryImpl(factory: TypeElement): TypeElement? {
+        val factoryName = ClassName.get(factory)
+        val factoryImplName = ClassName.get(
+            factoryName.packageName(),
+            "${factoryName.simpleName()}$CONTAINER_IMPL_SUFFIX"
+        )
+
+        return elementUtils.getTypeElement(factoryImplName.canonicalName())
     }
 
     private fun generateBoringDaggerModule(
         moduleName: ClassName,
-        factories: Set<TypeElement>
-    ): Set<Element> {
+        providesFunctions: List<MethodSpec>
+    ) {
         val moduleContent = TypeSpec.classBuilder(moduleName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addAnnotation(DaggerTypeName.MODULE)
             .addMethod(
                 MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build()
             )
+            .addMethods(providesFunctions)
 
-        for (factory in factories) {
-            moduleContent.addMethod(buildProvidesMethod(factory))
-        }
-
-        writeSourceFile(moduleName, moduleContent.build(), null)
-        return emptySet() // set of deferred annotated elements
+        writeSourceFile(moduleName, moduleContent.build(), originatingElement = null)
     }
 
-    private fun buildProvidesMethod(factory: TypeElement): MethodSpec {
+    private fun buildProvidesMethod(factory: TypeElement, factoryImpl: TypeElement): MethodSpec {
+        val factoryImplName = ClassName.get(factoryImpl)
         val factoryName = ClassName.get(factory)
-        val factoryImplName = ClassName.get(
-            factoryName.packageName(),
-            "${factoryName.simpleName()}$CONTAINER_IMPL_SUFFIX"
-        )
 
         return MethodSpec.methodBuilder("provide${factoryName.simpleName()}")
             .addModifiers(Modifier.STATIC)
@@ -82,5 +124,4 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
             .addStatement("return new \$T()", factoryImplName)
             .build()
     }
-
 }

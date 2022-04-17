@@ -1057,8 +1057,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.2.0"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.1"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.2.1"
 }
 ```
 
@@ -1068,8 +1068,8 @@ With Kotlin:
 apply plugin: 'kotlin-kapt'
 
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.2.0"
-  kapt "com.github.anton-novikau:boringyuri-processor:1.2.0"
+  implementation "com.github.anton-novikau:boringyuri-api:1.2.1"
+  kapt "com.github.anton-novikau:boringyuri-processor:1.2.1"
 }
 ```
 Snapshots of the development version are available in [Sonatype's snapshots repository][4].

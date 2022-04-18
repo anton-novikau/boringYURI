@@ -1,8 +1,13 @@
+## Boring YURI 1.2.1 (2022-04-18)
+* Add multi-round incremental processing support for Dagger module annotation processor ([Bug #26](https://github.com/anton-novikau/boringYURI/issues/26)).
+* Add multi-round incremental processing support for `TypeAdapterFactory` annotation processor.
+* Upgrade dependencies.
+
 ## Boring YURI 1.2.0 (2022-01-06)
 * Add support of inheritance in independent `Uri` data classes ([Issue #20](https://github.com/anton-novikau/boringYURI/issues/20)).
 * Remove support of ordered path segments in favor of named path segments ([Issue #22](https://github.com/anton-novikau/boringYURI/issues/22)).
 * Add `@Override` annotations to the generated getter methods in independent `Uri` data classes.
-* Upgrade the dependencies.
+* Upgrade dependencies.
 
 ## Boring YURI 1.1.4 (2021-10-24)
 
@@ -15,7 +20,7 @@
   ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
 * Add ability to disable a `Uri` in `UriMatcher` for a specific build type of a product flavor.
 * Add ability to provide a custom name to a `Uri` data class associated with the builder method.
-* Upgrade the dependencies.
+* Upgrade dependencies.
 
 ## Boring YURI 1.1.2 (2020-06-02)
 

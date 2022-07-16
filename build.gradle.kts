@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath(libs.gradlePlugin.android)
+        classpath(libs.gradlePlugin.kotlin)
+        classpath(libs.gradlePlugin.dokka)
+        classpath(libs.gradlePlugin.publish)
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+tasks.create<Delete>("clean") {
+    delete(rootProject.buildDir)
+}

@@ -1,0 +1,3 @@
+boringyuri.processor.TypeAdapterProcessor,aggregating
+boringyuri.processor.UriFactoryProcessor,isolating
+boringyuri.processor.IndependentUriDataProcessor,isolating

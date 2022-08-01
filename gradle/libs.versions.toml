@@ -32,8 +32,6 @@ commons-text = { module = "org.apache.commons:commons-text", version = "1.9" }
 google-auto-common = { module = "com.google.auto:auto-common", version = "1.2.1" }
 google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.0.1" }
 
-incap = { module = "net.ltgt.gradle.incap:incap", version = "0.3" }
-
 square-javaPoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 
 junit = { module = "junit:junit", version = "4.13.2" }

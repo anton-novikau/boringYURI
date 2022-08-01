@@ -35,8 +35,6 @@ dependencies {
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly(libs.google.auto.service)
     kapt(libs.google.auto.service)
-    compileOnly(libs.incap)
-    kapt(libs.incap)
 }
 
 java {

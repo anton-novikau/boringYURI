@@ -22,8 +22,6 @@ import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
 import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
@@ -32,7 +30,6 @@ import javax.lang.model.SourceVersion
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 @SupportedOptions(ProcessorOptions.OPT_DAGGER_BORING_MODULE)
 class DaggerModuleProcessor : BoringAnnotationProcessor() {
 

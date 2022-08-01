@@ -22,8 +22,6 @@ import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
-import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
 import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
@@ -32,7 +30,6 @@ import javax.lang.model.SourceVersion
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 @SupportedOptions(ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY)
 class TypeAdapterProcessor : BoringAnnotationProcessor() {
 

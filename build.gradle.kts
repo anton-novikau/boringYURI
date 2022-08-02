@@ -29,6 +29,15 @@ buildscript {
 }
 
 allprojects {
+    val isSnapshot = hasProperty("snapshot")
+    if (isSnapshot) {
+        val version = findProperty("VERSION_NAME")?.toString()
+        if (version != null) {
+            // add '-SNAPSHOT' suffix to an existing version when
+            // it was requested to build a snapshot.
+            setProperty("VERSION_NAME", "$version-SNAPSHOT")
+        }
+    }
     repositories {
         google()
         mavenCentral()

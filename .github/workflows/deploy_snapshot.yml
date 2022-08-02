@@ -1,8 +1,9 @@
 name: Build & deploy snapshot
 on:
-  push:
+  pull_request:
     branches:
       - develop
+    types: [closed]
 jobs:
   build:
     runs-on: ubuntu-latest

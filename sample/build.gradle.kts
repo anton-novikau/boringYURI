@@ -61,8 +61,10 @@ dependencies {
     implementation(libs.androidx.constraintLayout)
 
     // code generators
-    implementation(project(":api"))  // implementation("com.github.anton-novikau:boringyuri-api:$VERSION_NAME")
-    kapt(project(":processor"))      // kapt("com.github.anton-novikau:boringyuri-processor:$VERSION_NAME")
+    implementation(project(":api"))
+    // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
+    kapt(project(":processor"))
+    // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
 
     // unit tests
     testImplementation(libs.junit)

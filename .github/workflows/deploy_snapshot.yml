@@ -3,11 +3,18 @@ on:
   pull_request:
     branches:
       - develop
-    types: [closed]
+    types:
+      - closed
 jobs:
   build:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
+    env:
+      ORG_GRADLE_PROJECT_mavenCentralUsername:        ${{secrets.SONATYPE_NEXUS_USERNAME}}
+      ORG_GRADLE_PROJECT_mavenCentralPassword:        ${{secrets.SONATYPE_NEXUS_PASSWORD}}
+      ORG_GRADLE_PROJECT_signingInMemoryKey:          ${{secrets.SIGNING_SECRET_KEY_RING}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyId:        ${{secrets.SIGNING_KEY_ID}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword:  ${{secrets.SIGNING_PASSWORD}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,7 +31,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -34,10 +41,5 @@ jobs:
       - name: Build snapshot
         run: ./gradlew -Psnapshot clean build
 
-      - name: Decode the secret key and place the file
-        run: |
-          echo "${{secrets.SIGNING_SECRET_KEY_RING_FILE}}" > ~/.gradle/secring.gpg.b64
-          base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
-
       - name: Deploy snapshot
-        run: ./gradlew publish --no-daemon --no-parallel -Psnapshot -PmavenCentralUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PmavenCentralPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg)
+        run: ./gradlew publish --no-daemon --no-parallel -Psnapshot

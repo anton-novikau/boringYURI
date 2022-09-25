@@ -1,0 +1,35 @@
+name: Up version
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - edited
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Validate title
+        id: validate-title
+        run: |
+          ./scripts/validate-title.sh "${{ github.event.pull_request.title }}"
+
+      - name: Update version
+        run: |
+          ./scripts/update-version.sh "${{ steps.validate-title.outputs.version }}"
+
+      - name: Commit version changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Release version '${{ steps.validate-title.outputs.version }}'
+          commit_user_name: Boring Bot
+          commit_user_email: 1558018+anton-novikau@users.noreply.github.com
+          commit_author: Boring Bot <1558018+anton-novikau@users.noreply.github.com>
+          file_pattern: 'README.md dagger/README.md gradle.properties'

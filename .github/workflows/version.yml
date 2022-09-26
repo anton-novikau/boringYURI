@@ -1,4 +1,4 @@
-name: Up version
+name: Release a version
 on:
   pull_request:
     branches:
@@ -9,6 +9,7 @@ on:
       - edited
 jobs:
   check:
+    name: Check & Upgrade version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

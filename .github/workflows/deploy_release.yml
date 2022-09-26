@@ -1,14 +1,20 @@
-name: CI for Pull Requests
+name: Build & deploy release
 on:
   pull_request:
+    branches:
+      - master
     types:
-      - opened
-      - synchronize
-      - reopened
+      - closed
 jobs:
   build:
-    name: Sanity Check
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    env:
+      ORG_GRADLE_PROJECT_mavenCentralUsername:        ${{secrets.SONATYPE_NEXUS_USERNAME}}
+      ORG_GRADLE_PROJECT_mavenCentralPassword:        ${{secrets.SONATYPE_NEXUS_PASSWORD}}
+      ORG_GRADLE_PROJECT_signingInMemoryKey:          ${{secrets.SIGNING_SECRET_KEY_RING}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyId:        ${{secrets.SIGNING_KEY_ID}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword:  ${{secrets.SIGNING_PASSWORD}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,11 +38,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run pull request checks
-        run: ./gradlew clean check --stacktrace
+      - name: Build release
+        run: ./gradlew clean build
 
-      - name: Build 'sample'
-        run: ./gradlew :sample:assembleDebug --stacktrace
-
-      - name: Build 'dagger-sample'
-        run: ./gradlew :dagger-sample:assembleDebug --stacktrace
+      - name: Deploy release
+        run: ./gradlew publish --no-daemon --no-parallel

@@ -44,10 +44,7 @@ class MainActivity : AppCompatActivity() {
         val fetchVCardButton = findViewById<Button>(R.id.fetch_vcard)
 
         val locationUri = locationUriBuilder.buildShowPinsByCoordinatesUri(
-            arrayOf(
-                doubleArrayOf(37.773972, -122.431297),
-                doubleArrayOf(53.893009, 27.567444)
-            )
+            arrayOf(PIN_COORDINATES_1, PIN_COORDINATES_2)
         )
 
         Log.d(TAG, "onCreate(): location uri = $locationUri")
@@ -65,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             resources.getDimensionPixelSize(R.dimen.desired_photo_width),
             resources.getDimensionPixelSize(R.dimen.desired_photo_height)
         )
-        val photoUri = contactUriBuilder.buildContactPhotoUri("friends", 150, desiredDimens)
+        val photoUri = contactUriBuilder.buildContactPhotoUri("friends", PHOTO_CONTACT_ID, desiredDimens)
         fetchPhotoButton.setOnClickListener {
             uriView.text = photoUri.toString()
             dataView.text = getString(R.string.check_logs_message)
@@ -73,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val vcardUri = contactUriBuilder.buildVCardUri(
-            100L,
+            VCARD_CONTACT_ID,
             "John",
             "Doe",
             Address("Minsk", "Independence Ave", "220000")
@@ -101,5 +98,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+        private const val VCARD_CONTACT_ID = 100L
+        private const val PHOTO_CONTACT_ID = 150L
+        private val PIN_COORDINATES_1 = doubleArrayOf(37.773972, -122.431297)
+        private val PIN_COORDINATES_2 = doubleArrayOf(53.893009, 27.567444)
     }
 }

@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-rootProject.name='BoringYURI'
-include ':api'
-include ':processor'
-include ':sample'
-include ':dagger'
-include ':dagger-sample'
+plugins {
+    id("java-library")
+    id("com.vanniktech.maven.publish")
+}
+
+dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+
+    api(libs.androidx.annotation)
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}

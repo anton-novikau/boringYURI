@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'java-library'
-apply plugin: "com.vanniktech.maven.publish"
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    api "androidx.annotation:annotation:$annotationVersion"
-}
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+rootProject.name="BoringYURI"
+include(":api")
+include(":processor")
+include(":sample")
+include(":dagger")
+include(":dagger-sample")

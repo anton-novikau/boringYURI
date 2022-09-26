@@ -1,3 +1,11 @@
+## Boring YURI 1.2.2 (2022-09-27)
+:information_source: _This version is purely infrastructural and doesn't contain any logical changes_
+
+* Migrate project structure to `kts`.
+* Migrate dependencies declaration to `libs.versions.toml`.
+* Upgrade dependencies.
+* Configure CI pipelines ([Issue #5](https://github.com/anton-novikau/boringYURI/issues/5)).
+
 ## Boring YURI 1.2.1 (2022-04-18)
 * Add multi-round incremental processing support for Dagger module annotation processor ([Bug #26](https://github.com/anton-novikau/boringYURI/issues/26)).
 * Add multi-round incremental processing support for `TypeAdapterFactory` annotation processor.

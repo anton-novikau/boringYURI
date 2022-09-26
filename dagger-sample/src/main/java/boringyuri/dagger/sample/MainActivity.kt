@@ -33,7 +33,7 @@ class MainActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val userUri = uriBuilder.buildUserUri(User(42, "John Doe"))
+        val userUri = uriBuilder.buildUserUri(User(USER_ID, "John Doe"))
 
         Log.d(TAG, "onCreate(): user Uri = $userUri")
         findViewById<TextView>(R.id.uri).text = userUri.toString()
@@ -41,5 +41,6 @@ class MainActivity : DaggerAppCompatActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+        private const val USER_ID = 42
     }
 }

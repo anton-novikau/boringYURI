@@ -43,3 +43,6 @@ jobs:
 
       - name: Deploy release
         run: ./gradlew publish --no-daemon --no-parallel
+
+      - name: Close & release repository
+        run: ./gradlew closeAndReleaseRepository

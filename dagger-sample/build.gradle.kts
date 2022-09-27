@@ -22,6 +22,7 @@ plugins {
 }
 
 android {
+    namespace = "boringyuri.dagger.sample"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     buildToolsVersion = libs.versions.buildTools.get()
 

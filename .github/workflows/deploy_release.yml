@@ -1,4 +1,4 @@
-name: Build & deploy release
+name: Build & Publish Release
 on:
   pull_request:
     branches:
@@ -6,7 +6,7 @@ on:
     types:
       - closed
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     env:

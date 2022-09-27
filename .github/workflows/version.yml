@@ -1,4 +1,4 @@
-name: Release a version
+name: Release a Version
 on:
   pull_request:
     branches:
@@ -9,13 +9,13 @@ on:
       - edited
 jobs:
   check:
-    name: Check & Upgrade version
+    name: Check & Upgrade Version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Validate title
         id: validate-title

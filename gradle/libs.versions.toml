@@ -19,7 +19,7 @@ androidx-lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmode
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "7.3.0" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.6.20" }
-gradlePlugin-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.19.0" }
+gradlePlugin-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.22.0" }
 
 dagger-core = { module = "com.google.dagger:dagger", version.ref = "dagger" }
 dagger-android = { module = "com.google.dagger:dagger-android", version.ref = "dagger" }

@@ -42,4 +42,4 @@ jobs:
         run: ./gradlew -Psnapshot clean build
 
       - name: Deploy snapshot
-        run: ./gradlew publish --no-daemon --no-parallel -Psnapshot
+        run: ./gradlew publish -Psnapshot

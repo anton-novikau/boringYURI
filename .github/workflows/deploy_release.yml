@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: Deploy release
-        run: ./gradlew publish --no-daemon --no-parallel
+        run: ./gradlew publish
 
       - name: Close & release repository
         run: ./gradlew closeAndReleaseRepository

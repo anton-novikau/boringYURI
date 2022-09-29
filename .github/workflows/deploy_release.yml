@@ -33,12 +33,12 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Setup signing properties
         run: |
-            echo "signing.keyId=${{ secrets.SIGNING_KEY_ID }}" >> ~/.gradle/gradle.properties
-            echo "signing.password=${{ secrets.SIGNING_PASSWORD }}" >> ~/.gradle/gradle.properties
+            echo "signing.keyId=${{ secrets.SIGNING_KEY_ID }}" >> gradle.properties
+            echo "signing.password=${{ secrets.SIGNING_PASSWORD }}" >> gradle.properties
             
-            echo "${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}" > ~/.gradle/keyring.gpg.b64
-            base64 -d > ~/.gradle/keyring.gpg
-            echo "signing.secretKeyRingFile=$(echo ~/.gradle/secring.gpg)" >> ~/.gradle/gradle.properties
+            echo "${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}" > keyring.gpg.b64
+            base64 -d keyring.gpg.b64 > keyring.gpg && rm keyring.gpg.b64
+            echo "signing.secretKeyRingFile=secring.gpg" >> gradle.properties
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 

@@ -19,6 +19,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -52,6 +53,30 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
         sourceCompatibility = JavaVersion.VERSION_11
     }
+
+    buildTypes.onEach { buildType ->
+        if (productFlavors.isEmpty()) {
+            sourceSets {
+                getByName("main")
+                    .kotlin
+                    .srcDirs(
+                        "build/generated/ksp/${buildType.name}/kotlin",
+                        "build/generated/ksp/${buildType.name}/java",
+                    )
+            }
+        } else {
+            productFlavors.onEach { flavor ->
+                sourceSets {
+                    getByName("main")
+                        .kotlin
+                        .srcDirs(
+                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/kotlin",
+                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/java",
+                        )
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -66,6 +91,7 @@ dependencies {
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
     kapt(project(":processor"))
     // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
+    ksp(project(":processor-ksp"))
 
     // unit tests
     testImplementation(libs.junit)
@@ -79,6 +105,14 @@ kapt {
     arguments {
         arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
     }
+}
+
+ksp {
+    arg(
+        "boringyuri.type_adapter_factory",
+        "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
+    )
+    arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
 }
 
 tasks.withType<KotlinCompile>().configureEach {

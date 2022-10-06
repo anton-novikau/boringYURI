@@ -25,7 +25,13 @@ buildscript {
         classpath(libs.gradlePlugin.kotlin)
         classpath(libs.gradlePlugin.dokka)
         classpath(libs.gradlePlugin.publish)
+        classpath(libs.gradlePlugin.ksp)
+        classpath(libs.ksp.api)
     }
+}
+
+plugins {
+    id ("org.jetbrains.kotlin.jvm") version "1.7.10" apply false
 }
 
 allprojects {

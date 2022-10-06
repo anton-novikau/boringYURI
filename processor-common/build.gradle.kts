@@ -3,4 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":api"))
+
+    implementation(libs.square.javaPoet)
+    api(libs.xprocessing)
 }

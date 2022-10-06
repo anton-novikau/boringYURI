@@ -21,14 +21,8 @@ import androidx.annotation.Nullable;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.WildcardTypeName;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import boringyuri.api.adapter.BoringTypeAdapter;
 
 public interface CommonTypeName {
     @NonNull
@@ -43,12 +37,7 @@ public interface CommonTypeName {
     ClassName STRING = ClassName.get(String.class);
     @NonNull
     ClassName OVERRIDE = ClassName.get(Override.class);
-    @NonNull
-    ClassName MAP = ClassName.get(Map.class);
-    @NonNull
-    ClassName HASH_MAP = ClassName.get(HashMap.class);
-    @NonNull
-    ClassName CLASS = ClassName.get(Class.class);
+
     @NonNull
     ClassName UNSUPPORTED_OPERATION = ClassName.get(UnsupportedOperationException.class);
 
@@ -62,13 +51,6 @@ public interface CommonTypeName {
             "UriMatcher"
     );
 
-    @NonNull
-    ClassName TYPE_ADAPTER = ClassName.get(BoringTypeAdapter.class);
-    @NonNull
-    ParameterizedTypeName ANY_TYPE_ADAPTER = ParameterizedTypeName.get(
-            TYPE_ADAPTER,
-            WildcardTypeName.subtypeOf(TypeName.OBJECT)
-    );
     @NonNull
     ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
             ClassName.get(List.class),

@@ -91,7 +91,7 @@ dependencies {
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
     kapt(project(":processor"))
     // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
-    ksp(project(":processor-ksp"))
+    // ksp(project(":processor-ksp"))
 
     // unit tests
     testImplementation(libs.junit)

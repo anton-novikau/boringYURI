@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package boringyuri.processor
+package boringyuri.processor.ksp
 
-import androidx.room.compiler.processing.ExperimentalProcessingApi
-import boringyuri.processor.common.ProcessorOptions
 import boringyuri.processor.common.TypeAdapterFactoryGeneratorStep
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
-import com.google.auto.service.AutoService
-import com.google.common.collect.ImmutableSet
-import javax.annotation.processing.Processor
-import javax.annotation.processing.SupportedOptions
-import javax.annotation.processing.SupportedSourceVersion
-import javax.lang.model.SourceVersion
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 
-@OptIn(ExperimentalProcessingApi::class)
-@Suppress("unused") // class is used by @AutoService
-@AutoService(Processor::class)
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
-@SupportedOptions(ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY)
-class TypeAdapterProcessor : AptBoringAnnotationProcessor() {
+class TypeAdapterProcessor(
+    environment: SymbolProcessorEnvironment
+) : KspBoringAnnotationProcessor(environment) {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return ImmutableSet.of(TypeAdapterFactoryGeneratorStep(session))
+        return listOf(TypeAdapterFactoryGeneratorStep(session))
     }
 }

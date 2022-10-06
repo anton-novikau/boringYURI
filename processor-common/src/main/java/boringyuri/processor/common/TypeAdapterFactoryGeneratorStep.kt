@@ -14,118 +14,113 @@
  * limitations under the License.
  */
 
-package boringyuri.processor
+package boringyuri.processor.common
 
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.addOriginatingElement
 import boringyuri.api.adapter.TypeAdapter
-import boringyuri.processor.base.AbortProcessingException
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.type.CommonTypeName.ANY_TYPE_ADAPTER
-import boringyuri.processor.type.CommonTypeName.CLASS
-import boringyuri.processor.type.CommonTypeName.HASH_MAP
-import boringyuri.processor.type.CommonTypeName.MAP
-import boringyuri.processor.type.CommonTypeName.NON_NULL
-import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
-import com.google.auto.common.MoreTypes
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.ImmutableSetMultimap
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.type.CommonTypeName.ANY_TYPE_ADAPTER
+import boringyuri.processor.common.type.CommonTypeName.CLASS
+import boringyuri.processor.common.type.CommonTypeName.HASH_MAP
+import boringyuri.processor.common.type.CommonTypeName.MAP
+import boringyuri.processor.common.type.CommonTypeName.NON_NULL
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.WildcardTypeName
-import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
 
+@OptIn(ExperimentalProcessingApi::class)
+class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProcessingStep(session) {
 
-class TypeAdapterFactoryGeneratorStep(
-    session: ProcessingSession
-) : BoringProcessingStep(session) {
-
-    private val factoryMethods = mutableMapOf<TypeElement, MethodSpec>()
-    private val deferredElements = mutableSetOf<Element>()
+    private val sourceClasses = mutableSetOf<ClassName>()
+    private val factoryMethods = mutableMapOf<ClassName, MethodSpec>()
 
     private val cacheConstant by lazy { buildCacheConstant() }
 
+    private val originatingElements: MutableSet<XElement> = mutableSetOf()
+
     override fun annotations(): Set<String> {
-        return ImmutableSet.of(TypeAdapter::class.java.name)
+        return setOf(TypeAdapter::class.java.name)
     }
 
+    @Suppress("ReturnCount")
     override fun process(
-        elementsByAnnotation: ImmutableSetMultimap<String, Element>
-    ): Set<Element> {
-        // Stop processing Type Adapters if the factory class is not specified.
-        // Every adapter instance will be created at use without caching.
-        val typeAdapterFactory = getTypeAdapterFactory(session) ?: return emptySet()
+        env: XProcessingEnv,
+        elementsByAnnotation: Map<String, Set<XElement>>
+    ): Set<XElement> {
+
+        val typeAdapterFactory = ProcessorOptions.getTypeAdapterFactory(env)
+            ?: return emptySet()
 
         val adaptableElements = elementsByAnnotation[TypeAdapter::class.java.name]
+            ?: return emptySet()
 
-        for (element in adaptableElements) {
-            val typeAdapter = element.requireAnnotation<TypeAdapter>().valueMirror() ?: continue
-            try {
-                val adapterElement = MoreTypes.asTypeElement(typeAdapter)
-                if (adapterElement != null) {
-                    deferredElements.remove(element)
-                    if (adapterElement !in factoryMethods) {
-                        factoryMethods[adapterElement] = buildAdapterFactoryMethod(
-                            ClassName.get(adapterElement),
-                            cacheConstant
-                        )
-                    }
-                } else {
-                    deferredElements.add(element)
-                }
-            } catch (e: IllegalArgumentException) {
-                deferredElements.add(element)
-            } catch (e: NullPointerException) {
-                deferredElements.add(element)
-            }
+        if (adaptableElements.isEmpty() || adaptableElements.any { !it.validate() }) {
+            return adaptableElements
         }
 
-        if (deferredElements.isEmpty()) {
+        val roundClasses = adaptableElements.map {
+            it.requireAnnotation(TypeAdapter::class).getAsType("value")
+        }
+
+        val roundClassNames = roundClasses.map {
+            ClassName.bestGuess(it.toString())
+        }
+        if (sourceClasses.addAll(roundClassNames)) {
+            roundClassNames.forEach {
+                factoryMethods[it] = buildAdapterFactoryMethod(it, cacheConstant)
+            }
+
+            originatingElements.addAll(adaptableElements)
+            originatingElements.addAll(roundClasses.mapNotNull { it?.typeElement })
+
             generateTypeAdapterFactory(
                 typeAdapterFactory,
                 cacheConstant,
-                factoryMethods.values
+                factoryMethods.values.sortedBy { it.name },
+                originatingElements
             )
+            return emptySet()
         }
 
-        return ImmutableSet.copyOf(deferredElements)
+        return adaptableElements
     }
 
     override fun onProcessingOver() {
+        sourceClasses.clear()
         factoryMethods.clear()
-
-        if (deferredElements.isNotEmpty()) {
-            val missingAdapters = deferredElements.map { it.simpleName.toString() }
-            deferredElements.clear()
-
-            throw AbortProcessingException(
-                logger = logger,
-                message = "Type adapters are missing for $missingAdapters"
-            )
-        }
+        originatingElements.clear()
     }
 
     private fun generateTypeAdapterFactory(
-        factoryClassName: ClassName,
+        className: ClassName,
         cacheConstant: FieldSpec,
-        adapterFactoryMethods: Collection<MethodSpec>
+        adapterFactoryMethods: Collection<MethodSpec>,
+        originatingElements: Collection<XElement>
     ) {
-        val adapterFactory = TypeSpec.classBuilder(factoryClassName)
+        val classContent = TypeSpec.classBuilder(className)
             .addModifiers(Modifier.PUBLIC)
             .addField(cacheConstant)
             .addMethod(
                 MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build()
             )
             .addMethods(adapterFactoryMethods)
+            .apply {
+                originatingElements.forEach { xElement ->
+                    addOriginatingElement(xElement)
+                }
+            }
             .build()
 
-        writeSourceFile(factoryClassName, adapterFactory, originatingElement = null)
+        session.fileWriter.writeSourceFile(className, classContent, XFiler.Mode.Aggregating)
     }
 
     private fun buildCacheConstant(): FieldSpec {
@@ -148,6 +143,7 @@ class TypeAdapterFactoryGeneratorStep(
         ).addAnnotation(NON_NULL).build()
     }
 
+
     private fun buildAdapterFactoryMethod(
         adapterName: ClassName,
         cacheConstant: FieldSpec
@@ -158,7 +154,8 @@ class TypeAdapterFactoryGeneratorStep(
             .returns(adapterName)
 
         val adapterVarName = "adapter"
-        method.addStatement("\$T \$L = \$N.get(\$T.class)",
+        method.addStatement(
+            "\$T \$L = \$N.get(\$T.class)",
             ANY_TYPE_ADAPTER,
             adapterVarName,
             cacheConstant,

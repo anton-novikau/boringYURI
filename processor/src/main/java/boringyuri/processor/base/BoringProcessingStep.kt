@@ -16,6 +16,8 @@
 
 package boringyuri.processor.base
 
+import boringyuri.processor.common.FileWriter.Companion.DEFAULT_FILE_COMMENT
+import boringyuri.processor.common.FileWriter.Companion.DEFAULT_INDENTATION
 import com.google.auto.common.BasicAnnotationProcessor
 import com.google.common.collect.ImmutableSetMultimap
 import com.squareup.javapoet.ClassName
@@ -67,10 +69,5 @@ abstract class BoringProcessingStep(
                 "Could not write generated class $className: ${e.message}"
             )
         }
-    }
-
-    private companion object {
-        const val DEFAULT_INDENTATION = "    "
-        const val DEFAULT_FILE_COMMENT = "Boring YURI generated this code for you. Do not modify!"
     }
 }

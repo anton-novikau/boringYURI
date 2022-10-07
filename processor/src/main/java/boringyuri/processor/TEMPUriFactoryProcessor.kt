@@ -33,15 +33,17 @@ import boringyuri.api.constant.StringParams
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
-import boringyuri.processor.base.BoringAnnotationProcessor
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions
+import boringyuri.processor.common.AssociatedUriDataGeneratorStep
+import boringyuri.processor.common.ProcessorOptions
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.util.AnnotationHandler
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import javax.annotation.processing.Processor
 import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
@@ -50,17 +52,20 @@ import javax.lang.model.SourceVersion
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
+@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.ISOLATING)
 @SupportedOptions(
     ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
 )
-class UriFactoryProcessor : BoringAnnotationProcessor() {
+//TODO: Rename this after all steps migrated
+class TEMPUriFactoryProcessor : AptBoringAnnotationProcessor() {
+
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return ImmutableSet.of(
-//            AssociatedUriDataGeneratorStep(session, annotationHandler),
-            UriFactoryGeneratorStep(session, annotationHandler),
-            UriMatcherGeneratorStep(session)
+            AssociatedUriDataGeneratorStep(session, annotationHandler),
+//            UriFactoryGeneratorStep(session, annotationHandler),
+//            UriMatcherGeneratorStep(session)
         )
     }
 

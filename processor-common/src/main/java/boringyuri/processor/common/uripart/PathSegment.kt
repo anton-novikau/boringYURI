@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.uripart
+package boringyuri.processor.common.uripart
 
-import boringyuri.processor.base.AbortProcessingException
-import boringyuri.processor.ext.createMethodSignature
-import boringyuri.processor.ext.findTypeAdapter
-import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.type.CommonTypeName.STRING
-import boringyuri.processor.type.TypeConverter
-import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.Logger
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XType
+import androidx.room.compiler.processing.XVariableElement
+import boringyuri.processor.common.base.AbortProcessingException
+import boringyuri.processor.common.ext.createMethodSignature
+import boringyuri.processor.common.ext.findTypeAdapter
+import boringyuri.processor.common.type.CommonTypeName.STRING
+import boringyuri.processor.common.type.TypeConverter
+import boringyuri.processor.common.util.AnnotationHandler
+import boringyuri.processor.common.util.Logger
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.VariableElement
-import javax.lang.model.type.TypeMirror
 
 interface PathSegment {
 
@@ -48,27 +45,10 @@ interface ReadPathSegment : PathSegment {
     fun createMethodSignature(annotationHandler: AnnotationHandler): MethodSpec.Builder
 }
 
-class ConstantPathSegment(
-    private val segment: String,
-    private val encoded: Boolean,
-    private val builderName: String
-) : PathSegment {
-
-    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val appendMethod = if (encoded) "appendEncodedPath" else "appendPath"
-
-        return CodeBlock
-            .builder()
-            .addStatement("\$L.\$L(\$S)", builderName, appendMethod, segment)
-            .build()
-    }
-
-}
-
 class TemplatePathSegment(
     val segmentIndex: Int,
     private val name: String,
-    private val originatingElement: Element,
+    private val originatingElement: XElement,
     private val logger: Logger
 ) : ReadPathSegment, PathSegment {
 
@@ -87,64 +67,29 @@ class TemplatePathSegment(
         return AbortProcessingException(
             logger,
             originatingElement,
-            "Path template {$name} doesn't have an appropriate substitute"
+            message = "Path template {$name} doesn't have an appropriate substitute"
         )
     }
 
 }
 
-class VariableWritePathSegment(
-    private val segment: VariableElement,
-    private val methodParam: ParameterSpec,
-    private val defaultValue: String?,
-    private val encoded: Boolean,
-    private val builderName: String
-) : PathSegment {
-
-    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val typeAdapter = segment.findTypeAdapter()?.valueMirror()
-
-        val valueBlock = CodeBlock.builder()
-        val serializedSegment = typeConverter.buildSerializeBlock(
-            methodParam,
-            typeAdapter,
-            segment
-        )
-
-        val appendMethod = if (encoded) "appendEncodedPath" else "appendPath"
-
-        if (defaultValue != null) {
-            valueBlock.beginControlFlow("if (\$N != null)", methodParam)
-        }
-
-        valueBlock.addStatement("\$L.\$L(\$L)", builderName, appendMethod, serializedSegment)
-
-        if (defaultValue != null) {
-            valueBlock.nextControlFlow("else")
-            valueBlock.addStatement("\$L.\$L(\$S)", builderName, appendMethod, defaultValue)
-            valueBlock.endControlFlow()
-        }
-
-        return valueBlock.build()
-    }
-
-}
-
-class MethodReadPathSegment(
+class VariableReadPathSegment(
     segmentIndex: Int,
     segmentName: String,
     segmentField: FieldSpec,
     uriField: FieldSpec,
     private val defaultValue: String?,
-    private val segment: ExecutableElement
+    private val segment: XVariableElement
 ) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, defaultValue, segment) {
 
     override fun createMethodSignature(
         annotationHandler: AnnotationHandler
-    ): MethodSpec.Builder = segment.createMethodSignature(defaultValue, annotationHandler)
+    ): MethodSpec.Builder {
+        return segment.createMethodSignature(defaultValue, annotationHandler)
+    }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        return createValueBlock(typeConverter, segment.findTypeAdapter()?.valueMirror())
+        return createValueBlock(typeConverter, segment.findTypeAdapter()?.getAsType("value"))
     }
 
 }
@@ -155,12 +100,12 @@ abstract class BaseReadPathSegment(
     override val segmentField: FieldSpec,
     private val uriField: FieldSpec,
     private val defaultValue: String?,
-    private val segment: Element
+    private val segment: XElement
 ) : ReadPathSegment {
 
     protected fun createValueBlock(
         typeConverter: TypeConverter,
-        typeAdapter: TypeMirror?
+        typeAdapter: XType?
     ): CodeBlock {
         val codeBlock = CodeBlock.builder()
 

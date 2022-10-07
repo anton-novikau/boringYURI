@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.util
+package boringyuri.processor.common.util
 
 class Counter(initialValue: Int = 0) {
 

@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package boringyuri.processor
+package boringyuri.processor.common
 
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.isMethod
 import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
@@ -24,20 +32,16 @@ import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
 import boringyuri.api.constant.StringParam
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.ext.createFieldSpec
-import boringyuri.processor.ext.getAnnotation
-import boringyuri.processor.ext.getAnnotationsByType
-import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.type.CommonTypeName
-import boringyuri.processor.uripart.ReadQueryParameter
-import boringyuri.processor.uripart.TemplatePathSegment
-import boringyuri.processor.uripart.VariableReadPathSegment
-import boringyuri.processor.uripart.VariableReadQueryParameter
-import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.buildGetterName
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.ImmutableSetMultimap
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ext.createFieldSpec
+import boringyuri.processor.common.ext.extractPackage
+import boringyuri.processor.common.type.CommonTypeName
+import boringyuri.processor.common.uripart.ReadQueryParameter
+import boringyuri.processor.common.uripart.TemplatePathSegment
+import boringyuri.processor.common.uripart.VariableReadPathSegment
+import boringyuri.processor.common.uripart.VariableReadQueryParameter
+import boringyuri.processor.common.util.AnnotationHandler
+import boringyuri.processor.common.util.buildGetterName
 import com.squareup.javapoet.ArrayTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
@@ -46,27 +50,30 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import org.apache.commons.lang3.StringUtils
-import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.lang.model.util.ElementFilter
 
+@OptIn(ExperimentalProcessingApi::class)
 class AssociatedUriDataGeneratorStep(
     session: ProcessingSession,
     annotationHandler: AnnotationHandler
 ) : UriDataGeneratorStep(session, annotationHandler) {
 
     override fun annotations(): Set<String> {
-        return ImmutableSet.of(WithUriData::class.java.name)
+        return setOf(WithUriData::class.java.name)
     }
 
-    override fun process(elementsByAnnotation: ImmutableSetMultimap<String, Element>): Set<Element> {
-        val annotatedMethods = ElementFilter.methodsIn(
-            elementsByAnnotation[WithUriData::class.java.name]
-        )
-        val deferred = hashSetOf<Element>()
+    override fun process(
+        env: XProcessingEnv,
+        elementsByAnnotation: Map<String, Set<XElement>>
+    ): Set<XElement> {
+        val annotatedMethods = elementsByAnnotation[WithUriData::class.java.name]
+            ?.filter { it.isMethod() }
+            ?.map { it as XMethodElement }
+            ?: emptyList()
+
+        val deferred = hashSetOf<XElement>()
         for (annotatedMethod in annotatedMethods) {
-            val uriBuilder = annotatedMethod.getAnnotation<UriBuilder>()
+            val uriBuilder = annotatedMethod.getAnnotation(UriBuilder::class)?.value
             if (uriBuilder == null) {
                 logger.warn(
                     annotatedMethod,
@@ -90,7 +97,7 @@ class AssociatedUriDataGeneratorStep(
 
     private fun obtainUriMetadata(
         builderAnnotation: UriBuilder,
-        methodElement: ExecutableElement
+        methodElement: XExecutableElement
     ): UriMetadata {
         val basePath = builderAnnotation.value
         // Base path may contain constant segments and templates for method parameters.
@@ -104,24 +111,28 @@ class AssociatedUriDataGeneratorStep(
         // Iterating over method parameters we'll find all the replacements for
         // the method templates found on the previous step and create the params list.
         methodParameters.forEach { param ->
-            val paramName = param.simpleName.toString()
-            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+            val paramName = param.name
+            val defaultValue = param.getAnnotation(DefaultValue::class)?.value
 
             val field = param.createFieldSpec(
                 paramName,
-                defaultValue,
+                defaultValue?.value,
                 annotationHandler
             ).also { fieldSpecs.add(it) }
+
             val nullable = annotationHandler.isNullable(field.type, param)
 
-            val pathAnnotation = param.getAnnotation<Path>()
+            val pathAnnotation = param.getAnnotation(Path::class)
             if (pathAnnotation != null) {
                 if (nullable && defaultValue == null) {
-                    logger.error(param, "Path segment '$paramName' must be explicitly non-null or" +
-                            " or have a @${DefaultValue::class.simpleName}.")
+                    logger.error(param, param.type.nullability.toString())
+                    logger.error(
+                        param, "Path segment '$paramName' must be explicitly non-null or" +
+                                " or have a @${DefaultValue::class.simpleName}."
+                    )
                 }
 
-                val pathName = pathAnnotation.value.ifEmpty { paramName }
+                val pathName = pathAnnotation.value.value.ifEmpty { paramName }
                 val pathSegment = segments[pathName]
                 if (pathSegment is TemplatePathSegment) {
                     // Previously saved VariableNameSegment helps to preserve
@@ -131,12 +142,12 @@ class AssociatedUriDataGeneratorStep(
                         pathName,
                         field,
                         uriField,
-                        defaultValue,
+                        defaultValue?.value,
                         param
                     )
                 }
             } else {
-                val paramAnnotation = param.getAnnotation<Param>()
+                val paramAnnotation = param.getAnnotation(Param::class)?.value
                 if (paramAnnotation != null) {
                     val queryParamName = paramAnnotation.value.ifEmpty { paramName }
                     queryParams.add(
@@ -145,7 +156,7 @@ class AssociatedUriDataGeneratorStep(
                             field,
                             uriField,
                             nullable,
-                            defaultValue,
+                            defaultValue?.value,
                             param
                         )
                     )
@@ -159,28 +170,28 @@ class AssociatedUriDataGeneratorStep(
     }
 
     private fun generateUriDataClass(
-        sourceElement: ExecutableElement,
+        sourceElement: XMethodElement,
         uriMetadata: UriMetadata
     ): Boolean {
-        val withUriDataAnnotation = sourceElement.requireAnnotation<WithUriData>()
-        val desiredClassName = withUriDataAnnotation.value
+        val withUriDataAnnotation = sourceElement.requireAnnotation(WithUriData::class)
+        val desiredClassName = withUriDataAnnotation.value.value
 
         val className = if (desiredClassName.isEmpty()) {
-            val methodName = sourceElement.simpleName.toString()
+            val methodName = sourceElement.name
             val matchResult = BUILDER_NAME_REGEX.find(methodName)
 
             val classSimpleName = StringUtils.capitalize(
                 matchResult?.run { groupValues[1] } ?: methodName
             ) + DATA_SUFFIX
 
-            val packageName = elementUtils.getPackageOf(sourceElement)
+            val packageName = sourceElement.extractPackage()
 
-            ClassName.get(packageName.qualifiedName.toString(), classSimpleName)
+            ClassName.get(packageName, classSimpleName)
         } else {
             ClassName.bestGuess(desiredClassName).takeIf {
                 it.packageName().isNotEmpty()
             } ?: ClassName.get(
-                elementUtils.getPackageOf(sourceElement).qualifiedName.toString(),
+                (sourceElement.enclosingElement as? XTypeElement)?.packageName,
                 desiredClassName
             )
         }
@@ -191,12 +202,12 @@ class AssociatedUriDataGeneratorStep(
             uriMetadata
         )
 
-        writeSourceFile(className, classContent, sourceElement)
+        session.fileWriter.writeSourceFile(className, classContent, XFiler.Mode.Isolating)
 
         return true
     }
 
-    override fun onPostGenerateContent(classContent: TypeSpec.Builder, sourceElement: Element) {
+    override fun onPostGenerateContent(classContent: TypeSpec.Builder, sourceElement: XElement) {
         generateStringConstParamsGetters(classContent, sourceElement)
         generateBooleanConstParamsGetters(classContent, sourceElement)
         generateLongConstParamsGetters(classContent, sourceElement)
@@ -205,9 +216,10 @@ class AssociatedUriDataGeneratorStep(
 
     private fun generateStringConstParamsGetters(
         classContent: TypeSpec.Builder,
-        sourceElement: Element
+        sourceElement: XElement
     ) {
-        val constParams = sourceElement.getAnnotationsByType<StringParam>() ?: return
+        val constParams = sourceElement.getAnnotations(StringParam::class)
+            .map { it.value }
 
         constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
             generateConstParamGetter(classContent, CommonTypeName.STRING, name, params) {
@@ -218,9 +230,10 @@ class AssociatedUriDataGeneratorStep(
 
     private fun generateBooleanConstParamsGetters(
         classContent: TypeSpec.Builder,
-        sourceElement: Element
+        sourceElement: XElement
     ) {
-        val constParams = sourceElement.getAnnotationsByType<BooleanParam>() ?: return
+        val constParams = sourceElement.getAnnotations(BooleanParam::class)
+            .map { it.value }
 
         constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
             generateConstParamGetter(classContent, TypeName.BOOLEAN, name, params)
@@ -229,9 +242,9 @@ class AssociatedUriDataGeneratorStep(
 
     private fun generateLongConstParamsGetters(
         classContent: TypeSpec.Builder,
-        sourceElement: Element
+        sourceElement: XElement
     ) {
-        val constParams = sourceElement.getAnnotationsByType<LongParam>() ?: return
+        val constParams = sourceElement.getAnnotations(LongParam::class).map { it.value }
 
         constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
             generateConstParamGetter(classContent, TypeName.LONG, name, params)
@@ -240,9 +253,9 @@ class AssociatedUriDataGeneratorStep(
 
     private fun generateDoubleConstParamsGetters(
         classContent: TypeSpec.Builder,
-        sourceElement: Element
+        sourceElement: XElement
     ) {
-        val constParams = sourceElement.getAnnotationsByType<DoubleParam>() ?: return
+        val constParams = sourceElement.getAnnotations(DoubleParam::class).map { it.value }
 
         constParams.groupBy({ it.name }, { it.value }).forEach { (name, params) ->
             generateConstParamGetter(classContent, TypeName.DOUBLE, name, params)

@@ -16,7 +16,6 @@
 
 package boringyuri.processor
 
-import androidx.room.compiler.processing.ExperimentalProcessingApi
 import boringyuri.processor.common.ProcessorOptions
 import boringyuri.processor.common.TypeAdapterFactoryGeneratorStep
 import boringyuri.processor.common.base.BoringProcessingStep
@@ -28,7 +27,6 @@ import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 
-@OptIn(ExperimentalProcessingApi::class)
 @Suppress("unused") // class is used by @AutoService
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)

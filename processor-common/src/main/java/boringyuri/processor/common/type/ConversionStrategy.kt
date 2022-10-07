@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package boringyuri.processor.type
+package boringyuri.processor.common.type
 
+import androidx.room.compiler.processing.XArrayType
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XType
 import boringyuri.processor.common.util.Counter
+import boringyuri.processor.common.xvisitors.AbstractXTypeVisitor
+import boringyuri.processor.common.xvisitors.XTypeVisitor
+import boringyuri.processor.common.xvisitors.accept
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
-import javax.lang.model.element.Element
-import javax.lang.model.type.ArrayType
-import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.PrimitiveType
-import javax.lang.model.type.TypeMirror
-import javax.lang.model.util.SimpleTypeVisitor8
 
 object ConversionStrategyFactory {
 
     fun createQueryStrategy(
-        type: TypeMirror,
-        typeAdapter: TypeMirror?,
+        type: XType,
+        typeAdapter: XType?,
         typeConverter: TypeConverter,
-        originatingElement: Element
+        originatingElement: XElement
     ): QueryConversionStrategy {
         val componentType = type.accept(ComponentTypeVisitor(), null)
 
@@ -73,9 +73,9 @@ interface QueryConversionStrategy {
 }
 
 private class DefaultQueryConversionStrategy(
-    private val typeAdapter: TypeMirror?,
+    private val typeAdapter: XType?,
     private val typeConverter: TypeConverter,
-    private val originatingElement: Element
+    private val originatingElement: XElement
 ) : QueryConversionStrategy {
 
     private val deserializeVariableName = "queryParam"
@@ -161,10 +161,10 @@ private class DefaultQueryConversionStrategy(
 }
 
 private class ArrayQueryConversionStrategy(
-    private val componentType: TypeMirror,
-    private val typeAdapter: TypeMirror?,
+    private val componentType: XType,
+    private val typeAdapter: XType?,
     private val typeConverter: TypeConverter,
-    private val originatingElement: Element
+    private val originatingElement: XElement
 ) : QueryConversionStrategy {
 
     private val deserializeVariableName = "queryParams"
@@ -182,7 +182,7 @@ private class ArrayQueryConversionStrategy(
             indexName,
             methodParam
         )
-        val componentTypeName = TypeName.get(componentType)
+        val componentTypeName = componentType.typeName
 
         if (!componentTypeName.isPrimitive) {
             serializeBlock.beginControlFlow("if (\$N[\$L] != null)", methodParam, indexName)
@@ -254,7 +254,7 @@ private class ArrayQueryConversionStrategy(
                     rawComponentType,
                     typeConverter.buildStandardDeserializeBlockForDefault(
                         defaultValue,
-                        TypeName.get(componentType),
+                        componentType.typeName,
                         originatingElement
                     )
                 ).build()
@@ -295,7 +295,7 @@ private class ArrayQueryConversionStrategy(
                 typeConverter.buildStandardDeserializeBlock(
                     CodeBlock.of("\$L.get(\$L)", deserializeVariableName, indexName),
                     CodeBlock.of("\$N[\$L]", paramField, indexName),
-                    TypeName.get(componentType),
+                    componentType.typeName,
                     nullable,
                     defaultValue,
                     originatingElement
@@ -309,29 +309,21 @@ private class ArrayQueryConversionStrategy(
     }
 }
 
-private class ComponentTypeVisitor : SimpleTypeVisitor8<TypeMirror?, Void>() {
+class ComponentTypeVisitor : AbstractXTypeVisitor<XType, Void?>() {
 
-    override fun visitArray(type: ArrayType, parameter: Void?): TypeMirror = type.componentType
+    override fun visitArray(type: XArrayType, param: Void?): XType = type.componentType
 }
 
-private class RawTypeNameVisitor : SimpleTypeVisitor8<TypeName, Counter>() {
+private class RawTypeNameVisitor : XTypeVisitor<TypeName, Counter> {
 
-    override fun visitArray(type: ArrayType, counter: Counter): TypeName {
-        return type.componentType.accept(this, counter.increment())
+    override fun visitArray(type: XArrayType, param: Counter): TypeName? {
+        return type.componentType.accept(this, param.increment())
     }
 
-    override fun visitDeclared(type: DeclaredType, counter: Counter): TypeName {
-        return when (val declaredType = TypeName.get(type)) {
+    override fun visit(type: XType, param: Counter): TypeName? {
+        return when (val declaredType = type.typeName) {
             is ParameterizedTypeName -> declaredType.rawType
             else -> declaredType
         }
-    }
-
-    override fun visitPrimitive(type: PrimitiveType, counter: Counter): TypeName {
-        return TypeName.get(type)
-    }
-
-    override fun defaultAction(e: TypeMirror, p: Counter): TypeName {
-        throw IllegalArgumentException("$e is not supported")
     }
 }

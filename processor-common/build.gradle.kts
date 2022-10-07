@@ -7,4 +7,5 @@ dependencies {
 
     implementation(libs.square.javaPoet)
     api(libs.xprocessing)
+    implementation(libs.commons.text)
 }

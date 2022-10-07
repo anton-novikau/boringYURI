@@ -43,10 +43,6 @@ inline fun <reified T : Annotation> Element.requireAnnotation(): T {
     }
 }
 
-inline fun <reified T : Annotation> Element.getAnnotationsByType(): Array<T>? {
-    return getAnnotationsByType(T::class.java)
-}
-
 fun VariableElement.createParamSpec(annotationHandler: AnnotationHandler): ParameterSpec {
     val paramType = ClassName.get(asType())
     val paramName = simpleName.toString()
@@ -54,20 +50,6 @@ fun VariableElement.createParamSpec(annotationHandler: AnnotationHandler): Param
     return ParameterSpec.builder(paramType, paramName)
         .addModifiers(modifiers)
         .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors))
-        .build()
-}
-
-fun VariableElement.createFieldSpec(
-    paramName: String,
-    defaultValue: String?,
-    annotationHandler: AnnotationHandler
-): FieldSpec {
-    val fieldName = FIELD_PREFIX + StringUtils.capitalize(paramName)
-    val type = TypeName.get(asType())
-    val ensureNonNull = !type.isPrimitive && defaultValue != null
-
-    return FieldSpec.builder(type, fieldName, Modifier.PRIVATE)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .build()
 }
 
@@ -83,21 +65,6 @@ fun ExecutableElement.createFieldSpec(
     return FieldSpec.builder(type, fieldName, Modifier.PRIVATE)
         .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .build()
-}
-
-fun VariableElement.createMethodSignature(
-    defaultValue: String?,
-    annotationHandler: AnnotationHandler
-): MethodSpec.Builder {
-    val paramName = simpleName.toString()
-    val paramType = TypeName.get(asType())
-    val methodName = buildGetterName(paramName, paramType)
-    val ensureNonNull = !paramType.isPrimitive && defaultValue != null
-
-    return MethodSpec.methodBuilder(methodName)
-        .addModifiers(Modifier.PUBLIC)
-        .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
-        .returns(paramType)
 }
 
 fun ExecutableElement.createMethodSignature(

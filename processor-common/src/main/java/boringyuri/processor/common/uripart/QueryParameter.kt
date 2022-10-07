@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.uripart
+package boringyuri.processor.common.uripart
 
-import boringyuri.processor.ext.createMethodSignature
-import boringyuri.processor.ext.findTypeAdapter
-import boringyuri.processor.ext.valueMirror
-import boringyuri.processor.type.ConversionStrategyFactory
-import boringyuri.processor.type.QueryConversionStrategy
-import boringyuri.processor.type.TypeConverter
-import boringyuri.processor.util.AnnotationHandler
+import androidx.room.compiler.processing.XVariableElement
+import boringyuri.processor.common.ext.createMethodSignature
+import boringyuri.processor.common.ext.findTypeAdapter
+import boringyuri.processor.common.type.ConversionStrategyFactory
+import boringyuri.processor.common.type.QueryConversionStrategy
+import boringyuri.processor.common.type.TypeConverter
+import boringyuri.processor.common.util.AnnotationHandler
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterSpec
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.VariableElement
 
 interface QueryParameter {
 
@@ -46,64 +43,13 @@ interface ReadQueryParameter : QueryParameter {
 
 }
 
-class VariableWriteQueryParameter(
-    override val name: String,
-    private val methodParam: ParameterSpec,
-    private val parameter: VariableElement,
-    private val nullable: Boolean,
-    private val defaultValue: String?,
-    private val builderName: String
-) : QueryParameter {
-
-    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val typeAdapter = parameter.findTypeAdapter()?.valueMirror()
-
-        val appendQueryBlock = CodeBlock.builder()
-
-        if (nullable) {
-            appendQueryBlock.beginControlFlow("if (\$N != null)", methodParam)
-        }
-
-        val serializeStrategy = ConversionStrategyFactory.createQueryStrategy(
-            parameter.asType(),
-            typeAdapter,
-            typeConverter,
-            parameter
-        )
-
-        appendQueryBlock.add(
-            serializeStrategy.buildSerializeBlock(
-                builderName,
-                name,
-                methodParam
-            )
-        )
-
-        if (nullable) {
-            if (defaultValue != null) {
-                appendQueryBlock.nextControlFlow("else")
-                appendQueryBlock.addStatement(
-                    "\$L.appendQueryParameter(\$S, \$S)",
-                    builderName,
-                    name,
-                    defaultValue
-                )
-            }
-            appendQueryBlock.endControlFlow()
-        }
-
-        return appendQueryBlock.build()
-    }
-
-}
-
-class MethodReadQueryParameter(
+class VariableReadQueryParameter(
     name: String,
     paramField: FieldSpec,
     uriField: FieldSpec,
     nullable: Boolean,
     private val defaultValue: String?,
-    private val parameterElement: ExecutableElement
+    private val parameterElement: XVariableElement
 ) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue) {
 
     override fun createMethodSignature(
@@ -114,8 +60,8 @@ class MethodReadQueryParameter(
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
-            parameterElement.returnType,
-            parameterElement.findTypeAdapter()?.valueMirror(),
+            parameterElement.type,
+            parameterElement.findTypeAdapter()?.getAsType("value"),
             typeConverter,
             parameterElement
         )

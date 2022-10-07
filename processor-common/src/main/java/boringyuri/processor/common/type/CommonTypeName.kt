@@ -17,14 +17,26 @@
 package boringyuri.processor.common.type
 
 import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 import boringyuri.api.adapter.BoringTypeAdapter
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
+import org.jetbrains.annotations.NotNull
 
 object CommonTypeName {
     val NON_NULL: ClassName = ClassName.get(NonNull::class.java)
+
+    val NULLABLE: ClassName = ClassName.get(Nullable::class.java)
+
+    val JB_NON_NULL: ClassName = ClassName.get(NotNull::class.java)
+
+    val JB_NULLABLE: ClassName = ClassName.get(org.jetbrains.annotations.Nullable::class.java)
+
+    val STRING: ClassName = ClassName.get(String::class.java)
+
+    val OVERRIDE: ClassName = ClassName.get(Override::class.java)
 
     val MAP: ClassName = ClassName.get(MutableMap::class.java)
 
@@ -32,10 +44,18 @@ object CommonTypeName {
 
     val CLASS: ClassName = ClassName.get(Class::class.java)
 
+    val ANDROID_URI: ClassName = ClassName.get("android.net", "Uri")
+
     private var TYPE_ADAPTER: ClassName = ClassName.get(BoringTypeAdapter::class.java)
 
     val ANY_TYPE_ADAPTER: ParameterizedTypeName = ParameterizedTypeName.get(
         TYPE_ADAPTER,
         WildcardTypeName.subtypeOf(TypeName.OBJECT)
     )
+
+    val STRING_LIST: ParameterizedTypeName = ParameterizedTypeName.get(
+        ClassName.get(MutableList::class.java),
+        STRING
+    )
+
 }

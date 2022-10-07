@@ -1,1 +1,2 @@
 boringyuri.processor.ksp.TypeAdapterProcessorProvider
+boringyuri.processor.ksp.AssociatedUriDataGeneratorProcessorProvider

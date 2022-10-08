@@ -34,12 +34,10 @@ class AssociatedUriDataGeneratorProcessor(
 
         return listOf(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-            // For some reason if we pair AssociatedUriDataGeneratorStep and
-            // UriFactoryGeneratorStep in the same processor it will try to create some file twice
-            // and crashes with error (FileAlreadyExistsException). So moved UriFactoryGeneratorStep
-            // to it's own processor (UriFactoryGeneratorProcessor) unlike apt version
-//            UriFactoryGeneratorStep(session, annotationHandler),
-//            UriMatcherGeneratorStep(session)
+            // For some reason if we pair AssociatedUriDataGeneratorStep and UriFactoryGeneratorStep
+            // or UriMatcherGeneratorStep in the same processor it will try to create some file twice
+            // and crashes with error (FileAlreadyExistsException). So moved other steps to their
+            // own processors unlike apt version
         )
     }
 

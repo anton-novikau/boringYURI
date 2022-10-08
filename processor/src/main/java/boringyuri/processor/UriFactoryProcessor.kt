@@ -33,10 +33,13 @@ import boringyuri.api.constant.StringParams
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
-import boringyuri.processor.base.BoringAnnotationProcessor
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.util.ProcessorOptions
+import boringyuri.processor.common.AssociatedUriDataGeneratorStep
+import boringyuri.processor.common.ProcessorOptions
+import boringyuri.processor.common.UriFactoryGeneratorStep
+import boringyuri.processor.common.UriMatcherGeneratorStep
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.util.AnnotationHandler
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import com.squareup.javapoet.ClassName
@@ -52,13 +55,14 @@ import javax.lang.model.SourceVersion
 @SupportedOptions(
     ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
 )
-class UriFactoryProcessor : BoringAnnotationProcessor() {
+class UriFactoryProcessor : AptBoringAnnotationProcessor() {
+
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-//        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
+        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return ImmutableSet.of(
-//            AssociatedUriDataGeneratorStep(session, annotationHandler),
-//            UriFactoryGeneratorStep(session, annotationHandler),
+            AssociatedUriDataGeneratorStep(session, annotationHandler),
+            UriFactoryGeneratorStep(session, annotationHandler),
             UriMatcherGeneratorStep(session)
         )
     }

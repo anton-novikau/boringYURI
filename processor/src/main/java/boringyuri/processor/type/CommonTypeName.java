@@ -39,15 +39,7 @@ public interface CommonTypeName {
     ClassName OVERRIDE = ClassName.get(Override.class);
 
     @NonNull
-    ClassName UNSUPPORTED_OPERATION = ClassName.get(UnsupportedOperationException.class);
-
-    @NonNull
     ClassName ANDROID_URI = ClassName.get("android.net", "Uri");
-    @NonNull
-    ClassName ANDROID_URI_MATCHER = ClassName.get(
-            "android.content",
-            "UriMatcher"
-    );
 
     @NonNull
     ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(

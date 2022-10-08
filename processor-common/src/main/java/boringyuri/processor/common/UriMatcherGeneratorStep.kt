@@ -14,39 +14,42 @@
  * limitations under the License.
  */
 
-package boringyuri.processor
+package boringyuri.processor.common
 
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.addOriginatingElement
+import androidx.room.compiler.processing.isMethod
+import androidx.room.compiler.processing.isTypeElement
 import boringyuri.api.Path
 import boringyuri.api.UriBuilder
 import boringyuri.api.UriFactory
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
-import boringyuri.processor.base.AbortProcessingException
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.ext.getAnnotation
-import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.type.CommonTypeName.ANDROID_URI
-import boringyuri.processor.type.CommonTypeName.ANDROID_URI_MATCHER
-import boringyuri.processor.type.CommonTypeName.NON_NULL
-import boringyuri.processor.type.CommonTypeName.OVERRIDE
-import boringyuri.processor.type.CommonTypeName.STRING
-import boringyuri.processor.type.CommonTypeName.UNSUPPORTED_OPERATION
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.ImmutableSetMultimap
+import boringyuri.processor.common.base.AbortProcessingException
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.common.type.CommonTypeName.ANDROID_URI_MATCHER
+import boringyuri.processor.common.type.CommonTypeName.NON_NULL
+import boringyuri.processor.common.type.CommonTypeName.OVERRIDE
+import boringyuri.processor.common.type.CommonTypeName.STRING
+import boringyuri.processor.common.type.CommonTypeName.UNSUPPORTED_OPERATION
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.util.ElementFilter
 
+@OptIn(ExperimentalProcessingApi::class)
 class UriMatcherGeneratorStep(
     session: ProcessingSession
 ) : BoringProcessingStep(session) {
@@ -54,23 +57,25 @@ class UriMatcherGeneratorStep(
     /**
      * A collection of the deferred elements over all processing steps
      */
-    private val deferredElements = hashSetOf<Element>()
+    private val deferredElements = hashSetOf<XElement>()
 
     private var matcherCodeCounter = 0
 
     override fun annotations(): Set<String> {
-        return ImmutableSet.of(WithUriMatcher::class.java.name)
+        return setOf(WithUriMatcher::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: ImmutableSetMultimap<String, Element>
-    ): Set<Element> {
-        val factories = ElementFilter.typesIn(
-            elementsByAnnotation[WithUriMatcher::class.java.name]
-        )
+        env: XProcessingEnv,
+        elementsByAnnotation: Map<String, Set<XElement>>
+    ): Set<XElement> {
+        val factories = elementsByAnnotation[WithUriMatcher::class.java.name]
+            ?.filter { it.isTypeElement() }
+            ?.mapNotNull { it as? XTypeElement }
+            ?: return emptySet()
 
         // a collection of the deferred elements on the current processing step
-        val deferred = hashSetOf<Element>()
+        val deferred = hashSetOf<XElement>()
         for (factory in factories) {
             val metadata = try {
                 obtainFactoryMetadata(factory).also {
@@ -94,15 +99,14 @@ class UriMatcherGeneratorStep(
         if (deferredElements.isNotEmpty()) {
             throw AbortProcessingException(
                 logger,
-                null,
-                "For some of the Uri factories it is not possible to generate a proper UriMatcher." +
+                message = "For some of the Uri factories it is not possible to generate a proper UriMatcher." +
                         " Ensure all matcher codes defined correctly."
             )
         }
     }
 
-    private fun obtainFactoryMetadata(factory: TypeElement): UriMatcherMetadata? {
-        val uriFactoryAnnotation = factory.getAnnotation<UriFactory>()
+    private fun obtainFactoryMetadata(factory: XTypeElement): UriMatcherMetadata? {
+        val uriFactoryAnnotation = factory.getAnnotation(UriFactory::class)?.value
         if (uriFactoryAnnotation == null) {
             logger.warn(
                 factory,
@@ -115,16 +119,18 @@ class UriMatcherGeneratorStep(
 
         val matcherCodes = mutableMapOf<String, MatcherCodeMetadata>()
         val pathMappings = arrayListOf<Pair<String, MatcherCodeMetadata>>()
-        val declaredMethods = ElementFilter.methodsIn(factory.enclosedElements)
+        val declaredMethods = factory.getEnclosedElements()
+            .filter { it.isMethod() }
+            .mapNotNull { it as? XMethodElement }
 
         for (method in declaredMethods) {
-            if (method.modifiers.contains(Modifier.STATIC)) {
+            if (method.isStatic()) {
                 continue // skip static methods
             }
 
-            val uriBuilderAnnotation = method.getAnnotation<UriBuilder>()
-            val matchesToAnnotation = method.getAnnotation<MatchesTo>()
-            val matcherCodeAnnotation = method.getAnnotation<MatcherCode>()
+            val uriBuilderAnnotation = method.getAnnotation(UriBuilder::class)?.value
+            val matchesToAnnotation = method.getAnnotation(MatchesTo::class)?.value
+            val matcherCodeAnnotation = method.getAnnotation(MatcherCode::class)?.value
             val hasMatcherCode = matchesToAnnotation != null || matcherCodeAnnotation != null
             if (uriBuilderAnnotation == null || !hasMatcherCode) {
                 if (hasMatcherCode) {
@@ -201,41 +207,45 @@ class UriMatcherGeneratorStep(
 
     private fun generateUriMatcher(
         metadata: UriMatcherMetadata,
-        factory: TypeElement
+        factory: XTypeElement
     ) {
-        val matcherContent = generateUriMatcherContent(metadata)
+        val matcherContent = generateUriMatcherContent(metadata, factory)
 
-        writeSourceFile(metadata.matcherClassName, matcherContent, factory)
+        session.fileWriter.writeSourceFile(
+            metadata.matcherClassName,
+            matcherContent,
+            XFiler.Mode.Isolating
+        )
     }
 
-    private fun obtainMatcherClassName(factory: TypeElement): ClassName {
-        val withUriMatcherAnnotation = factory.requireAnnotation<WithUriMatcher>()
+    private fun obtainMatcherClassName(factory: XTypeElement): ClassName {
+        val withUriMatcherAnnotation = factory.requireAnnotation(WithUriMatcher::class).value
         val matcherName = withUriMatcherAnnotation.value
 
         return if (matcherName.isEmpty()) {
-            val packageName = elementUtils.getPackageOf(factory).qualifiedName.toString()
-            val simpleName = factory.simpleName.toString() + DEFAULT_MATCHER_SUFFIX
+            val packageName = factory.packageName
+            val simpleName = factory.name + DEFAULT_MATCHER_SUFFIX
 
             ClassName.get(packageName, simpleName)
         } else {
             ClassName.bestGuess(matcherName).takeIf {
                 it.packageName().isNotEmpty()
             } ?: ClassName.get(
-                elementUtils.getPackageOf(factory).qualifiedName.toString(),
+                factory.packageName,
                 matcherName
             )
         }
     }
 
-    private fun obtainPathParameters(method: ExecutableElement): Map<String, TypeName> {
+    private fun obtainPathParameters(method: XExecutableElement): Map<String, TypeName> {
         return method.parameters.mapNotNull {
-            val pathAnnotation = it.getAnnotation<Path>() ?: return@mapNotNull null
+            val pathAnnotation = it.getAnnotation(Path::class)?.value ?: return@mapNotNull null
 
             val segmentName = pathAnnotation.value.ifEmpty {
-                it.simpleName.toString()
+                it.name
             }
-            segmentName to ClassName.get(it.asType())
-        }.associate{ it }
+            segmentName to it.type.typeName
+        }.associate { it }
     }
 
     private fun obtainMatcherPathTemplate(
@@ -264,6 +274,7 @@ class UriMatcherGeneratorStep(
 
     private fun generateUriMatcherContent(
         metadata: UriMatcherMetadata,
+        factory: XTypeElement,
     ): TypeSpec {
         val uriMatcherContent = TypeSpec.classBuilder(metadata.matcherClassName)
             .addModifiers(Modifier.PUBLIC)
@@ -297,6 +308,8 @@ class UriMatcherGeneratorStep(
         if (metadata.matcherCodes.isNotEmpty()) {
             uriMatcherContent.addType(generateMatcherCodeClass(metadata))
         }
+
+        uriMatcherContent.addOriginatingElement(factory)
 
         return uriMatcherContent.build()
     }

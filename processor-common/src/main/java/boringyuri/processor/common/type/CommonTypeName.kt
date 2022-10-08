@@ -38,6 +38,8 @@ object CommonTypeName {
 
     val OVERRIDE: ClassName = ClassName.get(Override::class.java)
 
+    var UNSUPPORTED_OPERATION = ClassName.get(UnsupportedOperationException::class.java)
+
     val MAP: ClassName = ClassName.get(MutableMap::class.java)
 
     val HASH_MAP: ClassName = ClassName.get(HashMap::class.java)
@@ -45,6 +47,8 @@ object CommonTypeName {
     val CLASS: ClassName = ClassName.get(Class::class.java)
 
     val ANDROID_URI: ClassName = ClassName.get("android.net", "Uri")
+
+    var ANDROID_URI_MATCHER: ClassName = ClassName.get("android.content", "UriMatcher")
 
     val ANDROID_URI_BUILDER: ClassName = ANDROID_URI.nestedClass("Builder")
 

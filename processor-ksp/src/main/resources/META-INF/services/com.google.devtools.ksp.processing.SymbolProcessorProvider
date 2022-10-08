@@ -1,3 +1,4 @@
 boringyuri.processor.ksp.TypeAdapterProcessorProvider
 boringyuri.processor.ksp.AssociatedUriDataGeneratorProcessorProvider
 boringyuri.processor.ksp.UriFactoryGeneratorProcessorProvider
+boringyuri.processor.ksp.UriMatcherGeneratorProcessorProvider

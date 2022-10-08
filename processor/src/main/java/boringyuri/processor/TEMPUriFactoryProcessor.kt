@@ -35,6 +35,7 @@ import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.common.AssociatedUriDataGeneratorStep
 import boringyuri.processor.common.ProcessorOptions
+import boringyuri.processor.common.UriFactoryGeneratorStep
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.util.AnnotationHandler
@@ -64,7 +65,7 @@ class TEMPUriFactoryProcessor : AptBoringAnnotationProcessor() {
 
         return ImmutableSet.of(
             AssociatedUriDataGeneratorStep(session, annotationHandler),
-//            UriFactoryGeneratorStep(session, annotationHandler),
+            UriFactoryGeneratorStep(session, annotationHandler),
 //            UriMatcherGeneratorStep(session)
         )
     }

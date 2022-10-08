@@ -73,6 +73,11 @@ class AssociatedUriDataGeneratorStep(
 
         val deferred = hashSetOf<XElement>()
         for (annotatedMethod in annotatedMethods) {
+            if(!annotatedMethod.validate()){
+                deferred.add(annotatedMethod)
+                continue
+            }
+
             val uriBuilder = annotatedMethod.getAnnotation(UriBuilder::class)?.value
             if (uriBuilder == null) {
                 logger.warn(

@@ -18,7 +18,7 @@ import boringyuri.api.constant.StringParams
 import boringyuri.api.matcher.MatcherCode
 import boringyuri.api.matcher.MatchesTo
 import boringyuri.api.matcher.WithUriMatcher
-import boringyuri.processor.common.AssociatedUriDataGeneratorStep
+import boringyuri.processor.common.UriFactoryGeneratorStep
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.util.AnnotationHandler
@@ -26,20 +26,14 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 
-class AssociatedUriDataGeneratorProcessor(
+class UriFactoryGeneratorProcessor(
     environment: SymbolProcessorEnvironment
 ) : KspBoringAnnotationProcessor(environment) {
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return listOf(
-            AssociatedUriDataGeneratorStep(session, annotationHandler),
-            // For some reason if we pair AssociatedUriDataGeneratorStep and
-            // UriFactoryGeneratorStep in the same processor it will try to create some file twice
-            // and crashes with error (FileAlreadyExistsException). So moved UriFactoryGeneratorStep
-            // to it's own processor (UriFactoryGeneratorProcessor) unlike apt version
-//            UriFactoryGeneratorStep(session, annotationHandler),
-//            UriMatcherGeneratorStep(session)
+            UriFactoryGeneratorStep(session, annotationHandler),
         )
     }
 

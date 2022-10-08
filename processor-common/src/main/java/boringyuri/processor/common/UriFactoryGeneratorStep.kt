@@ -13,8 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package boringyuri.processor
+package boringyuri.processor.common
 
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.XVariableElement
+import androidx.room.compiler.processing.addOriginatingElement
+import androidx.room.compiler.processing.isMethod
+import androidx.room.compiler.processing.isTypeElement
 import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
@@ -24,60 +35,56 @@ import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
 import boringyuri.api.constant.StringParam
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.ext.createParamSpec
-import boringyuri.processor.ext.getAnnotation
-import boringyuri.processor.ext.requireAnnotation
-import boringyuri.processor.type.CommonTypeName.ANDROID_URI
-import boringyuri.processor.type.CommonTypeName.ANDROID_URI_BUILDER
-import boringyuri.processor.type.CommonTypeName.OVERRIDE
-import boringyuri.processor.type.CommonTypeName.STRING
-import boringyuri.processor.type.TypeConverter
-import boringyuri.processor.uripart.ConstantPathSegment
-import boringyuri.processor.uripart.PathSegment
-import boringyuri.processor.uripart.QueryParameter
-import boringyuri.processor.uripart.VariableWritePathSegment
-import boringyuri.processor.uripart.VariableWriteQueryParameter
-import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions.getTypeAdapterFactory
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.ImmutableSetMultimap
+import boringyuri.processor.common.ProcessorOptions.getTypeAdapterFactory
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ext.createModifiers
+import boringyuri.processor.common.ext.createParamSpec
+import boringyuri.processor.common.type.CommonTypeName.ANDROID_URI
+import boringyuri.processor.common.type.CommonTypeName.ANDROID_URI_BUILDER
+import boringyuri.processor.common.type.CommonTypeName.OVERRIDE
+import boringyuri.processor.common.type.CommonTypeName.STRING
+import boringyuri.processor.common.type.TypeConverter
+import boringyuri.processor.common.uripart.ConstantPathSegment
+import boringyuri.processor.common.uripart.PathSegment
+import boringyuri.processor.common.uripart.QueryParameter
+import boringyuri.processor.common.uripart.VariableWritePathSegment
+import boringyuri.processor.common.uripart.VariableWriteQueryParameter
+import boringyuri.processor.common.util.AnnotationHandler
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
-import javax.lang.model.util.ElementFilter
 
-class UriFactoryGeneratorStep internal constructor(
+@OptIn(ExperimentalProcessingApi::class)
+class UriFactoryGeneratorStep(
     session: ProcessingSession,
     private val annotationHandler: AnnotationHandler
 ) : BoringProcessingStep(session) {
 
     private val typeConverter = TypeConverter(
         logger,
-        getTypeAdapterFactory(session)
+        getTypeAdapterFactory(session.processingEnv)
     )
 
     override fun annotations(): Set<String> {
-        return ImmutableSet.of(UriFactory::class.java.name)
+        return setOf(UriFactory::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: ImmutableSetMultimap<String, Element>
-    ): Set<Element> {
-        val annotatedContainers = ElementFilter.typesIn(
+        env: XProcessingEnv,
+        elementsByAnnotation: Map<String, Set<XElement>>
+    ): Set<XElement> {
+        val annotatedContainers =
             elementsByAnnotation[UriFactory::class.java.name]
-        )
-        val deferred = hashSetOf<Element>()
+                ?.filter { it.isTypeElement() }
+                ?.mapNotNull { it as? XTypeElement }
+                ?: emptyList()
+
+        val deferred = hashSetOf<XElement>()
         for (container in annotatedContainers) {
-            if (container.kind != ElementKind.INTERFACE) {
+            if (!container.isInterface()) {
                 logger.warn(
                     container,
                     "@%s can only be applied to an interface",
@@ -85,8 +92,7 @@ class UriFactoryGeneratorStep internal constructor(
                 )
                 continue
             }
-            val modifiers = container.modifiers
-            if (modifiers.contains(Modifier.PRIVATE)) {
+            if (container.isPrivate()) {
                 logger.warn(
                     container,
                     "@%s can not be applied to a private interface",
@@ -104,19 +110,22 @@ class UriFactoryGeneratorStep internal constructor(
         return deferred
     }
 
-    private fun obtainContainerMetadata(containerElement: TypeElement): List<BuilderMetadata> {
-        val declaredMethods = ElementFilter.methodsIn(containerElement.enclosedElements)
+    private fun obtainContainerMetadata(containerElement: XTypeElement): List<BuilderMetadata> {
+        val declaredMethods = containerElement.getEnclosedElements()
+            .filter { it.isMethod() }
+            .map { it as XMethodElement }
         val metadata = ArrayList<BuilderMetadata>(declaredMethods.size)
 
         for (methodElement in declaredMethods) {
-            if (methodElement.modifiers.contains(Modifier.STATIC)) {
+            if (methodElement.isStatic()) {
                 continue  // skip static methods
             }
 
             val builderAnnotation =
-                methodElement.getAnnotation<UriBuilder>() ?: continue // skip non-annotated methods
+                methodElement.getAnnotation(UriBuilder::class)?.value
+                    ?: continue // skip non-annotated methods
 
-            val returnType = ClassName.get(methodElement.returnType)
+            val returnType = methodElement.returnType.typeElement?.className
             if (ANDROID_URI != returnType) {
                 logger.warn(
                     methodElement,
@@ -138,7 +147,7 @@ class UriFactoryGeneratorStep internal constructor(
 
     private fun obtainBuilderMetadata(
         builderAnnotation: UriBuilder,
-        methodElement: ExecutableElement
+        methodElement: XExecutableElement
     ): Triple<List<ParameterSpec>, List<PathSegment>, List<QueryParameter>> {
         val methodParameters = methodElement.parameters
         val parameterSpecs = createParamSpecs(methodParameters)
@@ -161,34 +170,36 @@ class UriFactoryGeneratorStep internal constructor(
     }
 
     private fun createParamSpecs(
-        methodParameters: List<VariableElement>
-    ): Map<VariableElement, ParameterSpec> {
+        methodParameters: List<XVariableElement>
+    ): Map<XVariableElement, ParameterSpec> {
         return methodParameters.associateWithTo(LinkedHashMap()) { parameter ->
             parameter.createParamSpec(annotationHandler)
         }
     }
 
     private fun obtainPathSegments(
-        methodParameters: List<VariableElement>,
-        parameterSpecs: Map<VariableElement, ParameterSpec>
+        methodParameters: List<XVariableElement>,
+        parameterSpecs: Map<XVariableElement, ParameterSpec>
     ): Map<String, VariableWritePathSegment> {
         return methodParameters.mapNotNull { param ->
-            val pathAnnotation = param.getAnnotation<Path>() ?: return@mapNotNull null
+            val pathAnnotation = param.getAnnotation(Path::class)?.value ?: return@mapNotNull null
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+            val defaultValue = param.getAnnotation(DefaultValue::class)?.value
 
             if (nullable && defaultValue == null) {
-                logger.error(param, "Path segment '${spec.name}' must be explicitly non-null" +
-                        " or have a @${DefaultValue::class.simpleName}.")
+                logger.error(
+                    param, "Path segment '${spec.name}' must be explicitly non-null" +
+                            " or have a @${DefaultValue::class.simpleName}."
+                )
             }
 
             val pathName = pathAnnotation.value.ifEmpty { spec.name }
             val segment = VariableWritePathSegment(
                 param,
                 spec,
-                defaultValue,
+                defaultValue?.value,
                 pathAnnotation.encoded,
                 URI_BUILDER_NAME
             )
@@ -198,15 +209,15 @@ class UriFactoryGeneratorStep internal constructor(
     }
 
     private fun obtainQueryParams(
-        methodParameters: List<VariableElement>,
-        parameterSpecs: Map<VariableElement, ParameterSpec>
+        methodParameters: List<XVariableElement>,
+        parameterSpecs: Map<XVariableElement, ParameterSpec>
     ): List<QueryParameter> {
         return methodParameters.mapNotNull { param ->
-            val paramAnnotation = param.getAnnotation<Param>() ?: return@mapNotNull null
+            val paramAnnotation = param.getAnnotation(Param::class)?.value ?: return@mapNotNull null
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+            val defaultValue = param.getAnnotation(DefaultValue::class)?.value
 
             val paramName = paramAnnotation.value.ifEmpty { spec.name }
             VariableWriteQueryParameter(
@@ -214,7 +225,7 @@ class UriFactoryGeneratorStep internal constructor(
                 spec,
                 param,
                 nullable,
-                defaultValue,
+                defaultValue?.value,
                 URI_BUILDER_NAME
             )
         }
@@ -223,7 +234,7 @@ class UriFactoryGeneratorStep internal constructor(
     private fun obtainPathSegmentsFromBasePath(
         builderAnnotation: UriBuilder,
         variablePathSegments: Map<String, VariableWritePathSegment>,
-        originatingElement: Element
+        originatingElement: XElement
     ): List<PathSegment> {
         val basePath = builderAnnotation.value
 
@@ -255,13 +266,12 @@ class UriFactoryGeneratorStep internal constructor(
     }
 
     private fun generateUriBuilderContainerImpl(
-        containerElement: TypeElement,
+        containerElement: XTypeElement,
         containerMetadata: List<BuilderMetadata>
     ): Boolean {
-        val packageElement = elementUtils.getPackageOf(containerElement)
-        val containerPackageName = packageElement.qualifiedName.toString()
-        val containerSimpleName = containerElement.simpleName.toString() + CONTAINER_IMPL_SUFFIX
-        val containerClassName = ClassName.get(containerPackageName, containerSimpleName)
+        val packageName = containerElement.packageName
+        val containerSimpleName = containerElement.name + CONTAINER_IMPL_SUFFIX
+        val containerClassName = ClassName.get(packageName, containerSimpleName)
 
         val content = generateUriBuilderContainerContent(
             containerClassName,
@@ -269,36 +279,39 @@ class UriFactoryGeneratorStep internal constructor(
             containerMetadata
         )
 
-        writeSourceFile(containerClassName, content, containerElement)
+        session.fileWriter.writeSourceFile(containerClassName, content, XFiler.Mode.Isolating)
 
         return true
     }
 
     private fun generateUriBuilderContainerContent(
         containerImplName: ClassName,
-        containerElement: TypeElement,
+        containerElement: XTypeElement,
         containerMetadata: List<BuilderMetadata>
     ): TypeSpec {
         val classContent = TypeSpec.classBuilder(containerImplName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addSuperinterface(ClassName.get(containerElement))
+            .addSuperinterface(containerElement.className)
 
-        val containerAnnotation = containerElement.requireAnnotation<UriFactory>()
+        val containerAnnotation = containerElement.requireAnnotation(UriFactory::class).value
         val scheme = containerAnnotation.scheme
         val authority = containerAnnotation.authority
 
         for (builderMetadata in containerMetadata) {
             val methodElement = builderMetadata.builderMethod
 
-            val modifiers = methodElement.modifiers
+            val modifiers = methodElement.createModifiers()
 
-            val method = MethodSpec.methodBuilder(methodElement.simpleName.toString())
+            val method = MethodSpec.methodBuilder(methodElement.name)
                 .addAnnotation(OVERRIDE)
-                .addAnnotations(annotationHandler.toAnnotationSpec(
-                    methodElement.annotationMirrors)
+                .addAnnotations(
+                    annotationHandler.toAnnotationSpec(
+                        methodElement.returnType,
+                        methodElement.getAllAnnotations()
+                    )
                 )
                 .returns(ANDROID_URI)
-                .addModifiers(LinkedHashSet(modifiers).apply {
+                .addModifiers(modifiers.toMutableSet().apply {
                     remove(Modifier.ABSTRACT)
                     remove(Modifier.DEFAULT)
                 })
@@ -324,6 +337,8 @@ class UriFactoryGeneratorStep internal constructor(
             classContent.addMethod(method.build())
         }
 
+        classContent.addOriginatingElement(containerElement)
+
         return classContent.build()
     }
 
@@ -340,70 +355,70 @@ class UriFactoryGeneratorStep internal constructor(
     }
 
     private fun appendConstantStringParams(
-        methodElement: ExecutableElement,
+        methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotationsByType(StringParam::class.java) ?: return
+        val constParams = methodElement.getAnnotations(StringParam::class)
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$S)",
                 URI_BUILDER_NAME,
-                constParam.name,
-                constParam.value
+                constParam.value.name,
+                constParam.value.value
             )
         }
     }
 
     private fun appendConstantLongParams(
-        methodElement: ExecutableElement,
+        methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotationsByType(LongParam::class.java) ?: return
+        val constParams = methodElement.getAnnotations(LongParam::class)
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.value.name,
                 STRING,
-                constParam.value
+                constParam.value.value
             )
         }
     }
 
     private fun appendConstantDoubleParams(
-        methodElement: ExecutableElement,
+        methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotationsByType(DoubleParam::class.java) ?: return
+        val constParams = methodElement.getAnnotations(DoubleParam::class)
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.value.name,
                 STRING,
-                constParam.value
+                constParam.value.value
             )
         }
     }
 
     private fun appendConstantBooleanParams(
-        methodElement: ExecutableElement,
+        methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotationsByType(BooleanParam::class.java) ?: return
+        val constParams = methodElement.getAnnotations(BooleanParam::class)
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.value.name,
                 STRING,
-                constParam.value
+                constParam.value.value
             )
         }
     }
 
     private data class BuilderMetadata(
-        val builderMethod: ExecutableElement,
+        val builderMethod: XMethodElement,
         val methodParameters: List<ParameterSpec>,
         val pathSegments: List<PathSegment>,
         val parameters: List<QueryParameter>

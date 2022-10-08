@@ -18,7 +18,6 @@ package boringyuri.processor.ext
 
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.buildGetterName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
@@ -79,15 +78,6 @@ fun ExecutableElement.createMethodSignature(
         .addAnnotations(annotationHandler.toAnnotationSpec(annotationMirrors, ensureNonNull))
         .addParameters(parameters.map { it.createParamSpec(annotationHandler) })
         .returns(paramType)
-}
-
-fun VariableElement.findTypeAdapter(): TypeAdapter? {
-    val adapter = getAnnotation(TypeAdapter::class.java)
-    if (adapter != null) {
-        return adapter
-    }
-
-    return asType().accept(TypeAdapterVisitor(), null)
 }
 
 fun ExecutableElement.findTypeAdapter(): TypeAdapter? {

@@ -26,9 +26,7 @@ import boringyuri.processor.util.AnnotationHandler
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterSpec
 import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.VariableElement
 
 interface QueryParameter {
 
@@ -43,57 +41,6 @@ interface ReadQueryParameter : QueryParameter {
     val paramField: FieldSpec
 
     fun createMethodSignature(annotationHandler: AnnotationHandler): MethodSpec.Builder
-
-}
-
-class VariableWriteQueryParameter(
-    override val name: String,
-    private val methodParam: ParameterSpec,
-    private val parameter: VariableElement,
-    private val nullable: Boolean,
-    private val defaultValue: String?,
-    private val builderName: String
-) : QueryParameter {
-
-    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val typeAdapter = parameter.findTypeAdapter()?.valueMirror()
-
-        val appendQueryBlock = CodeBlock.builder()
-
-        if (nullable) {
-            appendQueryBlock.beginControlFlow("if (\$N != null)", methodParam)
-        }
-
-        val serializeStrategy = ConversionStrategyFactory.createQueryStrategy(
-            parameter.asType(),
-            typeAdapter,
-            typeConverter,
-            parameter
-        )
-
-        appendQueryBlock.add(
-            serializeStrategy.buildSerializeBlock(
-                builderName,
-                name,
-                methodParam
-            )
-        )
-
-        if (nullable) {
-            if (defaultValue != null) {
-                appendQueryBlock.nextControlFlow("else")
-                appendQueryBlock.addStatement(
-                    "\$L.appendQueryParameter(\$S, \$S)",
-                    builderName,
-                    name,
-                    defaultValue
-                )
-            }
-            appendQueryBlock.endControlFlow()
-        }
-
-        return appendQueryBlock.build()
-    }
 
 }
 

@@ -46,6 +46,8 @@ object CommonTypeName {
 
     val ANDROID_URI: ClassName = ClassName.get("android.net", "Uri")
 
+    val ANDROID_URI_BUILDER: ClassName = ANDROID_URI.nestedClass("Builder")
+
     private var TYPE_ADAPTER: ClassName = ClassName.get(BoringTypeAdapter::class.java)
 
     val ANY_TYPE_ADAPTER: ParameterizedTypeName = ParameterizedTypeName.get(

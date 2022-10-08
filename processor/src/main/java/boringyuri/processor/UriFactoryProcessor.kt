@@ -36,7 +36,6 @@ import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.base.BoringAnnotationProcessor
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.util.AnnotationHandler
 import boringyuri.processor.util.ProcessorOptions
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
@@ -55,11 +54,11 @@ import javax.lang.model.SourceVersion
 )
 class UriFactoryProcessor : BoringAnnotationProcessor() {
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
+//        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
         return ImmutableSet.of(
 //            AssociatedUriDataGeneratorStep(session, annotationHandler),
-            UriFactoryGeneratorStep(session, annotationHandler),
+//            UriFactoryGeneratorStep(session, annotationHandler),
             UriMatcherGeneratorStep(session)
         )
     }

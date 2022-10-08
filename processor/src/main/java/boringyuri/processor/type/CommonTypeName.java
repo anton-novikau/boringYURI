@@ -44,8 +44,6 @@ public interface CommonTypeName {
     @NonNull
     ClassName ANDROID_URI = ClassName.get("android.net", "Uri");
     @NonNull
-    ClassName ANDROID_URI_BUILDER = ANDROID_URI.nestedClass("Builder");
-    @NonNull
     ClassName ANDROID_URI_MATCHER = ClassName.get(
             "android.content",
             "UriMatcher"

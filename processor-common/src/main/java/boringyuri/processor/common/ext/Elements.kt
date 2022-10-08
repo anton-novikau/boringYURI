@@ -18,7 +18,9 @@ package boringyuri.processor.common.ext
 
 import androidx.room.compiler.processing.XAnnotationBox
 import androidx.room.compiler.processing.XArrayType
+import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XHasModifiers
 import androidx.room.compiler.processing.XType
 import androidx.room.compiler.processing.XTypeElement
 import androidx.room.compiler.processing.XVariableElement
@@ -29,10 +31,53 @@ import boringyuri.processor.common.xvisitors.XTypeVisitor
 import boringyuri.processor.common.xvisitors.accept
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Modifier
 
 private const val FIELD_PREFIX = "m"
+
+fun XVariableElement.createParamSpec(annotationHandler: AnnotationHandler): ParameterSpec {
+    val paramType = type.typeName
+    val paramName = name
+
+    return ParameterSpec.builder(paramType, paramName)
+        .addModifiers(createModifiers())
+        .addAnnotations(annotationHandler.toAnnotationSpec(this.type, getAllAnnotations()))
+        .build()
+}
+
+fun XElement.createModifiers(): Iterable<Modifier> {
+    val result = mutableSetOf<Modifier>()
+    (this as? XHasModifiers)?.run {
+        if (isPublic()) {
+            result += Modifier.PUBLIC
+        }
+
+        if (isProtected()) {
+            result += Modifier.PROTECTED
+        }
+
+        if (isPrivate()) {
+            result += Modifier.PRIVATE
+        }
+
+        if (isAbstract()) {
+            result += Modifier.ABSTRACT
+        }
+        if (isStatic()) {
+            result += Modifier.STATIC
+        }
+        if (isFinal()) {
+            result += Modifier.FINAL
+        }
+
+        if (isTransient()) {
+            result += Modifier.TRANSIENT
+        }
+    }
+    return result
+}
 
 fun XExecutableElement.extractPackage(): String? {
     return (this.enclosingElement as? XTypeElement)?.packageName

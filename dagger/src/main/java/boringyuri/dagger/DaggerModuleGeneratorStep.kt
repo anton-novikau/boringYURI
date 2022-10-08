@@ -19,7 +19,6 @@ package boringyuri.dagger
 import boringyuri.api.UriFactory
 import boringyuri.dagger.util.DaggerTypeName
 import boringyuri.dagger.util.ProcessorOptions
-import boringyuri.processor.UriFactoryGeneratorStep.Companion.CONTAINER_IMPL_SUFFIX
 import boringyuri.processor.base.BoringProcessingStep
 import boringyuri.processor.base.ProcessingSession
 import boringyuri.processor.type.CommonTypeName
@@ -123,5 +122,9 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
             .returns(factoryName)
             .addStatement("return new \$T()", factoryImplName)
             .build()
+    }
+
+    companion object{
+        const val CONTAINER_IMPL_SUFFIX = "Impl"
     }
 }

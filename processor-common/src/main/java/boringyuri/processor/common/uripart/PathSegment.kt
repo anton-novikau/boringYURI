@@ -30,6 +30,7 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.ParameterizedTypeName
 
 interface PathSegment {
@@ -43,6 +44,23 @@ interface ReadPathSegment : PathSegment {
     val segmentField: FieldSpec
 
     fun createMethodSignature(annotationHandler: AnnotationHandler): MethodSpec.Builder
+}
+
+class ConstantPathSegment(
+    private val segment: String,
+    private val encoded: Boolean,
+    private val builderName: String
+) : PathSegment {
+
+    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
+        val appendMethod = if (encoded) "appendEncodedPath" else "appendPath"
+
+        return CodeBlock
+            .builder()
+            .addStatement("\$L.\$L(\$S)", builderName, appendMethod, segment)
+            .build()
+    }
+
 }
 
 class TemplatePathSegment(
@@ -69,6 +87,43 @@ class TemplatePathSegment(
             originatingElement,
             message = "Path template {$name} doesn't have an appropriate substitute"
         )
+    }
+
+}
+
+class VariableWritePathSegment(
+    private val segment: XVariableElement,
+    private val methodParam: ParameterSpec,
+    private val defaultValue: String?,
+    private val encoded: Boolean,
+    private val builderName: String
+) : PathSegment {
+
+    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
+        val typeAdapter = segment.findTypeAdapter()?.getAsType("value")
+
+        val valueBlock = CodeBlock.builder()
+        val serializedSegment = typeConverter.buildSerializeBlock(
+            methodParam,
+            typeAdapter,
+            segment
+        )
+
+        val appendMethod = if (encoded) "appendEncodedPath" else "appendPath"
+
+        if (defaultValue != null) {
+            valueBlock.beginControlFlow("if (\$N != null)", methodParam)
+        }
+
+        valueBlock.addStatement("\$L.\$L(\$L)", builderName, appendMethod, serializedSegment)
+
+        if (defaultValue != null) {
+            valueBlock.nextControlFlow("else")
+            valueBlock.addStatement("\$L.\$L(\$S)", builderName, appendMethod, defaultValue)
+            valueBlock.endControlFlow()
+        }
+
+        return valueBlock.build()
     }
 
 }

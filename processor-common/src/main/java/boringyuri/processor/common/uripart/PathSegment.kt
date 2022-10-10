@@ -17,6 +17,7 @@
 package boringyuri.processor.common.uripart
 
 import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XMethodElement
 import androidx.room.compiler.processing.XType
 import androidx.room.compiler.processing.XVariableElement
 import boringyuri.processor.common.base.AbortProcessingException
@@ -147,6 +148,24 @@ class VariableReadPathSegment(
         return createValueBlock(typeConverter, segment.findTypeAdapter()?.getAsType("value"))
     }
 
+}
+
+class MethodReadPathSegment(
+    segmentIndex: Int,
+    segmentName: String,
+    segmentField: FieldSpec,
+    uriField: FieldSpec,
+    private val defaultValue: String?,
+    private val segment: XMethodElement
+) : BaseReadPathSegment(segmentIndex, segmentName, segmentField, uriField, defaultValue, segment) {
+
+    override fun createMethodSignature(
+        annotationHandler: AnnotationHandler
+    ): MethodSpec.Builder = segment.createMethodSignature(defaultValue, annotationHandler)
+
+    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
+        return createValueBlock(typeConverter, segment.findTypeAdapter()?.getAsType("value"))
+    }
 }
 
 abstract class BaseReadPathSegment(

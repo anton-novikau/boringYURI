@@ -21,6 +21,7 @@ import androidx.room.compiler.processing.XArrayType
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
 import androidx.room.compiler.processing.XHasModifiers
+import androidx.room.compiler.processing.XMethodElement
 import androidx.room.compiler.processing.XType
 import androidx.room.compiler.processing.XTypeElement
 import androidx.room.compiler.processing.XVariableElement
@@ -103,6 +104,26 @@ fun XVariableElement.createFieldSpec(
         .build()
 }
 
+fun XMethodElement.createFieldSpec(
+    paramName: String,
+    defaultValue: String?,
+    annotationHandler: AnnotationHandler
+): FieldSpec {
+    val fieldName = FIELD_PREFIX + StringUtils.capitalize(paramName)
+    val type = returnType.typeName
+    val ensureNonNull = !type.isPrimitive && defaultValue != null
+
+    return FieldSpec.builder(type, fieldName, Modifier.PRIVATE)
+        .addAnnotations(
+            annotationHandler.toAnnotationSpec(
+                returnType,
+                getAllAnnotations(),
+                ensureNonNull
+            )
+        )
+        .build()
+}
+
 fun XVariableElement.createMethodSignature(
     defaultValue: String?,
     annotationHandler: AnnotationHandler
@@ -124,12 +145,37 @@ fun XVariableElement.createMethodSignature(
         .returns(paramType)
 }
 
+fun XMethodElement.createMethodSignature(
+    defaultValue: String?,
+    annotationHandler: AnnotationHandler
+): MethodSpec.Builder {
+    val paramType = returnType.typeName
+    val ensureNonNull = !paramType.isPrimitive && defaultValue != null
+
+    return MethodSpec.methodBuilder(name)
+        .addModifiers(Modifier.PUBLIC)
+        .addAnnotations(
+            annotationHandler.toAnnotationSpec(returnType, getAllAnnotations(), ensureNonNull)
+        )
+        .addParameters(parameters.map { it.createParamSpec(annotationHandler) })
+        .returns(paramType)
+}
+
 fun XVariableElement.findTypeAdapter(): XAnnotationBox<TypeAdapter>? {
     val adapter = getAnnotation(TypeAdapter::class)
     if (adapter != null) {
         return adapter
     }
     return type.accept(TypeAdapterVisitor(), null)
+}
+
+fun XMethodElement.findTypeAdapter(): XAnnotationBox<TypeAdapter>? {
+    val adapter = getAnnotation(TypeAdapter::class)
+    if (adapter != null) {
+        return adapter
+    }
+
+    return returnType.accept(TypeAdapterVisitor(), null)
 }
 
 private class TypeAdapterVisitor : XTypeVisitor<XAnnotationBox<TypeAdapter>?, Unit?> {

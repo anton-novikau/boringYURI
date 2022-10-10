@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.ext
+package boringyuri.processor.ksp
 
-import boringyuri.api.adapter.TypeAdapter
-import javax.lang.model.type.MirroredTypeException
-import javax.lang.model.type.TypeMirror
+import com.google.devtools.ksp.processing.SymbolProcessor
+import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.processing.SymbolProcessorProvider
 
-fun TypeAdapter.valueMirror(): TypeMirror? = try {
-    value
-    null // never happens in these annotation processors
-} catch (e: MirroredTypeException) {
-    e.typeMirror
+class IndependentUriDataProcessorProvider : SymbolProcessorProvider {
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        return IndependentUriDataProcessor(environment)
+    }
 }

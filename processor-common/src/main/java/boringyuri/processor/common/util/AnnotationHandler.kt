@@ -17,6 +17,7 @@ package boringyuri.processor.common.util
 
 import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XMethodElement
 import androidx.room.compiler.processing.XNullability
 import androidx.room.compiler.processing.XType
 import androidx.room.compiler.processing.XVariableElement
@@ -32,7 +33,7 @@ class AnnotationHandler @JvmOverloads constructor(
 ) {
 
     fun toAnnotationSpec(
-        type: XType,
+        nullabilityType: XType,
         annotations: List<XAnnotation>,
         ensureNonNull: Boolean = false
     ): List<AnnotationSpec> {
@@ -40,7 +41,7 @@ class AnnotationHandler @JvmOverloads constructor(
         var nullabilityAnnotation = if (ensureNonNull) NON_NULL else null
 
         if (nullabilityAnnotation == null) {
-            when (type.nullability) {
+            when (nullabilityType.nullability) {
                 XNullability.NONNULL ->
                     nullabilityAnnotation = NON_NULL
                 XNullability.NULLABLE ->
@@ -79,7 +80,7 @@ class AnnotationHandler @JvmOverloads constructor(
             }
         }
 
-        if (nullabilityAnnotation != null && !type.typeName.isPrimitive) {
+        if (nullabilityAnnotation != null && !nullabilityType.typeName.isPrimitive) {
             annotationSpecs.add(AnnotationSpec.builder(nullabilityAnnotation).build())
         }
 
@@ -91,14 +92,13 @@ class AnnotationHandler @JvmOverloads constructor(
             return false
         }
 
-        (element as? XVariableElement)?.let {
-            if (it.type.nullability == XNullability.NULLABLE) {
+        when (element.extractTypeNullability()) {
+            XNullability.NULLABLE ->
                 return true
-            } else if (it.type.nullability == XNullability.NONNULL) {
+            XNullability.NONNULL ->
                 return false
-            }
+            XNullability.UNKNOWN -> {}
         }
-
 
         element.getAllAnnotations().forEach { annotation ->
             val annotationType = annotation.typeElement.className
@@ -112,4 +112,12 @@ class AnnotationHandler @JvmOverloads constructor(
         return true
     }
 
+}
+
+fun XElement.extractTypeNullability(): XNullability {
+    return when (this) {
+        is XVariableElement -> type.nullability
+        is XMethodElement -> returnType.nullability
+        else -> XNullability.UNKNOWN
+    }
 }

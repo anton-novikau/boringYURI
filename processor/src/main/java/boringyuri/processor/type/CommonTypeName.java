@@ -17,33 +17,13 @@
 package boringyuri.processor.type;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-
-import java.util.List;
 
 public interface CommonTypeName {
     @NonNull
     ClassName NON_NULL = ClassName.get(NonNull.class);
     @NonNull
-    ClassName NULLABLE = ClassName.get(Nullable.class);
-    @NonNull
-    ClassName JB_NON_NULL = ClassName.get(org.jetbrains.annotations.NotNull.class);
-    @NonNull
-    ClassName JB_NULLABLE = ClassName.get(org.jetbrains.annotations.Nullable.class);
-    @NonNull
-    ClassName STRING = ClassName.get(String.class);
-    @NonNull
     ClassName OVERRIDE = ClassName.get(Override.class);
 
-    @NonNull
-    ClassName ANDROID_URI = ClassName.get("android.net", "Uri");
-
-    @NonNull
-    ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
-            ClassName.get(List.class),
-            STRING
-    );
 }

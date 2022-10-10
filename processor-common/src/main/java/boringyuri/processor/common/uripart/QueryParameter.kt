@@ -16,6 +16,7 @@
 
 package boringyuri.processor.common.uripart
 
+import androidx.room.compiler.processing.XMethodElement
 import androidx.room.compiler.processing.XVariableElement
 import boringyuri.processor.common.ext.createMethodSignature
 import boringyuri.processor.common.ext.findTypeAdapter
@@ -113,6 +114,34 @@ class VariableReadQueryParameter(
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
             parameterElement.type,
+            parameterElement.findTypeAdapter()?.getAsType("value"),
+            typeConverter,
+            parameterElement
+        )
+
+        return createValueBlock(deserializeStrategy)
+    }
+
+}
+
+class MethodReadQueryParameter(
+    name: String,
+    paramField: FieldSpec,
+    uriField: FieldSpec,
+    nullable: Boolean,
+    private val defaultValue: String?,
+    private val parameterElement: XMethodElement
+) : BaseReadQueryParameter(name, paramField, uriField, nullable, defaultValue) {
+
+    override fun createMethodSignature(
+        annotationHandler: AnnotationHandler
+    ): MethodSpec.Builder {
+        return parameterElement.createMethodSignature(defaultValue, annotationHandler)
+    }
+
+    override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
+        val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
+            parameterElement.returnType,
             parameterElement.findTypeAdapter()?.getAsType("value"),
             typeConverter,
             parameterElement

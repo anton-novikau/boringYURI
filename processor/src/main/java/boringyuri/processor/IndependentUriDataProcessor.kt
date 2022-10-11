@@ -24,8 +24,8 @@ import boringyuri.processor.common.IndependentUriDataGeneratorStep
 import boringyuri.processor.common.ProcessorOptions
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.type.CommonTypeName
 import boringyuri.processor.common.util.AnnotationHandler
-import boringyuri.processor.type.CommonTypeName
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName

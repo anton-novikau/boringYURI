@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package boringyuri.dagger.util
+package boringyuri.dagger.common.util
 
-import boringyuri.processor.base.ProcessingSession
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import boringyuri.processor.common.base.ProcessingSession
 import com.squareup.javapoet.ClassName
 
 
-internal object ProcessorOptions {
+object ProcessorOptions {
 
     /**
      * Option to customize the dagger module class name for BoringYURI dependencies.
@@ -32,9 +33,10 @@ internal object ProcessorOptions {
 
     private val MODULE_DEFAULT_NAME = ClassName.get("boringyuri.dagger", "BoringYuriModule")
 
+    @OptIn(ExperimentalProcessingApi::class)
     fun getModuleName(session: ProcessingSession): ClassName {
         return try {
-            session.getOption(OPT_DAGGER_BORING_MODULE)?.let {
+            session.processingEnv.options[OPT_DAGGER_BORING_MODULE]?.let {
                 ClassName.bestGuess(it)
             } ?: MODULE_DEFAULT_NAME
         } catch (e: IllegalArgumentException) {

@@ -27,7 +27,9 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     compileOnly(project(":api"))
+    implementation(project(":dagger-common"))
     compileOnly(project(":processor"))
+    compileOnly(project(":processor-common"))
 
     implementation(libs.square.javaPoet)
 

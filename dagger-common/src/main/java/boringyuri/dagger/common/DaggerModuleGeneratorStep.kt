@@ -14,40 +14,46 @@
  * limitations under the License.
  */
 
-package boringyuri.dagger
+package boringyuri.dagger.common
 
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.addOriginatingElement
 import boringyuri.api.UriFactory
-import boringyuri.dagger.util.DaggerTypeName
-import boringyuri.dagger.util.ProcessorOptions
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.type.CommonTypeName
-import com.google.common.collect.ImmutableSet
-import com.google.common.collect.ImmutableSetMultimap
+import boringyuri.dagger.common.util.DaggerTypeName
+import boringyuri.dagger.common.util.ProcessorOptions
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.type.CommonTypeName
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
-import javax.lang.model.util.ElementFilter
 
 
+@OptIn(ExperimentalProcessingApi::class)
 class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingStep(session) {
 
     private val providesFunctions = mutableListOf<MethodSpec>()
-    private val deferredElements = mutableSetOf<Element>()
+    private val originatingElements = mutableSetOf<XElement>()
+    private val deferredFactoriesName = mutableSetOf<String>()
 
     override fun annotations(): Set<String> {
-        return ImmutableSet.of(UriFactory::class.java.name)
+        return setOf(UriFactory::class.java.name)
     }
 
     override fun process(
-        elementsByAnnotation: ImmutableSetMultimap<String, Element>
-    ): Set<Element> {
-        val expectedFactories = ElementFilter.typesIn(
-            elementsByAnnotation[UriFactory::class.java.name]
-        )
+        env: XProcessingEnv,
+        elementsByAnnotation: Map<String, Set<XElement>>
+    ): Set<XElement> {
+        val deferredElements = mutableSetOf<XTypeElement>()
+
+        val expectedFactories = elementsByAnnotation[UriFactory::class.java.name]
+            ?.mapNotNull { it as? XTypeElement }
+            ?: emptyList()
 
         for (factory in expectedFactories) {
             val factoryImpl = findFactoryImpl(factory)
@@ -56,9 +62,11 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
             // in the next processing round.
             if (factoryImpl == null) {
                 deferredElements.add(factory)
+                deferredFactoriesName += factory.qualifiedName
             } else {
-                deferredElements.remove(factory)
+                deferredFactoriesName.remove(factory.qualifiedName)
                 providesFunctions.add(buildProvidesMethod(factory, factoryImpl))
+                originatingElements.add(factory)
             }
         }
 
@@ -67,38 +75,40 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
         if (deferredElements.isEmpty()) {
             generateBoringDaggerModule(
                 moduleName = ProcessorOptions.getModuleName(session),
-                providesFunctions = providesFunctions
+                providesFunctions = providesFunctions,
+                originatingElements = originatingElements,
             )
         }
 
-        return ImmutableSet.copyOf(deferredElements)
+        return deferredElements.toSet()
     }
 
     override fun onProcessingOver() {
-        if (deferredElements.isNotEmpty()) {
-            val missingFactories = deferredElements.map { it.simpleName.toString() }
+        if (deferredFactoriesName.isNotEmpty()) {
             logger.warn(
                 e = null,
-                "Some of the Uri factory implementations were not generated: $missingFactories"
+                "Some of the Uri factory implementations were not generated: $deferredFactoriesName"
             )
         }
-        deferredElements.clear()
+        deferredFactoriesName.clear()
         providesFunctions.clear()
+        originatingElements.clear()
     }
 
-    private fun findFactoryImpl(factory: TypeElement): TypeElement? {
-        val factoryName = ClassName.get(factory)
+    private fun findFactoryImpl(factory: XTypeElement): XTypeElement? {
+        val factoryName = factory.className
         val factoryImplName = ClassName.get(
             factoryName.packageName(),
             "${factoryName.simpleName()}$CONTAINER_IMPL_SUFFIX"
         )
 
-        return elementUtils.getTypeElement(factoryImplName.canonicalName())
+        return session.processingEnv.findTypeElement(factoryImplName)
     }
 
     private fun generateBoringDaggerModule(
         moduleName: ClassName,
-        providesFunctions: List<MethodSpec>
+        providesFunctions: List<MethodSpec>,
+        originatingElements: Collection<XElement>,
     ) {
         val moduleContent = TypeSpec.classBuilder(moduleName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -108,12 +118,20 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
             )
             .addMethods(providesFunctions)
 
-        writeSourceFile(moduleName, moduleContent.build(), originatingElement = null)
+        originatingElements.forEach {
+            moduleContent.addOriginatingElement(it)
+        }
+
+        session.fileWriter.writeSourceFile(
+            moduleName,
+            moduleContent.build(),
+            XFiler.Mode.Aggregating
+        )
     }
 
-    private fun buildProvidesMethod(factory: TypeElement, factoryImpl: TypeElement): MethodSpec {
-        val factoryImplName = ClassName.get(factoryImpl)
-        val factoryName = ClassName.get(factory)
+    private fun buildProvidesMethod(factory: XTypeElement, factoryImpl: XTypeElement): MethodSpec {
+        val factoryImplName = factoryImpl.className
+        val factoryName = factory.className
 
         return MethodSpec.methodBuilder("provide${factoryName.simpleName()}")
             .addModifiers(Modifier.STATIC)

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.base
+package boringyuri.dagger.common.util;
 
-import boringyuri.processor.util.Logger
-import javax.lang.model.element.Element
+import androidx.annotation.NonNull;
 
-class AbortProcessingException(message: String) : RuntimeException(message) {
+import com.squareup.javapoet.ClassName;
 
-    constructor(logger: Logger,
-                originatingElement: Element? = null,
-                message: String,
-                vararg args: Any?
-    ) : this(logger.error(originatingElement, message, *args))
+public interface DaggerTypeName {
+
+    @NonNull
+    ClassName MODULE = ClassName.get("dagger", "Module");
+    @NonNull
+    ClassName PROVIDES = ClassName.get("dagger", "Provides");
+
 }

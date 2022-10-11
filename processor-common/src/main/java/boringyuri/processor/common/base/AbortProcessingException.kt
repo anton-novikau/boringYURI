@@ -17,7 +17,7 @@
 package boringyuri.processor.common.base
 
 import androidx.room.compiler.processing.XElement
-import boringyuri.processor.common.util.Logger
+import boringyuri.processor.common.Logger
 
 class AbortProcessingException(
     message: String,

@@ -19,7 +19,7 @@ package boringyuri.processor.common.base
 import androidx.room.compiler.processing.ExperimentalProcessingApi
 import androidx.room.compiler.processing.XProcessingEnv
 import boringyuri.processor.common.FileWriter
-import boringyuri.processor.common.util.Logger
+import boringyuri.processor.common.Logger
 
 @OptIn(ExperimentalProcessingApi::class)
 class ProcessingSession(val processingEnv: XProcessingEnv) {

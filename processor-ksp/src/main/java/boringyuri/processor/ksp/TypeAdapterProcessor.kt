@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Novikau
+ * Copyright 2022 Anton Novikau
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package boringyuri.processor.ksp
 
-import boringyuri.processor.common.TypeAdapterFactoryGeneratorStep
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ksp.KspBoringAnnotationProcessor
+import boringyuri.processor.common.steps.TypeAdapterFactoryGeneratorStep
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 
 class TypeAdapterProcessor(

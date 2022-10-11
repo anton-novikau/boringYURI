@@ -16,9 +16,8 @@
 
 package boringyuri.dagger
 
-import boringyuri.dagger.common.DaggerModuleGeneratorStep
-import boringyuri.dagger.common.util.ProcessorOptions
-import boringyuri.processor.AptBoringAnnotationProcessor
+import boringyuri.dagger.util.ProcessorOptions
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
 import com.google.auto.service.AutoService

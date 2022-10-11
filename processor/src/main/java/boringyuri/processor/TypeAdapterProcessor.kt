@@ -16,10 +16,11 @@
 
 package boringyuri.processor
 
-import boringyuri.processor.common.ProcessorOptions
-import boringyuri.processor.common.TypeAdapterFactoryGeneratorStep
+import boringyuri.processor.common.steps.ProcessorOptions
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.steps.TypeAdapterFactoryGeneratorStep
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import javax.annotation.processing.Processor

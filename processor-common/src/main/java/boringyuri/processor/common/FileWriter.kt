@@ -18,7 +18,6 @@ package boringyuri.processor.common
 
 import androidx.room.compiler.processing.XFiler
 import boringyuri.processor.common.base.AbortProcessingException
-import boringyuri.processor.common.util.Logger
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec

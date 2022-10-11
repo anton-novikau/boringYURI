@@ -91,7 +91,9 @@ dependencies {
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
     kapt(project(":processor"))
     // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
+
     // ksp(project(":processor-ksp"))
+    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
 
     // unit tests
     testImplementation(libs.junit)
@@ -108,11 +110,7 @@ kapt {
 }
 
 ksp {
-    arg(
-        "boringyuri.type_adapter_factory",
-        "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
-    )
-    arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
+    arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
 }
 
 tasks.withType<KotlinCompile>().configureEach {

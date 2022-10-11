@@ -20,12 +20,13 @@ import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
 import boringyuri.api.adapter.TypeAdapter
-import boringyuri.processor.common.IndependentUriDataGeneratorStep
-import boringyuri.processor.common.ProcessorOptions
+import boringyuri.processor.common.steps.ProcessorOptions
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
-import boringyuri.processor.common.type.CommonTypeName
-import boringyuri.processor.common.util.AnnotationHandler
+import boringyuri.processor.common.steps.util.AnnotationHandler
+import boringyuri.processor.common.steps.IndependentUriDataGeneratorStep
+import boringyuri.processor.common.steps.type.CommonTypeName
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName

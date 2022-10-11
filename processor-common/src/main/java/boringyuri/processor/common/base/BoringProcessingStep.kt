@@ -17,7 +17,7 @@
 package boringyuri.processor.common.base
 
 import androidx.room.compiler.processing.XProcessingStep
-import boringyuri.processor.common.util.Logger
+import boringyuri.processor.common.Logger
 
 abstract class BoringProcessingStep(
     protected val session: ProcessingSession

@@ -38,7 +38,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -82,11 +85,15 @@ dependencies {
     implementation(project(":api"))
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
     kapt(project(":processor"))
-    //    ksp project(':processor-ksp')
     // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
     kapt(project(":dagger"))
-    //    ksp project(':dagger-ksp')
     // kapt("com.github.anton-novikau:boringyuri-dagger:${findProperty("VERSION_NAME")}")
+
+    // ksp(project(":processor-ksp"))
+    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
+    // ksp(project(":dagger-ksp"))
+    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-dagger-ksp:$VERSION_NAME")
+
 
     implementation(libs.bundles.dagger)
     kapt(libs.bundles.dagger.compiler)
@@ -101,13 +108,19 @@ kapt {
         option("-Xmaxerrs", 1000) // max count of AP errors
     }
     arguments {
-        arg("boringyuri.type_adapter_factory", "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory")
+        arg(
+            "boringyuri.type_adapter_factory",
+            "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
+        )
         arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
     }
 }
 
 ksp {
-    arg("boringyuri.type_adapter_factory", "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory")
+    arg(
+        "boringyuri.type_adapter_factory",
+        "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
+    )
     arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
 }
 

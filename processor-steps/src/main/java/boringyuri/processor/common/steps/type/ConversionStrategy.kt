@@ -19,9 +19,9 @@ import androidx.room.compiler.processing.XArrayType
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XType
 import boringyuri.processor.common.steps.util.Counter
-import boringyuri.processor.common.xvisitors.AbstractXTypeVisitor
-import boringyuri.processor.common.xvisitors.XTypeVisitor
-import boringyuri.processor.common.xvisitors.accept
+import boringyuri.processor.common.visitor.AbstractTypeVisitor
+import boringyuri.processor.common.visitor.TypeVisitor
+import boringyuri.processor.common.visitor.accept
 import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.ParameterSpec
@@ -309,12 +309,12 @@ private class ArrayQueryConversionStrategy(
     }
 }
 
-class ComponentTypeVisitor : AbstractXTypeVisitor<XType, Void?>() {
+class ComponentTypeVisitor : AbstractTypeVisitor<XType, Void?>() {
 
     override fun visitArray(type: XArrayType, param: Void?): XType = type.componentType
 }
 
-private class RawTypeNameVisitor : XTypeVisitor<TypeName, Counter> {
+private class RawTypeNameVisitor : TypeVisitor<TypeName, Counter> {
 
     override fun visitArray(type: XArrayType, param: Counter): TypeName? {
         return type.componentType.accept(this, param.increment())

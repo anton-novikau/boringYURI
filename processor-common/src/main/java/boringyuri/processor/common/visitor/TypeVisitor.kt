@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.common.xvisitors
+package boringyuri.processor.common.visitor
 
 import androidx.room.compiler.processing.XArrayType
 import androidx.room.compiler.processing.XType
 
-interface XTypeVisitor<R, P> {
+interface TypeVisitor<R, P> {
     fun visit(type: XType, param: P): R?
 
     fun visitArray(type: XArrayType, param: P): R?
 }
 
-fun <R, P> XType.accept(visitor: XTypeVisitor<R, P>, param: P): R? {
+fun <R, P> XType.accept(visitor: TypeVisitor<R, P>, param: P): R? {
     return when (this) {
         is XArrayType -> {
             acceptXArrayType(this, visitor, param)
@@ -38,7 +38,7 @@ fun <R, P> XType.accept(visitor: XTypeVisitor<R, P>, param: P): R? {
 
 fun <R, P> acceptXArrayType(
     type: XArrayType,
-    visitor: XTypeVisitor<R, P>,
+    visitor: TypeVisitor<R, P>,
     param: P
 ): R? {
     return visitor.visitArray(type, param)

@@ -28,8 +28,8 @@ import androidx.room.compiler.processing.XVariableElement
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.common.steps.util.AnnotationHandler
 import boringyuri.processor.common.steps.util.buildGetterName
-import boringyuri.processor.common.xvisitors.XTypeVisitor
-import boringyuri.processor.common.xvisitors.accept
+import boringyuri.processor.common.visitor.TypeVisitor
+import boringyuri.processor.common.visitor.accept
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
@@ -178,7 +178,7 @@ fun XMethodElement.findTypeAdapter(): XAnnotationBox<TypeAdapter>? {
     return returnType.accept(TypeAdapterVisitor(), null)
 }
 
-private class TypeAdapterVisitor : XTypeVisitor<XAnnotationBox<TypeAdapter>?, Unit?> {
+private class TypeAdapterVisitor : TypeVisitor<XAnnotationBox<TypeAdapter>?, Unit?> {
     override fun visit(type: XType, param: Unit?): XAnnotationBox<TypeAdapter>? {
         return type.typeElement?.getAnnotation(TypeAdapter::class)
     }

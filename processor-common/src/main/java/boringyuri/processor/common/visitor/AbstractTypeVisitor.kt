@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package boringyuri.processor.common.xvisitors
+package boringyuri.processor.common.visitor
 
 import androidx.room.compiler.processing.XArrayType
 import androidx.room.compiler.processing.XType
 
-abstract class AbstractXTypeVisitor<R, P> : XTypeVisitor<R, P> {
+abstract class AbstractTypeVisitor<R, P> : TypeVisitor<R, P> {
     override fun visit(type: XType, param: P): R? = null
 
     override fun visitArray(type: XArrayType, param: P): R? = null

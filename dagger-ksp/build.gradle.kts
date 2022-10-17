@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright 2022 Anton Novikau
  *
@@ -15,7 +17,7 @@
  */
 
 plugins {
-    id("org.jetbrains.kotlin.jvm")
+    kotlin("jvm")
 }
 
 java {
@@ -29,4 +31,11 @@ dependencies {
     implementation(project(":processor-dagger-steps"))
 
     implementation(libs.ksp.api)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        freeCompilerArgs = listOf("-Xjvm-default=all")
+    }
 }

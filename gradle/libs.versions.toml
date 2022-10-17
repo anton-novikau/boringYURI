@@ -53,4 +53,5 @@ dagger-compiler = [
     "dagger-compiler-android"
 ]
 
-# [plugins]
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

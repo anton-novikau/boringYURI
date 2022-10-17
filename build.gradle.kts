@@ -30,8 +30,10 @@ buildscript {
     }
 }
 
+// https://youtrack.jetbrains.com/issue/KTIJ-19369
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id ("org.jetbrains.kotlin.jvm") version "1.7.10" apply false
+    alias(libs.plugins.kotlin.jvm) apply false
 }
 
 allprojects {

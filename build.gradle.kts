@@ -26,7 +26,7 @@ buildscript {
         classpath(libs.gradlePlugin.dokka)
         classpath(libs.gradlePlugin.publish)
         classpath(libs.gradlePlugin.ksp)
-        classpath(libs.ksp.api)
+        classpath(libs.google.ksp.api)
     }
 }
 

@@ -28,7 +28,7 @@ java {
 dependencies {
     api(project(":processor-common"))
 
-    api(libs.ksp.api)
+    api(libs.google.ksp.api)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

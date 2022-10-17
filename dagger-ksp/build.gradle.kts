@@ -30,7 +30,7 @@ dependencies {
     implementation(project(":processor-common-ksp"))
     implementation(project(":processor-dagger-steps"))
 
-    implementation(libs.ksp.api)
+    implementation(libs.google.ksp.api)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

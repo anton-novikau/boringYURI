@@ -29,7 +29,7 @@ dependencies {
     implementation(project(":api"))
 
     implementation(libs.square.javaPoet)
-    api(libs.xprocessing)
+    api(libs.androidx.room.xprocessing)
     implementation(libs.commons.text)
 }
 

@@ -16,6 +16,7 @@ androidx-annotation = { module = "androidx.annotation:annotation", version = "1.
 androidx-constraintLayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
 androidx-appCompat = { module = "androidx.appcompat:appcompat", version = "1.5.1" }
 androidx-lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version = "2.5.1" }
+androidx-room-xprocessing = { module = "androidx.room:room-compiler-processing", version = "2.4.3" }
 
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "7.3.0" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -33,14 +34,11 @@ commons-text = { module = "org.apache.commons:commons-text", version = "1.9" }
 
 google-auto-common = { module = "com.google.auto:auto-common", version = "1.2.1" }
 google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.0.1" }
+google-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 square-javaPoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 
 junit = { module = "junit:junit", version = "4.13.2" }
-
-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
-
-xprocessing = { module = "androidx.room:room-compiler-processing", version = "2.4.3" }
 
 [bundles]
 dagger = [

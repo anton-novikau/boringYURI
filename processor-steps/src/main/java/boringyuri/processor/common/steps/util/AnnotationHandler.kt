@@ -46,7 +46,7 @@ class AnnotationHandler @JvmOverloads constructor(
                     nullabilityAnnotation = NON_NULL
                 XNullability.NULLABLE ->
                     nullabilityAnnotation = NULLABLE
-                else -> {}
+                else -> { /* NO-OP */ }
             }
         }
 
@@ -97,7 +97,7 @@ class AnnotationHandler @JvmOverloads constructor(
                 return true
             XNullability.NONNULL ->
                 return false
-            XNullability.UNKNOWN -> {}
+            XNullability.UNKNOWN -> { /* NO-OP */ }
         }
 
         element.getAllAnnotations().forEach { annotation ->

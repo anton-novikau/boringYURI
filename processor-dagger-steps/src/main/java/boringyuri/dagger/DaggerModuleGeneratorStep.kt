@@ -38,7 +38,7 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
 
     private val providesFunctions = mutableListOf<MethodSpec>()
     private val originatingElements = mutableSetOf<XElement>()
-    private val deferredFactoriesName = mutableSetOf<String>()
+    private val deferredFactoryNames = mutableSetOf<String>()
 
     override fun annotations(): Set<String> {
         return setOf(UriFactory::class.java.name)
@@ -61,9 +61,9 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
             // in the next processing round.
             if (factoryImpl == null) {
                 deferredElements.add(factory)
-                deferredFactoriesName += factory.qualifiedName
+                deferredFactoryNames += factory.qualifiedName
             } else {
-                deferredFactoriesName.remove(factory.qualifiedName)
+                deferredFactoryNames.remove(factory.qualifiedName)
                 providesFunctions.add(buildProvidesMethod(factory, factoryImpl))
                 originatingElements.add(factory)
             }
@@ -83,13 +83,13 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
     }
 
     override fun onProcessingOver() {
-        if (deferredFactoriesName.isNotEmpty()) {
+        if (deferredFactoryNames.isNotEmpty()) {
             logger.warn(
                 e = null,
-                "Some of the Uri factory implementations were not generated: $deferredFactoriesName"
+                "Some of the Uri factory implementations were not generated: $deferredFactoryNames"
             )
         }
-        deferredFactoriesName.clear()
+        deferredFactoryNames.clear()
         providesFunctions.clear()
         originatingElements.clear()
     }

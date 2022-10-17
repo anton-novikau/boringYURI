@@ -47,7 +47,7 @@ class FileWriter(private val logger: Logger, private val xFiler: XFiler) {
         }
     }
 
-    companion object {
+    private companion object {
         const val DEFAULT_INDENTATION = "    "
         const val DEFAULT_FILE_COMMENT = "Boring YURI generated this code for you. Do not modify!"
     }

@@ -38,17 +38,17 @@ abstract class KspBoringAnnotationProcessor(
         .build()
 ) {
 
-    abstract fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep>
+    abstract fun initStep(session: ProcessingSession): BoringProcessingStep
 
     private val delegate: BoringAnnotationProcessorDelegate by lazy {
         object : BoringAnnotationProcessorDelegate(xProcessingEnv) {
             override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-                return this@KspBoringAnnotationProcessor.initSteps(session)
+                return listOf(this@KspBoringAnnotationProcessor.initStep(session))
             }
         }
     }
 
-    override fun processingSteps(): Iterable<XProcessingStep> {
+    final override fun processingSteps(): Iterable<XProcessingStep> {
         return delegate.processingSteps()
     }
 

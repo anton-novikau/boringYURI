@@ -25,15 +25,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 class AssociatedUriDataGeneratorProcessor(
     environment: SymbolProcessorEnvironment
 ) : KspBoringAnnotationProcessor(environment) {
-    override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return listOf(
-            AssociatedUriDataGeneratorStep.create(session),
-            // For some reason if we pair AssociatedUriDataGeneratorStep and UriFactoryGeneratorStep
-            // or UriMatcherGeneratorStep in the same processor it will try to create some file twice
-            // and crashes with error (FileAlreadyExistsException). So moved other steps to their
-            // own processors unlike apt version
-        )
+    override fun initStep(session: ProcessingSession): BoringProcessingStep {
+        return AssociatedUriDataGeneratorStep.create(session)
     }
-
-
 }

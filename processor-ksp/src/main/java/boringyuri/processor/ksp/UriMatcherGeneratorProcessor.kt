@@ -25,9 +25,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 class UriMatcherGeneratorProcessor(
     environment: SymbolProcessorEnvironment
 ) : KspBoringAnnotationProcessor(environment) {
-    override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return listOf(
-            UriMatcherGeneratorStep(session)
-        )
+    override fun initStep(session: ProcessingSession): BoringProcessingStep {
+        return UriMatcherGeneratorStep(session)
     }
 }

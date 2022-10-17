@@ -25,9 +25,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 class DaggerModuleGeneratorProcessor(
     environment: SymbolProcessorEnvironment
 ) : KspBoringAnnotationProcessor(environment) {
-    override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return setOf(
-            DaggerModuleGeneratorStep(session)
-        )
+    override fun initStep(session: ProcessingSession): BoringProcessingStep {
+        return DaggerModuleGeneratorStep(session)
     }
 }

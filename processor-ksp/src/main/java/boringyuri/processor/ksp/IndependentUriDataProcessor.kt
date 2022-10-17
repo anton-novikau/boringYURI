@@ -33,12 +33,10 @@ import com.squareup.javapoet.TypeName
 
 class IndependentUriDataProcessor(environment: SymbolProcessorEnvironment) :
     KspBoringAnnotationProcessor(environment) {
-    override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
+    override fun initStep(session: ProcessingSession): BoringProcessingStep {
         val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
 
-        return setOf(
-            IndependentUriDataGeneratorStep(session, annotationHandler)
-        )
+        return IndependentUriDataGeneratorStep(session, annotationHandler)
     }
 
     companion object {

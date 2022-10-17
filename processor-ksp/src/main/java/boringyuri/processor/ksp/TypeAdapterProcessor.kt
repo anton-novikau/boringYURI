@@ -26,7 +26,7 @@ class TypeAdapterProcessor(
     environment: SymbolProcessorEnvironment
 ) : KspBoringAnnotationProcessor(environment) {
 
-    override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return listOf(TypeAdapterFactoryGeneratorStep(session))
+    override fun initStep(session: ProcessingSession): BoringProcessingStep {
+        return TypeAdapterFactoryGeneratorStep(session)
     }
 }

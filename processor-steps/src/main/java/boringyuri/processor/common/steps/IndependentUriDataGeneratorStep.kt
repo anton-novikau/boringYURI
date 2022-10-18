@@ -170,12 +170,12 @@ class IndependentUriDataGeneratorStep(
     }
 
     private fun canBeImplemented(method: XMethodElement): Boolean {
-        if (method.isStatic() || method.isJavaDefault()) {
+        if (method.isStatic() || method.isJavaDefault() || method.hasKotlinDefaultImpl()) {
             return false  // skip static or default methods
         }
 
         if (method.getAnnotation<Path>() == null && method.getAnnotation<Param>() == null) {
-            logger.warn(
+            logger.error(
                 method,
                 "'${method.name}' must have either @%s or @%s",
                 Path::class.simpleName,
@@ -186,7 +186,7 @@ class IndependentUriDataGeneratorStep(
 
         val returnType = method.returnType.typeName
         if (TypeName.VOID == returnType) {
-            logger.warn(
+            logger.error(
                 method,
                 "Method annotated with @%s or @%s can not return 'void'",
                 Path::class.simpleName,

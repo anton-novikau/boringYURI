@@ -16,16 +16,10 @@
 
 package boringyuri.processor.common.steps.ext
 
-import androidx.room.compiler.processing.XAnnotationBox
-import androidx.room.compiler.processing.XArrayType
-import androidx.room.compiler.processing.XElement
-import androidx.room.compiler.processing.XExecutableElement
-import androidx.room.compiler.processing.XHasModifiers
-import androidx.room.compiler.processing.XMethodElement
-import androidx.room.compiler.processing.XType
-import androidx.room.compiler.processing.XTypeElement
-import androidx.room.compiler.processing.XVariableElement
+import androidx.room.compiler.processing.*
 import boringyuri.api.adapter.TypeAdapter
+import boringyuri.processor.common.ext.getAnnotationValueAsType
+import boringyuri.processor.common.ext.requireAnnotationValueAsType
 import boringyuri.processor.common.steps.util.AnnotationHandler
 import boringyuri.processor.common.steps.util.buildGetterName
 import boringyuri.processor.common.visitor.TypeVisitor
@@ -161,21 +155,22 @@ fun XMethodElement.createMethodSignature(
         .returns(paramType)
 }
 
-fun XVariableElement.findTypeAdapter(): XAnnotationBox<TypeAdapter>? {
-    val adapter = getAnnotation(TypeAdapter::class)
+fun XElement.findTypeAdapter(): XType? {
+    val adapter = getAnnotationValueAsType<TypeAdapter>()
     if (adapter != null) {
         return adapter
     }
-    return type.accept(TypeAdapterVisitor(), null)
+    val type = when (this) {
+        is XVariableElement -> type
+        is XMethodElement -> returnType
+        else -> null
+    }
+    return type?.accept(TypeAdapterVisitor(), null)
+        ?.getAsType("value")
 }
 
-fun XMethodElement.findTypeAdapter(): XAnnotationBox<TypeAdapter>? {
-    val adapter = getAnnotation(TypeAdapter::class)
-    if (adapter != null) {
-        return adapter
-    }
-
-    return returnType.accept(TypeAdapterVisitor(), null)
+fun XAnnotated.requireTypeAdapter(): XType {
+    return requireAnnotationValueAsType<TypeAdapter>()
 }
 
 private class TypeAdapterVisitor : TypeVisitor<XAnnotationBox<TypeAdapter>?, Unit?> {

@@ -24,6 +24,7 @@ import androidx.room.compiler.processing.addOriginatingElement
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.steps.ext.requireTypeAdapter
 import boringyuri.processor.common.steps.type.CommonTypeName.ANY_TYPE_ADAPTER
 import boringyuri.processor.common.steps.type.CommonTypeName.CLASS
 import boringyuri.processor.common.steps.type.CommonTypeName.HASH_MAP
@@ -68,7 +69,7 @@ class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProces
         }
 
         val roundClasses = adaptableElements.map {
-            it.requireAnnotation(TypeAdapter::class).getAsType("value")
+            it.requireTypeAdapter()
         }
 
         val roundClassNames = roundClasses.map {
@@ -80,7 +81,7 @@ class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProces
             }
 
             originatingElements.addAll(adaptableElements)
-            originatingElements.addAll(roundClasses.mapNotNull { it?.typeElement })
+            originatingElements.addAll(roundClasses.mapNotNull { it.typeElement })
 
             val adapterFactoryMethods = factoryMethods.values.sortedBy { it.name }
             generateTypeAdapterFactory(

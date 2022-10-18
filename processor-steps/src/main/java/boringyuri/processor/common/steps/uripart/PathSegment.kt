@@ -101,7 +101,7 @@ class VariableWritePathSegment(
 ) : PathSegment {
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val typeAdapter = segment.findTypeAdapter()?.getAsType("value")
+        val typeAdapter = segment.findTypeAdapter()
 
         val valueBlock = CodeBlock.builder()
         val serializedSegment = typeConverter.buildSerializeBlock(
@@ -145,7 +145,7 @@ class VariableReadPathSegment(
     }
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        return createValueBlock(typeConverter, segment.findTypeAdapter()?.getAsType("value"))
+        return createValueBlock(typeConverter, segment.findTypeAdapter())
     }
 
 }
@@ -164,7 +164,7 @@ class MethodReadPathSegment(
     ): MethodSpec.Builder = segment.createMethodSignature(defaultValue, annotationHandler)
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        return createValueBlock(typeConverter, segment.findTypeAdapter()?.getAsType("value"))
+        return createValueBlock(typeConverter, segment.findTypeAdapter())
     }
 }
 

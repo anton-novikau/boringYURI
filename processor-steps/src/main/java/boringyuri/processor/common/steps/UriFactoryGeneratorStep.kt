@@ -38,6 +38,9 @@ import boringyuri.api.constant.StringParam
 import boringyuri.processor.common.steps.ProcessorOptions.getTypeAdapterFactory
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ext.getAnnotation
+import boringyuri.processor.common.ext.getAnnotations
+import boringyuri.processor.common.ext.requireAnnotation
 import boringyuri.processor.common.steps.ext.createModifiers
 import boringyuri.processor.common.steps.ext.createParamSpec
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI
@@ -122,7 +125,7 @@ class UriFactoryGeneratorStep(
             }
 
             val builderAnnotation =
-                methodElement.getAnnotation(UriBuilder::class)?.value
+                methodElement.getAnnotation<UriBuilder>()
                     ?: continue // skip non-annotated methods
 
             val returnType = methodElement.returnType.typeElement?.className
@@ -182,11 +185,11 @@ class UriFactoryGeneratorStep(
         parameterSpecs: Map<XVariableElement, ParameterSpec>
     ): Map<String, VariableWritePathSegment> {
         return methodParameters.mapNotNull { param ->
-            val pathAnnotation = param.getAnnotation(Path::class)?.value ?: return@mapNotNull null
+            val pathAnnotation = param.getAnnotation<Path>() ?: return@mapNotNull null
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation(DefaultValue::class)?.value
+            val defaultValue = param.getAnnotation<DefaultValue>()
 
             if (nullable && defaultValue == null) {
                 logger.error(
@@ -213,11 +216,11 @@ class UriFactoryGeneratorStep(
         parameterSpecs: Map<XVariableElement, ParameterSpec>
     ): List<QueryParameter> {
         return methodParameters.mapNotNull { param ->
-            val paramAnnotation = param.getAnnotation(Param::class)?.value ?: return@mapNotNull null
+            val paramAnnotation = param.getAnnotation<Param>() ?: return@mapNotNull null
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation(DefaultValue::class)?.value
+            val defaultValue = param.getAnnotation<DefaultValue>()
 
             val paramName = paramAnnotation.value.ifEmpty { spec.name }
             VariableWriteQueryParameter(
@@ -293,7 +296,7 @@ class UriFactoryGeneratorStep(
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addSuperinterface(containerElement.className)
 
-        val containerAnnotation = containerElement.requireAnnotation(UriFactory::class).value
+        val containerAnnotation = containerElement.requireAnnotation<UriFactory>()
         val scheme = containerAnnotation.scheme
         val authority = containerAnnotation.authority
 
@@ -358,13 +361,13 @@ class UriFactoryGeneratorStep(
         methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotations(StringParam::class)
+        val constParams = methodElement.getAnnotations<StringParam>()
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$S)",
                 URI_BUILDER_NAME,
-                constParam.value.name,
-                constParam.value.value
+                constParam.name,
+                constParam.value
             )
         }
     }
@@ -373,14 +376,14 @@ class UriFactoryGeneratorStep(
         methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotations(LongParam::class)
+        val constParams = methodElement.getAnnotations<LongParam>()
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.value.name,
+                constParam.name,
                 STRING,
-                constParam.value.value
+                constParam.value
             )
         }
     }
@@ -389,14 +392,14 @@ class UriFactoryGeneratorStep(
         methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotations(DoubleParam::class)
+        val constParams = methodElement.getAnnotations<DoubleParam>()
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.value.name,
+                constParam.name,
                 STRING,
-                constParam.value.value
+                constParam.value
             )
         }
     }
@@ -405,14 +408,14 @@ class UriFactoryGeneratorStep(
         methodElement: XExecutableElement,
         method: MethodSpec.Builder
     ) {
-        val constParams = methodElement.getAnnotations(BooleanParam::class)
+        val constParams = methodElement.getAnnotations<BooleanParam>()
         for (constParam in constParams) {
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.value.name,
+                constParam.name,
                 STRING,
-                constParam.value.value
+                constParam.value
             )
         }
     }

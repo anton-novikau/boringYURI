@@ -55,7 +55,7 @@ class VariableWriteQueryParameter(
 ) : QueryParameter {
 
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
-        val typeAdapter = parameter.findTypeAdapter()?.getAsType("value")
+        val typeAdapter = parameter.findTypeAdapter()
 
         val appendQueryBlock = CodeBlock.builder()
 
@@ -114,7 +114,7 @@ class VariableReadQueryParameter(
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
             parameterElement.type,
-            parameterElement.findTypeAdapter()?.getAsType("value"),
+            parameterElement.findTypeAdapter(),
             typeConverter,
             parameterElement
         )
@@ -142,7 +142,7 @@ class MethodReadQueryParameter(
     override fun createValueBlock(typeConverter: TypeConverter): CodeBlock {
         val deserializeStrategy = ConversionStrategyFactory.createQueryStrategy(
             parameterElement.returnType,
-            parameterElement.findTypeAdapter()?.getAsType("value"),
+            parameterElement.findTypeAdapter(),
             typeConverter,
             parameterElement
         )

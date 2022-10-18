@@ -35,6 +35,8 @@ import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.common.base.AbortProcessingException
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ext.getAnnotation
+import boringyuri.processor.common.ext.requireAnnotation
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI_MATCHER
 import boringyuri.processor.common.steps.type.CommonTypeName.NON_NULL
@@ -106,7 +108,7 @@ class UriMatcherGeneratorStep(
     }
 
     private fun obtainFactoryMetadata(factory: XTypeElement): UriMatcherMetadata? {
-        val uriFactoryAnnotation = factory.getAnnotation(UriFactory::class)?.value
+        val uriFactoryAnnotation = factory.getAnnotation<UriFactory>()
         if (uriFactoryAnnotation == null) {
             logger.warn(
                 factory,
@@ -128,9 +130,9 @@ class UriMatcherGeneratorStep(
                 continue // skip static methods
             }
 
-            val uriBuilderAnnotation = method.getAnnotation(UriBuilder::class)?.value
-            val matchesToAnnotation = method.getAnnotation(MatchesTo::class)?.value
-            val matcherCodeAnnotation = method.getAnnotation(MatcherCode::class)?.value
+            val uriBuilderAnnotation = method.getAnnotation<UriBuilder>()
+            val matchesToAnnotation = method.getAnnotation<MatchesTo>()
+            val matcherCodeAnnotation = method.getAnnotation<MatcherCode>()
             val hasMatcherCode = matchesToAnnotation != null || matcherCodeAnnotation != null
             if (uriBuilderAnnotation == null || !hasMatcherCode) {
                 if (hasMatcherCode) {
@@ -219,7 +221,7 @@ class UriMatcherGeneratorStep(
     }
 
     private fun obtainMatcherClassName(factory: XTypeElement): ClassName {
-        val withUriMatcherAnnotation = factory.requireAnnotation(WithUriMatcher::class).value
+        val withUriMatcherAnnotation = factory.requireAnnotation<WithUriMatcher>()
         val matcherName = withUriMatcherAnnotation.value
 
         return if (matcherName.isEmpty()) {
@@ -239,7 +241,7 @@ class UriMatcherGeneratorStep(
 
     private fun obtainPathParameters(method: XExecutableElement): Map<String, TypeName> {
         return method.parameters.mapNotNull {
-            val pathAnnotation = it.getAnnotation(Path::class)?.value ?: return@mapNotNull null
+            val pathAnnotation = it.getAnnotation<Path>() ?: return@mapNotNull null
 
             val segmentName = pathAnnotation.value.ifEmpty {
                 it.name

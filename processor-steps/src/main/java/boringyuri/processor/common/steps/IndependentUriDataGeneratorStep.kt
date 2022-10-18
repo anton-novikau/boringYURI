@@ -27,6 +27,8 @@ import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
 import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.ext.getAnnotation
+import boringyuri.processor.common.ext.requireAnnotation
 import boringyuri.processor.common.steps.ext.createFieldSpec
 import boringyuri.processor.common.steps.uripart.MethodReadPathSegment
 import boringyuri.processor.common.steps.uripart.MethodReadQueryParameter
@@ -90,7 +92,7 @@ class IndependentUriDataGeneratorStep(
     }
 
     private fun obtainUriMetadata(sourceElement: XTypeElement): UriMetadata {
-        val uriDataAnnotation = sourceElement.requireAnnotation(UriData::class).value
+        val uriDataAnnotation = sourceElement.requireAnnotation<UriData>()
 
         val basePath = uriDataAnnotation.value
         // Base path may contain constant segments, wildcard segments and templates
@@ -107,7 +109,7 @@ class IndependentUriDataGeneratorStep(
                 GETTER_PATTERN.find(methodName)?.run { groupValues[1] } ?: methodName
             )
 
-            val defaultValue = method.getAnnotation(DefaultValue::class)?.value?.value
+            val defaultValue = method.getAnnotation<DefaultValue>()?.value
             val field = method.createFieldSpec(
                 paramName,
                 defaultValue,
@@ -115,7 +117,7 @@ class IndependentUriDataGeneratorStep(
             ).also { fieldSpecs.add(it) }
             val nullable = annotationHandler.isNullable(method.returnType.typeName, method)
 
-            val pathAnnotation = method.getAnnotation(Path::class)?.value
+            val pathAnnotation = method.getAnnotation<Path>()
             if (pathAnnotation != null) {
                 if (nullable) {
                     logger.error(
@@ -146,7 +148,7 @@ class IndependentUriDataGeneratorStep(
                 }
 
             } else {
-                val paramAnnotation = method.requireAnnotation(Param::class).value
+                val paramAnnotation = method.requireAnnotation<Param>()
                 val queryParamName = paramAnnotation.value.ifEmpty { paramName }
                 queryParams.add(
                     MethodReadQueryParameter(
@@ -175,7 +177,7 @@ class IndependentUriDataGeneratorStep(
             return false  // skip static or default methods
         }
 
-        if (method.getAnnotation(Path::class) == null && method.getAnnotation(Param::class) == null) {
+        if (method.getAnnotation<Path>() == null && method.getAnnotation<Param>() == null) {
             logger.warn(
                 method,
                 "'${method.name}' must have either @%s or @%s",

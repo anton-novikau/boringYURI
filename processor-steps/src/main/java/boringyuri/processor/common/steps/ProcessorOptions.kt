@@ -17,8 +17,8 @@
 package boringyuri.processor.common.steps
 
 import androidx.room.compiler.processing.ExperimentalProcessingApi
-import androidx.room.compiler.processing.XProcessingEnv
 import boringyuri.api.adapter.BoringTypeAdapter
+import boringyuri.processor.common.base.ProcessingSession
 import com.squareup.javapoet.ClassName
 
 
@@ -33,9 +33,17 @@ object ProcessorOptions {
     const val OPT_TYPE_ADAPTER_FACTORY = "boringyuri.type_adapter_factory"
 
     @OptIn(ExperimentalProcessingApi::class)
-    fun getTypeAdapterFactory(env: XProcessingEnv): ClassName? {
-        return env.options[OPT_TYPE_ADAPTER_FACTORY]?.let {
-            ClassName.bestGuess(it)
+    fun getTypeAdapterFactory(session: ProcessingSession): ClassName? {
+        return session.processingEnv.options[OPT_TYPE_ADAPTER_FACTORY]?.let {
+            try {
+                ClassName.bestGuess(it)
+            } catch (e: IllegalArgumentException) {
+                session.logger.warn(
+                    null,
+                    "Invalid class name in '$OPT_TYPE_ADAPTER_FACTORY' option."
+                )
+                null
+            }
         }
     }
 }

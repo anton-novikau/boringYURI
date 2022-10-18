@@ -60,7 +60,7 @@ class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProces
 
         // Stop processing Type Adapters if the factory class is not specified.
         // Every adapter instance will be created at use without caching.
-        val typeAdapterFactory = ProcessorOptions.getTypeAdapterFactory(env)
+        val typeAdapterFactory = ProcessorOptions.getTypeAdapterFactory(session)
             ?: return emptySet()
 
         val adaptableElements = elementsByAnnotation[TypeAdapter::class.java.name]

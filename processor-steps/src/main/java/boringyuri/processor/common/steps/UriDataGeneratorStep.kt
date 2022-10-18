@@ -60,7 +60,7 @@ abstract class UriDataGeneratorStep protected constructor(
 
     private val typeConverter = TypeConverter(
         logger,
-        getTypeAdapterFactory(session.processingEnv)
+        getTypeAdapterFactory(session)
     )
 
     protected fun obtainBasePathSegments(

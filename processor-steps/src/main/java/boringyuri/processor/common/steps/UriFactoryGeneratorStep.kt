@@ -68,7 +68,7 @@ class UriFactoryGeneratorStep(
 
     private val typeConverter = TypeConverter(
         logger,
-        getTypeAdapterFactory(session.processingEnv)
+        getTypeAdapterFactory(session)
     )
 
     override fun annotations(): Set<String> {

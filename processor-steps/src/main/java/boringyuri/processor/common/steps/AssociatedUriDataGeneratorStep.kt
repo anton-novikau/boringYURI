@@ -15,32 +15,12 @@
  */
 package boringyuri.processor.common.steps
 
-import androidx.room.compiler.processing.ExperimentalProcessingApi
-import androidx.room.compiler.processing.XElement
-import androidx.room.compiler.processing.XExecutableElement
-import androidx.room.compiler.processing.XFiler
-import androidx.room.compiler.processing.XMethodElement
-import androidx.room.compiler.processing.XProcessingEnv
-import androidx.room.compiler.processing.XTypeElement
-import androidx.room.compiler.processing.isMethod
-import boringyuri.api.DefaultValue
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriBuilder
-import boringyuri.api.UriFactory
-import boringyuri.api.WithUriData
-import boringyuri.api.adapter.TypeAdapter
+import androidx.room.compiler.processing.*
+import boringyuri.api.*
 import boringyuri.api.constant.BooleanParam
-import boringyuri.api.constant.BooleanParams
 import boringyuri.api.constant.DoubleParam
-import boringyuri.api.constant.DoubleParams
 import boringyuri.api.constant.LongParam
-import boringyuri.api.constant.LongParams
 import boringyuri.api.constant.StringParam
-import boringyuri.api.constant.StringParams
-import boringyuri.api.matcher.MatcherCode
-import boringyuri.api.matcher.MatchesTo
-import boringyuri.api.matcher.WithUriMatcher
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.getAnnotations
@@ -54,15 +34,25 @@ import boringyuri.processor.common.steps.uripart.VariableReadPathSegment
 import boringyuri.processor.common.steps.uripart.VariableReadQueryParameter
 import boringyuri.processor.common.steps.util.AnnotationHandler
 import boringyuri.processor.common.steps.util.buildGetterName
-import com.squareup.javapoet.ArrayTypeName
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.CodeBlock
-import com.squareup.javapoet.FieldSpec
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Modifier
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.Set
+import kotlin.collections.arrayListOf
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.forEach
+import kotlin.collections.groupBy
+import kotlin.collections.hashSetOf
+import kotlin.collections.joinToString
+import kotlin.collections.map
+import kotlin.collections.set
+import kotlin.collections.setOf
+import kotlin.collections.toList
 
 @OptIn(ExperimentalProcessingApi::class)
 class AssociatedUriDataGeneratorStep(
@@ -85,7 +75,7 @@ class AssociatedUriDataGeneratorStep(
 
         val deferred = hashSetOf<XElement>()
         for (annotatedMethod in annotatedMethods) {
-            if(!annotatedMethod.validate()){
+            if (!annotatedMethod.validate()) {
                 deferred.add(annotatedMethod)
                 continue
             }
@@ -208,7 +198,7 @@ class AssociatedUriDataGeneratorStep(
             ClassName.bestGuess(desiredClassName).takeIf {
                 it.packageName().isNotEmpty()
             } ?: ClassName.get(
-                (sourceElement.enclosingElement as? XTypeElement)?.packageName,
+                sourceElement.extractPackage(),
                 desiredClassName
             )
         }
@@ -315,28 +305,10 @@ class AssociatedUriDataGeneratorStep(
         private const val DATA_SUFFIX = "Data"
 
         fun create(session: ProcessingSession): AssociatedUriDataGeneratorStep {
-            return AssociatedUriDataGeneratorStep(session, AnnotationHandler(INTERNAL_ANNOTATIONS))
+            return AssociatedUriDataGeneratorStep(
+                session,
+                AnnotationHandler(COMMON_INTERNAL_ANNOTATIONS)
+            )
         }
-
-        internal val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
-            ClassName.get(UriFactory::class.java),
-            ClassName.get(WithUriMatcher::class.java),
-            ClassName.get(UriBuilder::class.java),
-            ClassName.get(MatchesTo::class.java),
-            ClassName.get(MatcherCode::class.java),
-            ClassName.get(WithUriData::class.java),
-            ClassName.get(TypeAdapter::class.java),
-            ClassName.get(Path::class.java),
-            ClassName.get(Param::class.java),
-            ClassName.get(DefaultValue::class.java),
-            ClassName.get(StringParam::class.java),
-            ClassName.get(StringParams::class.java),
-            ClassName.get(LongParam::class.java),
-            ClassName.get(LongParams::class.java),
-            ClassName.get(DoubleParam::class.java),
-            ClassName.get(DoubleParams::class.java),
-            ClassName.get(BooleanParam::class.java),
-            ClassName.get(BooleanParams::class.java)
-        )
     }
 }

@@ -297,8 +297,8 @@ class TypeConverter(
         return if (typeAdapterFactory == null) {
             CodeBlock.of("new \$T()", typeAdapter.typeName)
         } else {
-            val typeAdapterName = typeAdapter.typeElement?.name
-            CodeBlock.of("\$T.create\$L()", typeAdapterFactory, typeAdapterName.toString())
+            val typeAdapterName = requireNotNull(typeAdapter.typeElement?.name)
+            CodeBlock.of("\$T.create\$L()", typeAdapterFactory, typeAdapterName)
         }
     }
 }

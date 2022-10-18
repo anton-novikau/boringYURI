@@ -436,7 +436,7 @@ class UriFactoryGeneratorStep(
         fun create(session: ProcessingSession): UriFactoryGeneratorStep {
             return UriFactoryGeneratorStep(
                 session,
-                AnnotationHandler(AssociatedUriDataGeneratorStep.INTERNAL_ANNOTATIONS)
+                AnnotationHandler(COMMON_INTERNAL_ANNOTATIONS)
             )
         }
     }

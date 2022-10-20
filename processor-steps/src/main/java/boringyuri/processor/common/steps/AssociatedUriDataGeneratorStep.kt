@@ -15,8 +15,18 @@
  */
 package boringyuri.processor.common.steps
 
-import androidx.room.compiler.processing.*
-import boringyuri.api.*
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.isMethod
+import boringyuri.api.DefaultValue
+import boringyuri.api.Param
+import boringyuri.api.Path
+import boringyuri.api.UriBuilder
+import boringyuri.api.WithUriData
 import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
@@ -34,25 +44,18 @@ import boringyuri.processor.common.steps.uripart.VariableReadPathSegment
 import boringyuri.processor.common.steps.uripart.VariableReadQueryParameter
 import boringyuri.processor.common.steps.util.AnnotationHandler
 import boringyuri.processor.common.steps.util.buildGetterName
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ArrayTypeName
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.TypeName
+import com.squareup.javapoet.TypeSpec
 import org.apache.commons.lang3.StringUtils
 import javax.lang.model.element.Modifier
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.Set
-import kotlin.collections.arrayListOf
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.forEach
-import kotlin.collections.groupBy
-import kotlin.collections.hashSetOf
-import kotlin.collections.joinToString
-import kotlin.collections.map
 import kotlin.collections.set
-import kotlin.collections.setOf
-import kotlin.collections.toList
 
 @OptIn(ExperimentalProcessingApi::class)
 class AssociatedUriDataGeneratorStep(
@@ -119,11 +122,11 @@ class AssociatedUriDataGeneratorStep(
         // the method templates found on the previous step and create the params list.
         methodParameters.forEach { param ->
             val paramName = param.name
-            val defaultValue = param.getAnnotation<DefaultValue>()
+            val defaultValue = param.getAnnotation<DefaultValue>()?.value
 
             val field = param.createFieldSpec(
                 paramName,
-                defaultValue?.value,
+                defaultValue,
                 annotationHandler
             ).also { fieldSpecs.add(it) }
 
@@ -132,9 +135,8 @@ class AssociatedUriDataGeneratorStep(
             val pathAnnotation = param.getAnnotation<Path>()
             if (pathAnnotation != null) {
                 if (nullable && defaultValue == null) {
-                    logger.error(param, param.type.nullability.toString())
                     logger.error(
-                        param, "Path segment '$paramName' must be explicitly non-null or" +
+                        param, "Path segment '$paramName' must be explicitly non-null" +
                                 " or have a @${DefaultValue::class.simpleName}."
                     )
                 }
@@ -149,7 +151,7 @@ class AssociatedUriDataGeneratorStep(
                         pathName,
                         field,
                         uriField,
-                        defaultValue?.value,
+                        defaultValue,
                         param
                     )
                 }
@@ -163,7 +165,7 @@ class AssociatedUriDataGeneratorStep(
                             field,
                             uriField,
                             nullable,
-                            defaultValue?.value,
+                            defaultValue,
                             param
                         )
                     )
@@ -307,7 +309,7 @@ class AssociatedUriDataGeneratorStep(
         fun create(session: ProcessingSession): AssociatedUriDataGeneratorStep {
             return AssociatedUriDataGeneratorStep(
                 session,
-                AnnotationHandler(COMMON_INTERNAL_ANNOTATIONS)
+                AnnotationHandler(URI_FACTORY_ANNOTATIONS)
             )
         }
     }

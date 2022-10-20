@@ -189,7 +189,7 @@ class UriFactoryGeneratorStep(
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()
+            val defaultValue = param.getAnnotation<DefaultValue>()?.value
 
             if (nullable && defaultValue == null) {
                 logger.error(
@@ -202,7 +202,7 @@ class UriFactoryGeneratorStep(
             val segment = VariableWritePathSegment(
                 param,
                 spec,
-                defaultValue?.value,
+                defaultValue,
                 pathAnnotation.encoded,
                 URI_BUILDER_NAME
             )
@@ -220,7 +220,7 @@ class UriFactoryGeneratorStep(
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()
+            val defaultValue = param.getAnnotation<DefaultValue>()?.value
 
             val paramName = paramAnnotation.value.ifEmpty { spec.name }
             VariableWriteQueryParameter(
@@ -228,7 +228,7 @@ class UriFactoryGeneratorStep(
                 spec,
                 param,
                 nullable,
-                defaultValue?.value,
+                defaultValue,
                 URI_BUILDER_NAME
             )
         }
@@ -436,7 +436,7 @@ class UriFactoryGeneratorStep(
         fun create(session: ProcessingSession): UriFactoryGeneratorStep {
             return UriFactoryGeneratorStep(
                 session,
-                AnnotationHandler(COMMON_INTERNAL_ANNOTATIONS)
+                AnnotationHandler(URI_FACTORY_ANNOTATIONS)
             )
         }
     }

@@ -15,17 +15,21 @@
  */
 package boringyuri.processor.common.steps
 
-import androidx.room.compiler.processing.*
+import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XFiler
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XProcessingEnv
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.isTypeElement
 import boringyuri.api.DefaultValue
 import boringyuri.api.Param
 import boringyuri.api.Path
 import boringyuri.api.UriData
-import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.requireAnnotation
 import boringyuri.processor.common.steps.ext.createFieldSpec
-import boringyuri.processor.common.steps.type.CommonTypeName
 import boringyuri.processor.common.steps.uripart.MethodReadPathSegment
 import boringyuri.processor.common.steps.uripart.MethodReadQueryParameter
 import boringyuri.processor.common.steps.uripart.ReadQueryParameter
@@ -227,17 +231,8 @@ class IndependentUriDataGeneratorStep(
         private const val CONTAINER_IMPL_SUFFIX = "Impl"
         private val GETTER_PATTERN = "^(?:get|is|has|are)([A-Z][a-zA-Z0-9]+)$".toRegex()
 
-        private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
-            CommonTypeName.OVERRIDE,
-            ClassName.get(UriData::class.java),
-            ClassName.get(Path::class.java),
-            ClassName.get(Param::class.java),
-            ClassName.get(DefaultValue::class.java),
-            ClassName.get(TypeAdapter::class.java)
-        )
-
         fun create(session: ProcessingSession): IndependentUriDataGeneratorStep {
-            return IndependentUriDataGeneratorStep(session, AnnotationHandler(INTERNAL_ANNOTATIONS))
+            return IndependentUriDataGeneratorStep(session, AnnotationHandler(INDEPENDENT_DATA_ANNOTATIONS))
         }
     }
 

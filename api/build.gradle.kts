@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright 2020 Anton Novikau
  *
@@ -30,11 +28,4 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
-        freeCompilerArgs = listOf("-Xjvm-default=all")
-    }
 }

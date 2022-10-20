@@ -16,7 +16,16 @@
 
 package boringyuri.processor.common.steps.ext
 
-import androidx.room.compiler.processing.*
+import androidx.room.compiler.processing.XAnnotated
+import androidx.room.compiler.processing.XAnnotationBox
+import androidx.room.compiler.processing.XArrayType
+import androidx.room.compiler.processing.XElement
+import androidx.room.compiler.processing.XExecutableElement
+import androidx.room.compiler.processing.XHasModifiers
+import androidx.room.compiler.processing.XMethodElement
+import androidx.room.compiler.processing.XType
+import androidx.room.compiler.processing.XTypeElement
+import androidx.room.compiler.processing.XVariableElement
 import boringyuri.api.adapter.TypeAdapter
 import boringyuri.processor.common.ext.getAnnotationValueAsType
 import boringyuri.processor.common.ext.requireAnnotationValueAsType

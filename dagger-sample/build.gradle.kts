@@ -19,6 +19,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -37,13 +38,40 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
     compileOptions {
         targetCompatibility = JavaVersion.VERSION_11
         sourceCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildTypes.onEach { buildType ->
+        if (productFlavors.isEmpty()) {
+            sourceSets {
+                getByName("main")
+                    .kotlin
+                    .srcDirs(
+                        "build/generated/ksp/${buildType.name}/kotlin",
+                        "build/generated/ksp/${buildType.name}/java",
+                    )
+            }
+        } else {
+            productFlavors.onEach { flavor ->
+                sourceSets {
+                    getByName("main")
+                        .kotlin
+                        .srcDirs(
+                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/kotlin",
+                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/java",
+                        )
+                }
+            }
+        }
     }
 }
 
@@ -61,6 +89,12 @@ dependencies {
     kapt(project(":dagger"))
     // kapt("com.github.anton-novikau:boringyuri-dagger:${findProperty("VERSION_NAME")}")
 
+    // ksp(project(":processor-ksp"))
+    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
+    // ksp(project(":dagger-ksp"))
+    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-dagger-ksp:$VERSION_NAME")
+
+
     implementation(libs.bundles.dagger)
     kapt(libs.bundles.dagger.compiler)
 
@@ -74,9 +108,20 @@ kapt {
         option("-Xmaxerrs", 1000) // max count of AP errors
     }
     arguments {
-        arg("boringyuri.type_adapter_factory", "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory")
+        arg(
+            "boringyuri.type_adapter_factory",
+            "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
+        )
         arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
     }
+}
+
+ksp {
+    arg(
+        "boringyuri.type_adapter_factory",
+        "boringyuri.dagger.sample.data.adapter.TypeAdapterFactory"
+    )
+    arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
 }
 
 tasks.withType<KotlinCompile>().configureEach {

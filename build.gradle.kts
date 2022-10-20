@@ -25,7 +25,15 @@ buildscript {
         classpath(libs.gradlePlugin.kotlin)
         classpath(libs.gradlePlugin.dokka)
         classpath(libs.gradlePlugin.publish)
+        classpath(libs.gradlePlugin.ksp)
+        classpath(libs.google.ksp.api)
     }
+}
+
+// https://youtrack.jetbrains.com/issue/KTIJ-19369
+@Suppress("DSL_SCOPE_VIOLATION")
+plugins {
+    alias(libs.plugins.kotlin.jvm) apply false
 }
 
 allprojects {

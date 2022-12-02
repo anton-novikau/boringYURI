@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -23,16 +24,27 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+val fatJarMembers: Set<String> = setOf(
+    "processor-common",
+    "processor-common-apt",
+    "processor-steps",
+)
+
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     implementation(project(":api"))
-    implementation(project(":processor-common-apt"))
-    implementation(project(":processor-steps"))
+    fatJarMembers.forEach { projectName ->
+        compileOnly(project(":$projectName"))
+    }
 
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly(libs.google.auto.service)
     kapt(libs.google.auto.service)
+
+    implementation(libs.square.javaPoet)
+    implementation(libs.androidx.room.xprocessing)
+    implementation(libs.commons.text)
 }
 
 java {
@@ -40,8 +52,19 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+tasks.jar.configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(
+        configurations.compileClasspath.get()
+            .filter { it.extension == "jar" && it.nameWithoutExtension in fatJarMembers }
+            .map {
+                zipTree(it)
+            }
+    )
+}
+
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
     }
 }

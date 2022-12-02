@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright 2022 Anton Novikau
  *
@@ -15,9 +13,28 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+}
+
+val fatJarMembers: Set<String> = setOf(
+    "processor-common",
+    "processor-common-ksp",
+    "processor-steps",
+)
+
+dependencies {
+    implementation(project(":api"))
+    fatJarMembers.forEach { projectName ->
+        compileOnly(project(":$projectName"))
+    }
+
+    implementation(libs.google.ksp.api)
+    implementation(libs.square.javaPoet)
+    implementation(libs.androidx.room.xprocessing)
+    implementation(libs.commons.text)
 }
 
 java {
@@ -25,15 +42,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-dependencies {
-    implementation(project(":api"))
-    implementation(project(":processor-common-ksp"))
-    implementation(project(":processor-steps"))
+tasks.jar.configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(
+        configurations.compileClasspath.get()
+            .filter { it.extension == "jar" && it.nameWithoutExtension in fatJarMembers }
+            .map {
+                zipTree(it)
+            }
+    )
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }

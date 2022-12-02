@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 /*
  * Copyright 2022 Anton Novikau
  *
@@ -15,9 +13,21 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+}
+
+dependencies {
+    compileOnly(project(":api"))
+    implementation(project(":processor-common"))
+    implementation(project(":processor-common-ksp"))
+    implementation(project(":processor-dagger-steps"))
+
+    implementation(libs.google.ksp.api)
+    implementation(libs.square.javaPoet)
+    implementation(libs.androidx.room.xprocessing)
 }
 
 java {
@@ -25,17 +35,9 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-dependencies {
-    implementation(project(":api"))
-    implementation(project(":processor-common-ksp"))
-    implementation(project(":processor-dagger-steps"))
-
-    implementation(libs.google.ksp.api)
-}
-
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }

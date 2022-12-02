@@ -27,12 +27,16 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     compileOnly(project(":api"))
+    implementation(project(":processor-common"))
     implementation(project(":processor-common-apt"))
     implementation(project(":processor-dagger-steps"))
 
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly(libs.google.auto.service)
     kapt(libs.google.auto.service)
+
+    implementation(libs.square.javaPoet)
+    implementation(libs.androidx.room.xprocessing)
 }
 
 java {
@@ -42,6 +46,6 @@ java {
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
     }
 }

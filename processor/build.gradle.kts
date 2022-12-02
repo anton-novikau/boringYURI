@@ -63,8 +63,68 @@ tasks.jar.configure {
     )
 }
 
+val fatSourcesJar = tasks.register<Jar>("fatSourcesJar") {
+    archiveClassifier.set("fatSources")
+    // TODO: configure assembling fat jar sources
+
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//
+//    from(sourceSets.main.get().java.srcDirs.single())
+//    fatJarMembers.forEach { projectName ->
+//        from(project(":$projectName").sourceSets.main.get().java.srcDirs.single())
+//    }
+}
+
+val fatJavadocJar = tasks.register<Jar>("fatJavadocJar") {
+    archiveClassifier.set("fatJavadoc")
+    // TODO: configure assembling fat jar javadocs
+}
+
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
     }
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("fatJar") {
+            from(components.getByName("java"))
+
+            artifact(fatSourcesJar)
+            artifact(fatJavadocJar)
+
+            groupId = project.findStringProperty("GROUP")
+            artifactId = project.findStringProperty("POM_ARTIFACT_ID")
+            version = project.findStringProperty("VERSION_NAME")
+
+            pom {
+                name.set(project.findStringProperty("POM_NAME"))
+                description.set(project.findStringProperty("POM_DESCRIPTION"))
+                url.set(project.findStringProperty("POM_URL"))
+                inceptionYear.set(project.findStringProperty("POM_INCEPTION_YEAR"))
+                scm {
+                    url.set(project.findStringProperty("POM_SCM_URL"))
+                    connection.set(project.findStringProperty("POM_SCM_CONNECTION"))
+                    developerConnection.set(project.findStringProperty("POM_SCM_DEV_CONNECTION"))
+                }
+                licenses {
+                    license {
+                        name.set(project.findStringProperty("POM_LICENCE_NAME"))
+                        url.set(project.findStringProperty("POM_LICENSE_URL"))
+                        distribution.set(project.findStringProperty("POM_LICENSE_DIST"))
+                    }
+                }
+                developers {
+                    developer {
+                        id.set(project.findStringProperty("POM_DEVELOPER_ID"))
+                        name.set(project.findStringProperty("POM_DEVELOPER_NAME"))
+                        url.set(project.findStringProperty("POM_DEVELOPER_URL"))
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun Project.findStringProperty(name: String) = requireNotNull(findProperty(name)).toString()

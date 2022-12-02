@@ -11,14 +11,13 @@ ksp = "1.7.10-1.0.6"
 dagger = "2.44"
 
 [libraries]
-
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.5.0" }
 androidx-constraintLayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
 androidx-appCompat = { module = "androidx.appcompat:appcompat", version = "1.5.1" }
 androidx-lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version = "2.5.1" }
 androidx-room-xprocessing = { module = "androidx.room:room-compiler-processing", version = "2.4.3" }
 
-gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "7.3.0" }
+gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "7.3.1" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.6.20" }
 gradlePlugin-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.19.0" }

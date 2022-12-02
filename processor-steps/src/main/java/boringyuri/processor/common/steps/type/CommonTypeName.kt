@@ -23,22 +23,23 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.WildcardTypeName
-import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.NotNull as JBNonNull
+import org.jetbrains.annotations.Nullable as JBNullable
 
 object CommonTypeName {
     val NON_NULL: ClassName = ClassName.get(NonNull::class.java)
 
     val NULLABLE: ClassName = ClassName.get(Nullable::class.java)
 
-    val JB_NON_NULL: ClassName = ClassName.get(NotNull::class.java)
+    val JB_NON_NULL: ClassName = ClassName.get(JBNonNull::class.java)
 
-    val JB_NULLABLE: ClassName = ClassName.get(org.jetbrains.annotations.Nullable::class.java)
+    val JB_NULLABLE: ClassName = ClassName.get(JBNullable::class.java)
 
     val STRING: ClassName = ClassName.get(String::class.java)
 
     val OVERRIDE: ClassName = ClassName.get(Override::class.java)
 
-    var UNSUPPORTED_OPERATION = ClassName.get(UnsupportedOperationException::class.java)
+    var UNSUPPORTED_OPERATION: ClassName = ClassName.get(UnsupportedOperationException::class.java)
 
     val MAP: ClassName = ClassName.get(MutableMap::class.java)
 

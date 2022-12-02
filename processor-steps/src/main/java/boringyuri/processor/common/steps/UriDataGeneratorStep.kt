@@ -16,7 +16,6 @@
 
 package boringyuri.processor.common.steps
 
-import androidx.room.compiler.processing.ExperimentalProcessingApi
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.addOriginatingElement
 import boringyuri.processor.common.base.BoringProcessingStep
@@ -40,7 +39,6 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-@OptIn(ExperimentalProcessingApi::class)
 abstract class UriDataGeneratorStep protected constructor(
     session: ProcessingSession,
     protected val annotationHandler: AnnotationHandler,

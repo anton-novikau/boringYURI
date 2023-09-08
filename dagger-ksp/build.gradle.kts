@@ -21,6 +21,15 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+val fatJarMembers: Set<String> = setOf(
+    "processor-dagger-steps",
+)
+
+fatJarMembers.forEach {
+    evaluationDependsOn(":$it")
+}
+
+
 dependencies {
     compileOnly(project(":api"))
     compileOnly(project(":processor-common"))
@@ -38,6 +47,43 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
+tasks.jar.configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(
+        configurations.compileClasspath.get()
+            .filter { it.extension == "jar" && it.nameWithoutExtension in fatJarMembers }
+            .map {
+                zipTree(it)
+            }
+    )
+}
+
+tasks.withType(com.vanniktech.maven.publish.tasks.SourcesJar::class)
+    .configureEach {
+        if (name == "javaSourcesJar") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            fatJarMembers.forEach {
+                from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            fatJarMembers.forEach {
+                sourceRoots.from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+}
+
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {

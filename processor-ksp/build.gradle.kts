@@ -27,6 +27,10 @@ val fatJarMembers: Set<String> = setOf(
     "processor-steps",
 )
 
+fatJarMembers.forEach {
+    evaluationDependsOn(":$it")
+}
+
 dependencies {
     implementation(project(":api"))
     fatJarMembers.forEach { projectName ->

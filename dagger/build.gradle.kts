@@ -27,9 +27,11 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     compileOnly(project(":api"))
-    implementation(project(":processor-common"))
-    implementation(project(":processor-common-apt"))
-    implementation(project(":processor-dagger-steps"))
+    compileOnly(project(":processor-common"))
+    compileOnly(project(":processor-common-apt"))
+    compileOnly(project(":processor-dagger-steps"))
+
+    implementation(project(":processor"))
 
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly(libs.google.auto.service)

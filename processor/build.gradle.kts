@@ -63,21 +63,29 @@ tasks.jar.configure {
     )
 }
 
-val fatSourcesJar = tasks.register<Jar>("fatSourcesJar") {
-    archiveClassifier.set("fatSources")
-    // TODO: configure assembling fat jar sources
+tasks.withType(com.vanniktech.maven.publish.tasks.SourcesJar::class)
+    .configureEach {
+        if (name == "javaSourcesJar") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//
-//    from(sourceSets.main.get().java.srcDirs.single())
-//    fatJarMembers.forEach { projectName ->
-//        from(project(":$projectName").sourceSets.main.get().java.srcDirs.single())
-//    }
-}
+            fatJarMembers.forEach {
+                from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
 
-val fatJavadocJar = tasks.register<Jar>("fatJavadocJar") {
-    archiveClassifier.set("fatJavadoc")
-    // TODO: configure assembling fat jar javadocs
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            fatJarMembers.forEach {
+                sourceRoots.from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -90,9 +98,6 @@ publishing {
     publications {
         create<MavenPublication>("fatJar") {
             from(components.getByName("java"))
-
-            artifact(fatSourcesJar)
-            artifact(fatJavadocJar)
 
             groupId = project.findStringProperty("GROUP")
             artifactId = project.findStringProperty("POM_ARTIFACT_ID")

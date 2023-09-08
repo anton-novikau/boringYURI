@@ -17,13 +17,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.dokka")
+    id("com.vanniktech.maven.publish")
 }
 
 dependencies {
     compileOnly(project(":api"))
-    implementation(project(":processor-common"))
-    implementation(project(":processor-common-ksp"))
-    implementation(project(":processor-dagger-steps"))
+    compileOnly(project(":processor-common"))
+    compileOnly(project(":processor-common-ksp"))
+    compileOnly(project(":processor-dagger-steps"))
+
+    implementation(project(":processor-ksp"))
 
     implementation(libs.google.ksp.api)
     implementation(libs.square.javaPoet)

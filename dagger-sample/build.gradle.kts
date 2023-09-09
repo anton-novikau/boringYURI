@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("UnstableApiUsage")
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -91,9 +93,9 @@ dependencies {
 
     if (useKsp) {
          ksp(project(":processor-ksp"))
-        // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
+        // ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
          ksp(project(":dagger-ksp"))
-        // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-dagger-ksp:$VERSION_NAME")
+        // ksp("com.github.anton-novikau:boringyuri-dagger-ksp:$VERSION_NAME")
     } else {
         kapt(project(":processor"))
         // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
@@ -137,7 +139,7 @@ kapt {
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        jvmTarget = "11" // in order to compile Kotlin to java 11 bytecode
+        jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
 }

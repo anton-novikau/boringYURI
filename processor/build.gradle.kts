@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import com.vanniktech.maven.publish.tasks.SourcesJar
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -29,6 +31,10 @@ val fatJarMembers: Set<String> = setOf(
     "processor-common-apt",
     "processor-steps",
 )
+
+fatJarMembers.forEach {
+    evaluationDependsOn(":$it")
+}
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -61,6 +67,31 @@ tasks.jar.configure {
                 zipTree(it)
             }
     )
+}
+
+tasks.withType(SourcesJar::class)
+    .configureEach {
+        if (name == "javaSourcesJar") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            fatJarMembers.forEach {
+                from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+
+tasks.withType<DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            fatJarMembers.forEach {
+                sourceRoots.from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.vanniktech.maven.publish.tasks.SourcesJar
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -23,13 +25,23 @@ plugins {
     id("com.vanniktech.maven.publish")
 }
 
+val fatJarMembers: Set<String> = setOf(
+    "processor-dagger-steps",
+)
+
+fatJarMembers.forEach {
+    evaluationDependsOn(":$it")
+}
+
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     compileOnly(project(":api"))
-    implementation(project(":processor-common"))
-    implementation(project(":processor-common-apt"))
-    implementation(project(":processor-dagger-steps"))
+    compileOnly(project(":processor-common"))
+    compileOnly(project(":processor-common-apt"))
+    compileOnly(project(":processor-dagger-steps"))
+
+    implementation(project(":processor"))
 
     //noinspection AnnotationProcessorOnCompilePath
     compileOnly(libs.google.auto.service)
@@ -43,6 +55,43 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
+tasks.jar.configure {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(
+        configurations.compileClasspath.get()
+            .filter { it.extension == "jar" && it.nameWithoutExtension in fatJarMembers }
+            .map {
+                zipTree(it)
+            }
+    )
+}
+
+tasks.withType(SourcesJar::class)
+    .configureEach {
+        if (name == "javaSourcesJar") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            fatJarMembers.forEach {
+                from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+
+tasks.withType<DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            fatJarMembers.forEach {
+                sourceRoots.from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+}
+
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {

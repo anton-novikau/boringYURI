@@ -22,6 +22,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val useKsp = false
+
 android {
     namespace = "boringyuri.sample"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -45,7 +47,10 @@ android {
             buildConfigField("boolean", "DEBUG_ONLY", "false")
 
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -54,25 +59,27 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
     }
 
-    buildTypes.onEach { buildType ->
-        if (productFlavors.isEmpty()) {
-            sourceSets {
-                getByName("main")
-                    .kotlin
-                    .srcDirs(
-                        "build/generated/ksp/${buildType.name}/kotlin",
-                        "build/generated/ksp/${buildType.name}/java",
-                    )
-            }
-        } else {
-            productFlavors.onEach { flavor ->
+    if (useKsp) {
+        buildTypes.onEach { buildType ->
+            if (productFlavors.isEmpty()) {
                 sourceSets {
                     getByName("main")
                         .kotlin
                         .srcDirs(
-                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/kotlin",
-                            "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/java",
+                            "build/generated/ksp/${buildType.name}/kotlin",
+                            "build/generated/ksp/${buildType.name}/java",
                         )
+                }
+            } else {
+                productFlavors.onEach { flavor ->
+                    sourceSets {
+                        getByName("main")
+                            .kotlin
+                            .srcDirs(
+                                "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/kotlin",
+                                "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/java",
+                            )
+                    }
                 }
             }
         }
@@ -89,28 +96,36 @@ dependencies {
     // code generators
     implementation(project(":api"))
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
-    kapt(project(":processor"))
-    // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
+    if (useKsp) {
+        ksp(project(":processor-ksp"))
+        // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
+    } else {
+        kapt(project(":processor"))
+        // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")
+    }
 
-    // ksp(project(":processor-ksp"))
-    // TODO actualize with actual artefact ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
 
     // unit tests
     testImplementation(libs.junit)
 }
 
-kapt {
-    useBuildCache = true
-    javacOptions {
-        option("-Xmaxerrs", 1000) // max count of AP errors
-    }
-    arguments {
+if (useKsp) {
+    ksp {
         arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
     }
-}
-
-ksp {
-    arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
+} else {
+    kapt {
+        useBuildCache = true
+        javacOptions {
+            option("-Xmaxerrs", 1000) // max count of AP errors
+        }
+        arguments {
+            arg(
+                "boringyuri.type_adapter_factory",
+                "boringyuri.sample.data.adapter.TypeAdapterFactory"
+            )
+        }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {

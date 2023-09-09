@@ -17,6 +17,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    id("org.jetbrains.dokka")
+    id("com.vanniktech.maven.publish")
 }
 
 val fatJarMembers: Set<String> = setOf(
@@ -24,6 +26,10 @@ val fatJarMembers: Set<String> = setOf(
     "processor-common-ksp",
     "processor-steps",
 )
+
+fatJarMembers.forEach {
+    evaluationDependsOn(":$it")
+}
 
 dependencies {
     implementation(project(":api"))
@@ -51,6 +57,31 @@ tasks.jar.configure {
                 zipTree(it)
             }
     )
+}
+
+tasks.withType(com.vanniktech.maven.publish.tasks.SourcesJar::class)
+    .configureEach {
+        if (name == "javaSourcesJar") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            fatJarMembers.forEach {
+                from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
+
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            fatJarMembers.forEach {
+                sourceRoots.from(
+                    project(":$it").sourceSets.getByName("main").java.srcDirs
+                )
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {

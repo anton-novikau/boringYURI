@@ -89,5 +89,32 @@ option:
    in your own package or would like to give it a different name, you may use this option and
    provide a new fully qualified name that works for you better.
 
+To enable the option above you need to include the following in your app module
+`build.gradle.kts` (or `build.gradle`) file:
+
+With Kotlin KAPT:
+
+```kotlin
+kapt {
+    arguments {
+        arg("boringyuri.dagger.module", "your.company.domain.BoringYuriModule")
+    }
+}
+```
+
+With Java only:
+
+```groovy
+android {
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["boringyuri.dagger.module": "your.company.domain.BoringYuriModule"]
+            }
+        }
+    }
+}
+```
+
 [1]: https://github.com/google/dagger/
 [2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java

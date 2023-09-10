@@ -1120,14 +1120,14 @@ dependencies {
   the specific type adapter only once. When the option is turned off, every instance of the adapter
   is created at use which gives to garbage collector more work.
 
-To enable any of the options above you need to include the following in your app module
+To enable the option above you need to include the following in your app module
 `build.gradle.kts` (or `build.gradle`) file:
 
 With Kotlin KSP:
 
 ```kotlin
 ksp {
-  arg("option_name", "option_value")
+  arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
 }
 ```
 
@@ -1136,7 +1136,7 @@ With Kotlin KAPT:
 ```kotlin
 kapt {
     arguments {
-        arg("option_name", "option_value")
+        arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
     }
 }
 ```
@@ -1148,7 +1148,7 @@ android {
     defaultConfig {
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["option_name": "option_value"]
+                arguments = ["boringyuri.type_adapter_factory": "your.company.domain.BoringTypeAdapter"]
             }
         }
     }

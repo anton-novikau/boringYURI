@@ -92,10 +92,10 @@ dependencies {
     // implementation("com.github.anton-novikau:boringyuri-api:${findProperty("VERSION_NAME")}")
 
     if (useKsp) {
-         ksp(project(":processor-ksp"))
-        // ksp("com.github.anton-novikau:boringyuri-processor-ksp:$VERSION_NAME")
-         ksp(project(":dagger-ksp"))
-        // ksp("com.github.anton-novikau:boringyuri-dagger-ksp:$VERSION_NAME")
+        ksp(project(":processor-ksp"))
+        // ksp("com.github.anton-novikau:boringyuri-processor-ksp:${findProperty("VERSION_NAME")}")
+        ksp(project(":dagger-ksp"))
+        // ksp("com.github.anton-novikau:boringyuri-dagger-ksp:${findProperty("VERSION_NAME")}")
     } else {
         kapt(project(":processor"))
         // kapt("com.github.anton-novikau:boringyuri-processor:${findProperty("VERSION_NAME")}")

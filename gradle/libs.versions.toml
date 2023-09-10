@@ -1,25 +1,25 @@
 [versions]
 # android versions
-buildTools = "33.0.0"
-android-compileSdk = "33"
-android-targetSdk = "33"
-android-minSdk = "17"
+buildTools = "34.0.0"
+android-compileSdk = "34"
+android-targetSdk = "34"
+android-minSdk = "21"
 
 # dependencies' versions
-kotlin = "1.7.10"
-ksp = "1.7.10-1.0.6"
-dagger = "2.44"
+kotlin = "1.9.10"
+ksp = "1.9.10-1.0.13"
+dagger = "2.48"
 
 [libraries]
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.5.0" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.7.0" }
 androidx-constraintLayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
-androidx-appCompat = { module = "androidx.appcompat:appcompat", version = "1.5.1" }
-androidx-lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version = "2.5.1" }
-androidx-room-xprocessing = { module = "androidx.room:room-compiler-processing", version = "2.4.3" }
+androidx-appCompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
+androidx-lifecycle-viewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version = "2.6.2" }
+androidx-room-xprocessing = { module = "androidx.room:room-compiler-processing", version = "2.5.2" }
 
-gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "7.3.1" }
+gradlePlugin-android = { module = "com.android.tools.build:gradle", version = "8.1.1" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-gradlePlugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.6.20" }
+gradlePlugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "1.9.0" }
 gradlePlugin-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.19.0" }
 gradlePlugin-ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 
@@ -29,10 +29,10 @@ dagger-support = { module = "com.google.dagger:dagger-android-support", version.
 dagger-compiler-common = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
 dagger-compiler-android = { module = "com.google.dagger:dagger-android-processor", version.ref = "dagger" }
 
-commons-text = { module = "org.apache.commons:commons-text", version = "1.9" }
+commons-text = { module = "org.apache.commons:commons-text", version = "1.10.0" }
 
-google-auto-common = { module = "com.google.auto:auto-common", version = "1.2.1" }
-google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.0.1" }
+google-auto-common = { module = "com.google.auto:auto-common", version = "1.2.2" }
+google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.1.1" }
 google-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 square-javaPoet = { module = "com.squareup:javapoet", version = "1.13.0" }

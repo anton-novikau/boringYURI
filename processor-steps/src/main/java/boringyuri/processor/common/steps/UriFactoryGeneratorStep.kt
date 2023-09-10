@@ -75,6 +75,11 @@ class UriFactoryGeneratorStep(
         return setOf(UriFactory::class.java.name)
     }
 
+    @Deprecated(
+        "We're combining processOver() and this process() overload.",
+        replaceWith = ReplaceWith("process(XProcessingEnv, Map<String, Set<XElement>>, Boolean)"),
+        level = DeprecationLevel.WARNING
+    )
     override fun process(
         env: XProcessingEnv,
         elementsByAnnotation: Map<String, Set<XElement>>

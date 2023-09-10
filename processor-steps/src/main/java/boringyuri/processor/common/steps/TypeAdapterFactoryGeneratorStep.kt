@@ -52,6 +52,11 @@ class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProces
         return setOf(TypeAdapter::class.java.name)
     }
 
+    @Deprecated(
+        "We're combining processOver() and this process() overload.",
+        replaceWith = ReplaceWith("process(XProcessingEnv, Map<String, Set<XElement>>, Boolean)"),
+        level = DeprecationLevel.WARNING
+    )
     @Suppress("ReturnCount")
     override fun process(
         env: XProcessingEnv,

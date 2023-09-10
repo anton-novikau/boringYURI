@@ -1121,7 +1121,25 @@ dependencies {
   is created at use which gives to garbage collector more work.
 
 To enable any of the options above you need to include the following in your app module
-`build.gradle` file:
+`build.gradle.kts` (or `build.gradle`) file:
+
+With Kotlin KSP:
+
+```kotlin
+ksp {
+  arg("option_name", "option_value")
+}
+```
+
+With Kotlin KAPT:
+
+```kotlin
+kapt {
+    arguments {
+        arg("option_name", "option_value")
+    }
+}
+```
 
 With Java only:
 
@@ -1133,16 +1151,6 @@ android {
                 arguments = ["option_name": "option_value"]
             }
         }
-    }
-}
-```
-
-With Kotlin:
-
-```kotlin
-kapt {
-    arguments {
-        arg("option_name", "option_value")
     }
 }
 ```

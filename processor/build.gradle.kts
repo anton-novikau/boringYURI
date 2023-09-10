@@ -83,6 +83,8 @@ tasks.withType(SourcesJar::class)
     }
 
 tasks.withType<DokkaTask>().configureEach {
+    mustRunAfter(tasks["kaptKotlin"])
+
     dokkaSourceSets {
         configureEach {
             fatJarMembers.forEach {

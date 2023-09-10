@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
 
       - name: Setup Gradle cache
         uses: actions/cache@v3
@@ -35,8 +35,14 @@ jobs:
       - name: Run pull request checks
         run: ./gradlew clean check --stacktrace
 
-      - name: Build 'sample'
+      - name: Build 'sample' with KAPT
         run: ./gradlew :sample:assembleDebug --stacktrace
 
-      - name: Build 'dagger-sample'
+      - name: Build 'dagger-sample' with KAPT
         run: ./gradlew :dagger-sample:assembleDebug --stacktrace
+
+      - name: Build 'sample' with KSP
+        run: ./gradlew -Pboringyuri.useKsp :sample:assembleDebug --stacktrace
+
+      - name: Build 'dagger-sample' with KSP
+        run: ./gradlew -Pboringyuri.useKsp :dagger-sample:assembleDebug --stacktrace

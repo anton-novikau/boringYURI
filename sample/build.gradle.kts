@@ -24,7 +24,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val useKsp = false
+val useKsp: Boolean = hasProperty("boringyuri.useKsp")
 
 android {
     namespace = "boringyuri.sample"

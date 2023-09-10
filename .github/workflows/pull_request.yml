@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew :dagger-sample:assembleDebug --stacktrace
 
       - name: Build 'sample' with KSP
-        run: ./gradlew -Pboringyuri.useKsp :sample:assembleDebug --stacktrace
+        run: ./gradlew -Pboringyuri.useKsp clean :sample:assembleDebug --stacktrace
 
       - name: Build 'dagger-sample' with KSP
         run: ./gradlew -Pboringyuri.useKsp :dagger-sample:assembleDebug --stacktrace

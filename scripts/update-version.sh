@@ -36,9 +36,10 @@ update_version() {
 
   update_file "s/^${VERSION_VAR_NAME}[[:blank:]]*=[[:blank:]]*($VERSION_PATTERN)[[:blank:]]*$/$VERSION_VAR_NAME = $version/" gradle.properties
 
-  local readme_regex="s/^([[:blank:]]*[a-zA-Z]+[[:blank:]]+\"com\.github\.anton-novikau:boringyuri-[a-z]+:)$VERSION_PATTERN\"[[:blank:]]*$/\1$version\"/"
+  local readme_regex="s/^([[:blank:]]*[a-zA-Z]+([[:blank:]]+|\()\"com\.github\.anton-novikau:boringyuri-[a-z-]+:)$VERSION_PATTERN\"(\))?[[:blank:]]*$/\1$version\"\3/"
   update_file "$readme_regex" README.md
   update_file "$readme_regex" dagger/README.md
+  update_file "$readme_regex" dagger-ksp/README.md
 }
 
 update_version "$1"

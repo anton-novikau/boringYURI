@@ -1,43 +1,41 @@
 # Dagger extension for Boring YURI
 
-An extension for `Boring Yuri` to provide generated `Uri` factories as injectable [Dagger][1]
-dependencies.
+A [KSP][3] extension for `Boring Yuri` to provide generated `Uri` factories as injectable
+[Dagger][1] dependencies.
 
 To be able to inject the generated `Uri` factories you need to add a generated module in the
 application [Component][2] like in the example:
 
-```java
+```kotlin
 @Singleton
-@Component(modules = {
-        ...
-        BoringYuriModule.class
-})
-interface AppComponent extends AndroidInjector<MyApplication> {
-
+@Component(
+        modules = [
+           ...
+        BoringYuriModule::class
+        ]
+)
+interface AppComponent : AndroidInjector<App> {
     @Component.Factory
-    abstract class Factory implements AndroidInjector.Factory<MyApplication> {
-    }
-
+    interface Factory : AndroidInjector.Factory<App>
 }
 ```
 
 When you have the generated `dagger` module included in your application component, you may enjoy
 your injectable `Uri` factories:
 
-```java
-public class MyActivity extends AppCompatActivity {
+```kotlin
+class MyActivity : AppCompatActivity {
 
     @Inject
-    ContactUriFactory uriFactory;
+    lateinit var uriFactory: ContactUriFactory
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
 
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
         ...
 
-        Uri contactUri = uriFactory.buildContactUri(42);
+        val contactUri = uriFactory.buildContactUri(42)
         ...
     }
 }
@@ -51,32 +49,12 @@ The detailed example on how to use `dagger` extension for `Boring Yuri` can be f
 ## Installation
 
 To add `dagger` extension for `Boring Yuri`, include the following in your app module
-`build.gradle.kts` (or `build.gradle`) file:
-
-With Kotlin KSP:
+`build.gradle.kts` file:
 
 ```kotlin
 dependencies {
         ...
   ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.0.0")
-}
-```
-
-With Kotlin KAPT:
-
-```kotlin
-dependencies {
-        ...
-  kapt("com.github.anton-novikau:boringyuri-dagger:2.0.0")
-}
-```
-
-With Java only:
-
-```groovy
-dependencies {
-         ...
-  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.0.0"
 }
 ```
 
@@ -89,5 +67,12 @@ option:
    in your own package or would like to give it a different name, you may use this option and
    provide a new fully qualified name that works for you better.
 
+```kotlin
+ksp {
+  arg("boringyuri.dagger.module", "boringyuri.dagger.sample.di.BoringYuriModule")
+}
+```
+
 [1]: https://github.com/google/dagger/
 [2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java
+[3]: https://kotlinlang.org/docs/ksp-overview.html

@@ -16,10 +16,11 @@
 
 package boringyuri.processor
 
-import boringyuri.processor.base.BoringAnnotationProcessor
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.util.ProcessorOptions
+import boringyuri.processor.common.steps.ProcessorOptions
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.steps.TypeAdapterFactoryGeneratorStep
 import com.google.auto.service.AutoService
 import com.google.common.collect.ImmutableSet
 import javax.annotation.processing.Processor
@@ -31,10 +32,9 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedOptions(ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY)
-class TypeAdapterProcessor : BoringAnnotationProcessor() {
+class TypeAdapterProcessor : AptBoringAnnotationProcessor() {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
         return ImmutableSet.of(TypeAdapterFactoryGeneratorStep(session))
     }
-
 }

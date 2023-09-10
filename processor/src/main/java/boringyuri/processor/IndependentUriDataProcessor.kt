@@ -15,21 +15,12 @@
  */
 package boringyuri.processor
 
-import boringyuri.api.DefaultValue
-import boringyuri.api.Param
-import boringyuri.api.Path
-import boringyuri.api.UriData
-import boringyuri.api.adapter.TypeAdapter
-import boringyuri.processor.base.BoringAnnotationProcessor
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
-import boringyuri.processor.type.CommonTypeName
-import boringyuri.processor.util.AnnotationHandler
-import boringyuri.processor.util.ProcessorOptions
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
+import boringyuri.processor.common.steps.IndependentUriDataGeneratorStep
+import boringyuri.processor.common.steps.ProcessorOptions
 import com.google.auto.service.AutoService
-import com.google.common.collect.ImmutableSet
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.TypeName
 import javax.annotation.processing.Processor
 import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
@@ -41,24 +32,11 @@ import javax.lang.model.SourceVersion
 @SupportedOptions(
     ProcessorOptions.OPT_TYPE_ADAPTER_FACTORY
 )
-class IndependentUriDataProcessor : BoringAnnotationProcessor() {
+class IndependentUriDataProcessor : AptBoringAnnotationProcessor() {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        val annotationHandler = AnnotationHandler(INTERNAL_ANNOTATIONS)
-
-        return ImmutableSet.of<BoringProcessingStep>(
-            IndependentUriDataGeneratorStep(session, annotationHandler)
-        )
-    }
-
-    companion object {
-        private val INTERNAL_ANNOTATIONS: Set<TypeName> = hashSetOf(
-            CommonTypeName.OVERRIDE,
-            ClassName.get(UriData::class.java),
-            ClassName.get(Path::class.java),
-            ClassName.get(Param::class.java),
-            ClassName.get(DefaultValue::class.java),
-            ClassName.get(TypeAdapter::class.java)
+        return setOf(
+            IndependentUriDataGeneratorStep.create(session)
         )
     }
 }

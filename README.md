@@ -824,15 +824,15 @@ class BoringFileProvider extends ContentProvider {
             case PHOTO_CODE:
                 // find a photo file for the requested Uri and return it as a file descriptor
                 ...
-                break
+                break;
             case THUMB_CODE:
                 // find a thumbnail file for the requested Uri and return it as a file descriptor
                 ...
-                break
+                break;
             case BACKGROUND_CODE:
                 // find a background file for the requested Uri and return it as a file descriptor
                 ...
-                break
+                break;
         }
     }
 }
@@ -1040,16 +1040,42 @@ won't be a mapping defined between the `Uri` and the generated matcher code.
 
 ## Installation
 
-To add `Boring Yuri` to your project, include the following in your app module `build.gradle` file:
+To add `Boring Yuri` to your project, include the following in your app module `build.gradle.kts`
+(or `build.gradle`) file:
 
-```groovy
+```kotlin
 android {
   ...
   // Boring YURI requires at least Java 8 compatibility.
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_8
+    sourceCompatibility = JavaVersion.VERSION_8
   }
+}
+```
+
+With Kotlin KSP:
+```kotlin
+plugins {
+  id("com.google.devtools.ksp")
+}
+
+dependencies {
+  implementation("com.github.anton-novikau:boringyuri-api:2.0.0")
+  ksp("com.github.anton-novikau:boringyuri-processor-ksp:2.0.0")
+}
+```
+
+With Kotlin KAPT:
+
+```kotlin
+plugins {
+  kotlin("kapt")
+}
+
+dependencies {
+  implementation("com.github.anton-novikau:boringyuri-api:2.0.0")
+  kapt("com.github.anton-novikau:boringyuri-processor:2.0.0")
 }
 ```
 
@@ -1057,28 +1083,18 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.2.2"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:1.2.2"
+  implementation "com.github.anton-novikau:boringyuri-api:2.0.0"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:2.0.0"
 }
 ```
 
-With Kotlin:
-
-```groovy
-apply plugin: 'kotlin-kapt'
-
-dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:1.2.2"
-  kapt "com.github.anton-novikau:boringyuri-processor:1.2.2"
-}
-```
 Snapshots of the development version are available in [Sonatype's snapshots repository][4].
 Add the repo below to download `SNAPSHOT` releases.
 
-```groovy
+```kotlin
 repositories {
   mavenCentral()
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+  maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots/") }
 }
 ```
 
@@ -1087,10 +1103,10 @@ the **Group ID**  had to be changed. If you used a version `1.1.3` or below, ple
 have a correct dependency name.
 ```diff
 dependencies {
--  implementation "org.boringyuri:boringyuri-api:${latestVersion}"
-+  implementation "com.github.anton-novikau:boringyuri-api:${latestVersion}"
--  kapt "org.boringyuri:boringyuri-processor:${latestVersion}"
-+  kapt "com.github.anton-novikau:boringyuri-processor:${latestVersion}"
+-  implementation("org.boringyuri:boringyuri-api:${latestVersion}")
++  implementation("com.github.anton-novikau:boringyuri-api:${latestVersion}")
+-  kapt("org.boringyuri:boringyuri-processor:${latestVersion}")
++  kapt("com.github.anton-novikau:boringyuri-processor:${latestVersion}")
 }
 ```
 
@@ -1104,8 +1120,26 @@ dependencies {
   the specific type adapter only once. When the option is turned off, every instance of the adapter
   is created at use which gives to garbage collector more work.
 
-To enable any of the options above you need to include the following in your app module
-`build.gradle` file:
+To enable the option above you need to include the following in your app module
+`build.gradle.kts` (or `build.gradle`) file:
+
+With Kotlin KSP:
+
+```kotlin
+ksp {
+  arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
+}
+```
+
+With Kotlin KAPT:
+
+```kotlin
+kapt {
+    arguments {
+        arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
+    }
+}
+```
 
 With Java only:
 
@@ -1114,19 +1148,9 @@ android {
     defaultConfig {
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["option_name": "option_value"]
+                arguments = ["boringyuri.type_adapter_factory": "your.company.domain.BoringTypeAdapter"]
             }
         }
-    }
-}
-```
-
-With Kotlin:
-
-```groovy
-kapt {
-    arguments {
-        arg("option_name", "option_value")
     }
 }
 ```

@@ -33,4 +33,4 @@ jobs:
           commit_user_name: Boring Bot
           commit_user_email: 1558018+anton-novikau@users.noreply.github.com
           commit_author: Boring Bot <1558018+anton-novikau@users.noreply.github.com>
-          file_pattern: 'README.md dagger/README.md gradle.properties'
+          file_pattern: 'README.md dagger/README.md dagger-ksp/README.md gradle.properties'

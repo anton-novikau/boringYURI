@@ -17,11 +17,10 @@
 package boringyuri.dagger
 
 import boringyuri.dagger.util.ProcessorOptions
-import boringyuri.processor.base.BoringAnnotationProcessor
-import boringyuri.processor.base.BoringProcessingStep
-import boringyuri.processor.base.ProcessingSession
+import boringyuri.processor.common.apt.AptBoringAnnotationProcessor
+import boringyuri.processor.common.base.BoringProcessingStep
+import boringyuri.processor.common.base.ProcessingSession
 import com.google.auto.service.AutoService
-import com.google.common.collect.ImmutableSet
 import javax.annotation.processing.Processor
 import javax.annotation.processing.SupportedOptions
 import javax.annotation.processing.SupportedSourceVersion
@@ -31,10 +30,10 @@ import javax.lang.model.SourceVersion
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedOptions(ProcessorOptions.OPT_DAGGER_BORING_MODULE)
-class DaggerModuleProcessor : BoringAnnotationProcessor() {
+class DaggerModuleProcessor : AptBoringAnnotationProcessor() {
 
     override fun initSteps(session: ProcessingSession): Iterable<BoringProcessingStep> {
-        return ImmutableSet.of(DaggerModuleGeneratorStep(session))
+        return setOf(DaggerModuleGeneratorStep(session))
     }
 
 }

@@ -51,23 +51,32 @@ The detailed example on how to use `dagger` extension for `Boring Yuri` can be f
 ## Installation
 
 To add `dagger` extension for `Boring Yuri`, include the following in your app module
-`build.gradle` file:
+`build.gradle.kts` (or `build.gradle`) file:
+
+With Kotlin KSP:
+
+```kotlin
+dependencies {
+        ...
+  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.0.0")
+}
+```
+
+With Kotlin KAPT:
+
+```kotlin
+dependencies {
+        ...
+  kapt("com.github.anton-novikau:boringyuri-dagger:2.0.0")
+}
+```
 
 With Java only:
 
 ```groovy
 dependencies {
          ...
-  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:1.2.2"
-}
-```
-
-With Kotlin:
-
-```groovy
-dependencies {
-        ...
-  kapt "com.github.anton-novikau:boringyuri-dagger:1.2.2"
+  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.0.0"
 }
 ```
 
@@ -79,6 +88,33 @@ option:
    generated module is `boringyuri.dagger.BoringYuriModule`. But if you prefer to have the module
    in your own package or would like to give it a different name, you may use this option and
    provide a new fully qualified name that works for you better.
+
+To enable the option above you need to include the following in your app module
+`build.gradle.kts` (or `build.gradle`) file:
+
+With Kotlin KAPT:
+
+```kotlin
+kapt {
+    arguments {
+        arg("boringyuri.dagger.module", "your.company.domain.BoringYuriModule")
+    }
+}
+```
+
+With Java only:
+
+```groovy
+android {
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["boringyuri.dagger.module": "your.company.domain.BoringYuriModule"]
+            }
+        }
+    }
+}
+```
 
 [1]: https://github.com/google/dagger/
 [2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java

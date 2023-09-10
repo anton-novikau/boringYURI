@@ -1,3 +1,7 @@
+## Boring YURI 2.0.0 (2023-09-10)
+* Add support for [Kotlin Symbol Processing API](https://kotlinlang.org/docs/ksp-overview.html). Big thanks and credits to [@bomiyr](https://github.com/bomiyr) :tada:
+* Upgrade dependencies.
+
 ## Boring YURI 1.2.2 (2022-09-27)
 :information_source: _This version is purely infrastructural and doesn't contain any logical changes_
 

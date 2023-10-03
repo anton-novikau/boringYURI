@@ -80,7 +80,7 @@ class TypeAdapterFactoryGeneratorStep(session: ProcessingSession) : BoringProces
         }
 
         val roundClassNames = roundClasses.map {
-            ClassName.bestGuess(it.toString())
+            ClassName.bestGuess(it.typeName.toString())
         }
         if (sourceClasses.addAll(roundClassNames)) {
             roundClassNames.forEach {

@@ -12,6 +12,9 @@ jobs:
     env:
       ORG_GRADLE_PROJECT_mavenCentralUsername:        ${{secrets.SONATYPE_NEXUS_USERNAME}}
       ORG_GRADLE_PROJECT_mavenCentralPassword:        ${{secrets.SONATYPE_NEXUS_PASSWORD}}
+      ORG_GRADLE_PROJECT_signingInMemoryKey:          ${{secrets.SIGNING_SECRET_KEY_RING}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyId:        ${{secrets.SIGNING_KEY_ID}}
+      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword:  ${{secrets.SIGNING_PASSWORD}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,14 +34,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Setup signing properties
-        run: |
-            echo "signing.keyId=${{ secrets.SIGNING_KEY_ID }}" >> gradle.properties
-            echo "signing.password=${{ secrets.SIGNING_PASSWORD }}" >> gradle.properties
-            
-            echo "${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}" > keyring.gpg.b64
-            base64 -d keyring.gpg.b64 > keyring.gpg && rm keyring.gpg.b64
-            echo "signing.secretKeyRingFile=$(pwd)/keyring.gpg" >> gradle.properties
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 

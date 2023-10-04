@@ -1,3 +1,7 @@
+## Boring YURI 2.0.1 (2023-10-04)
+* Fix generating imports for types in `TypeAdapterFactory` with KSP.
+* Fix signing maven artifacts ([Bug #40](https://github.com/anton-novikau/boringYURI/issues/40)).
+
 ## Boring YURI 2.0.0 (2023-09-10)
 * Add support for [Kotlin Symbol Processing API](https://kotlinlang.org/docs/ksp-overview.html). Big thanks and credits to [@bomiyr](https://github.com/bomiyr) :tada:
 * Upgrade dependencies.

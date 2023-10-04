@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.vanniktech.maven.publish.tasks.SourcesJar
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -67,18 +67,17 @@ tasks.jar.configure {
     )
 }
 
-tasks.withType(SourcesJar::class)
-    .configureEach {
-        if (name == "javaSourcesJar") {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+tasks.withType(Jar::class).configureEach {
+    if (name == "javaSourcesJar") {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-            fatJarMembers.forEach {
-                from(
-                    project(":$it").sourceSets.getByName("main").java.srcDirs
-                )
-            }
+        fatJarMembers.forEach {
+            from(
+                project(":$it").sourceSets.getByName("main").java.srcDirs
+            )
         }
     }
+}
 
 tasks.withType<DokkaTask>().configureEach {
     mustRunAfter(tasks["kaptKotlin"])

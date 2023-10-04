@@ -113,7 +113,7 @@ dependencies {
 
 if (useKsp) {
     ksp {
-        arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.TypeAdapterFactory")
+        arg("boringyuri.type_adapter_factory", "boringyuri.sample.data.adapter.factory.TypeAdapterFactory")
     }
 } else {
     kapt {
@@ -124,7 +124,7 @@ if (useKsp) {
         arguments {
             arg(
                 "boringyuri.type_adapter_factory",
-                "boringyuri.sample.data.adapter.TypeAdapterFactory"
+                "boringyuri.sample.data.adapter.factory.TypeAdapterFactory"
             )
         }
     }

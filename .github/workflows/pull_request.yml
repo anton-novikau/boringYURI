@@ -5,6 +5,7 @@ on:
       - opened
       - synchronize
       - reopened
+      - edited
 jobs:
   build:
     name: Sanity Check

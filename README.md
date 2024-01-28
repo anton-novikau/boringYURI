@@ -1061,8 +1061,8 @@ plugins {
 }
 
 dependencies {
-  implementation("com.github.anton-novikau:boringyuri-api:2.0.1")
-  ksp("com.github.anton-novikau:boringyuri-processor-ksp:2.0.1")
+  implementation("com.github.anton-novikau:boringyuri-api:2.0.2")
+  ksp("com.github.anton-novikau:boringyuri-processor-ksp:2.0.2")
 }
 ```
 
@@ -1074,8 +1074,8 @@ plugins {
 }
 
 dependencies {
-  implementation("com.github.anton-novikau:boringyuri-api:2.0.1")
-  kapt("com.github.anton-novikau:boringyuri-processor:2.0.1")
+  implementation("com.github.anton-novikau:boringyuri-api:2.0.2")
+  kapt("com.github.anton-novikau:boringyuri-processor:2.0.2")
 }
 ```
 
@@ -1083,8 +1083,8 @@ With Java only:
 
 ```groovy
 dependencies {
-  implementation "com.github.anton-novikau:boringyuri-api:2.0.1"
-  annotationProcessor "com.github.anton-novikau:boringyuri-processor:2.0.1"
+  implementation "com.github.anton-novikau:boringyuri-api:2.0.2"
+  annotationProcessor "com.github.anton-novikau:boringyuri-processor:2.0.2"
 }
 ```
 

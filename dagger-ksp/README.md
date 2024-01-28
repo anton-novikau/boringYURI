@@ -54,7 +54,7 @@ To add `dagger` extension for `Boring Yuri`, include the following in your app m
 ```kotlin
 dependencies {
         ...
-  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.0.1")
+  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.0.2")
 }
 ```
 

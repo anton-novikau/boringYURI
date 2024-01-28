@@ -18,7 +18,6 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("java-library")
     kotlin("jvm")
     kotlin("kapt")
     id("org.jetbrains.dokka")

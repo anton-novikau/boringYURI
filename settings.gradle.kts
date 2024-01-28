@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-rootProject.name="BoringYURI"
+rootProject.name="boringYURI"
 include(":api")
 include(":processor")
 include(":sample")

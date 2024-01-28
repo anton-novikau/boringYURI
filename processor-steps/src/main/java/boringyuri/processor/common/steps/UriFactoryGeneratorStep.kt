@@ -15,6 +15,7 @@
  */
 package boringyuri.processor.common.steps
 
+import androidx.room.compiler.codegen.toJavaPoet
 import androidx.room.compiler.processing.ExperimentalProcessingApi
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
@@ -58,9 +59,10 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
+import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 import javax.lang.model.element.Modifier
 
-@OptIn(ExperimentalProcessingApi::class)
+@OptIn(ExperimentalProcessingApi::class, KotlinPoetJavaPoetPreview::class)
 class UriFactoryGeneratorStep(
     session: ProcessingSession,
     private val annotationHandler: AnnotationHandler
@@ -133,7 +135,7 @@ class UriFactoryGeneratorStep(
                 methodElement.getAnnotation<UriBuilder>()
                     ?: continue // skip non-annotated methods
 
-            val returnType = methodElement.returnType.typeElement?.className
+            val returnType = methodElement.returnType.typeElement?.asClassName()?.toJavaPoet()
             if (ANDROID_URI != returnType) {
                 logger.warn(
                     methodElement,
@@ -299,7 +301,7 @@ class UriFactoryGeneratorStep(
     ): TypeSpec {
         val classContent = TypeSpec.classBuilder(containerImplName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addSuperinterface(containerElement.className)
+            .addSuperinterface(containerElement.asClassName().toJavaPoet())
 
         val containerAnnotation = containerElement.requireAnnotation<UriFactory>()
         val scheme = containerAnnotation.scheme

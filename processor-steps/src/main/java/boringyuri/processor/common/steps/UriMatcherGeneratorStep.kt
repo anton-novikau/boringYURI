@@ -416,7 +416,7 @@ class UriMatcherGeneratorStep(
             .addModifiers(Modifier.PRIVATE)
 
         method.beginControlFlow("if (!\$N)", isInitialized)
-        method.beginControlFlow("synchronized(this)")
+        method.beginControlFlow("synchronized (this)")
         method.beginControlFlow("if (!\$N)", isInitialized)
         method.addStatement("\$N()", initMatcher)
         method.addStatement("\$N = \$L", isInitialized, true)

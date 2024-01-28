@@ -16,6 +16,7 @@
 
 package boringyuri.dagger
 
+import androidx.room.compiler.codegen.toJavaPoet
 import androidx.room.compiler.processing.ExperimentalProcessingApi
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XFiler
@@ -30,10 +31,11 @@ import boringyuri.processor.common.base.ProcessingSession
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
+import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 import javax.lang.model.element.Modifier
 
 
-@OptIn(ExperimentalProcessingApi::class)
+@OptIn(ExperimentalProcessingApi::class, KotlinPoetJavaPoetPreview::class)
 class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingStep(session) {
 
     private val providesFunctions = mutableListOf<MethodSpec>()
@@ -100,7 +102,7 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
     }
 
     private fun findFactoryImpl(factory: XTypeElement): XTypeElement? {
-        val factoryName = factory.className
+        val factoryName = factory.asClassName().toJavaPoet()
         val factoryImplName = ClassName.get(
             factoryName.packageName(),
             "${factoryName.simpleName()}$CONTAINER_IMPL_SUFFIX"
@@ -134,8 +136,8 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
     }
 
     private fun buildProvidesMethod(factory: XTypeElement, factoryImpl: XTypeElement): MethodSpec {
-        val factoryImplName = factoryImpl.className
-        val factoryName = factory.className
+        val factoryImplName = factoryImpl.asClassName().toJavaPoet()
+        val factoryName = factory.asClassName().toJavaPoet()
 
         return MethodSpec.methodBuilder("provide${factoryName.simpleName()}")
             .addModifiers(Modifier.STATIC)

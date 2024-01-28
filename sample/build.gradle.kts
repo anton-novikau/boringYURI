@@ -16,6 +16,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Locale
 
 plugins {
     id("com.android.application")
@@ -61,6 +62,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     if (useKsp) {
         buildTypes.onEach { buildType ->
             if (productFlavors.isEmpty()) {
@@ -78,8 +83,8 @@ android {
                         getByName("main")
                             .kotlin
                             .srcDirs(
-                                "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/kotlin",
-                                "build/generated/ksp/${flavor.name}${buildType.name.capitalize()}/java",
+                                "build/generated/ksp/${flavor.name}${buildType.name.replaceFirstCharToCapital()}/kotlin",
+                                "build/generated/ksp/${flavor.name}${buildType.name.replaceFirstCharToCapital()}/java",
                             )
                     }
                 }
@@ -135,4 +140,8 @@ tasks.withType<KotlinCompile>().configureEach {
         jvmTarget = JavaVersion.VERSION_11.toString() // in order to compile Kotlin to java 11 bytecode
         freeCompilerArgs = listOf("-Xjvm-default=all")
     }
+}
+
+fun String.replaceFirstCharToCapital() = replaceFirstChar {
+    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }

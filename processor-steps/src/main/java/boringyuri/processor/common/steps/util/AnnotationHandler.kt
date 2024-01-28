@@ -15,6 +15,7 @@
  */
 package boringyuri.processor.common.steps.util
 
+import androidx.room.compiler.codegen.toJavaPoet
 import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XMethodElement
@@ -27,7 +28,9 @@ import boringyuri.processor.common.steps.type.CommonTypeName.NON_NULL
 import boringyuri.processor.common.steps.type.CommonTypeName.NULLABLE
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.TypeName
+import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 
+@OptIn(KotlinPoetJavaPoetPreview::class)
 class AnnotationHandler @JvmOverloads constructor(
     private val internalAnnotations: Set<TypeName> = emptySet()
 ) {
@@ -51,7 +54,7 @@ class AnnotationHandler @JvmOverloads constructor(
         }
 
         for (annotation in annotations) {
-            val annotationTypeName = annotation.typeElement.className
+            val annotationTypeName = annotation.typeElement.asClassName().toJavaPoet()
             if (internalAnnotations.contains(annotationTypeName)) {
                 // exclude the internal library annotations
                 // defined in api module from method and
@@ -101,7 +104,7 @@ class AnnotationHandler @JvmOverloads constructor(
         }
 
         element.getAllAnnotations().forEach { annotation ->
-            val annotationType = annotation.typeElement.className
+            val annotationType = annotation.typeElement.asClassName().toJavaPoet()
             if (NON_NULL == annotationType || JB_NON_NULL == annotationType) {
                 return false
             } else if (NULLABLE == annotationType || JB_NULLABLE == annotationType) {

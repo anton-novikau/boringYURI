@@ -44,5 +44,5 @@ jobs:
       - name: Deploy release
         run: ./gradlew publish
 
-      - name: Close & release repository
-        run: ./gradlew closeAndReleaseRepository
+      - name: Release repository
+        run: ./gradlew releaseRepository

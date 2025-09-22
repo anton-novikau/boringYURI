@@ -58,7 +58,7 @@ With Kotlin KSP:
 ```kotlin
 dependencies {
         ...
-  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.1.0")
+  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.2.0")
 }
 ```
 
@@ -67,7 +67,7 @@ With Kotlin KAPT:
 ```kotlin
 dependencies {
         ...
-  kapt("com.github.anton-novikau:boringyuri-dagger:2.1.0")
+  kapt("com.github.anton-novikau:boringyuri-dagger:2.2.0")
 }
 ```
 
@@ -76,7 +76,7 @@ With Java only:
 ```groovy
 dependencies {
          ...
-  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.1.0"
+  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.2.0"
 }
 ```
 

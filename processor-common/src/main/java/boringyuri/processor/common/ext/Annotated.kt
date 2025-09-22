@@ -17,18 +17,19 @@
 package boringyuri.processor.common.ext
 
 import androidx.room.compiler.processing.XAnnotated
+import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XType
 
-inline fun <reified T : Annotation> XAnnotated.getAnnotation(): T? {
-    return getAnnotation(T::class)?.value
+inline fun <reified T : Annotation> XAnnotated.getAnnotation(): XAnnotation? {
+    return getAnnotation(T::class)
 }
 
-inline fun <reified T : Annotation> XAnnotated.getAnnotations(): Iterable<T> {
-    return getAnnotations(T::class).map { it.value }
+inline fun <reified T : Annotation> XAnnotated.getAnnotations(): Iterable<XAnnotation> {
+    return getAnnotations(T::class)
 }
 
-inline fun <reified T : Annotation> XAnnotated.requireAnnotation(): T {
-    return requireAnnotation(T::class).value
+inline fun <reified T : Annotation> XAnnotated.requireAnnotation(): XAnnotation {
+    return requireAnnotation(T::class)
 }
 
 inline fun <reified T : Annotation> XAnnotated.getAnnotationValueAsType(): XType? {

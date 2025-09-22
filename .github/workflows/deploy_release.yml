@@ -2,7 +2,7 @@ name: Build & Publish Release
 on:
   pull_request:
     branches:
-      - master
+      - main
     types:
       - closed
 jobs:
@@ -42,7 +42,4 @@ jobs:
         run: ./gradlew clean build
 
       - name: Deploy release
-        run: ./gradlew publish
-
-      - name: Close & release repository
-        run: ./gradlew closeAndReleaseRepository
+        run: ./gradlew publishToMavenCentral

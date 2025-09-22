@@ -42,7 +42,4 @@ jobs:
         run: ./gradlew clean build
 
       - name: Deploy release
-        run: ./gradlew publish
-
-      - name: Release repository
-        run: ./gradlew releaseRepository
+        run: ./gradlew publishToMavenCentral

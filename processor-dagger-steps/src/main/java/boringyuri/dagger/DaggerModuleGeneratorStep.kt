@@ -16,6 +16,9 @@
 
 package boringyuri.dagger
 
+import androidx.room.compiler.codegen.XClassName
+import androidx.room.compiler.codegen.XTypeName
+import androidx.room.compiler.codegen.compat.XConverters.toXPoet
 import androidx.room.compiler.codegen.toJavaPoet
 import androidx.room.compiler.processing.ExperimentalProcessingApi
 import androidx.room.compiler.processing.XElement
@@ -103,7 +106,7 @@ class DaggerModuleGeneratorStep(session: ProcessingSession) : BoringProcessingSt
 
     private fun findFactoryImpl(factory: XTypeElement): XTypeElement? {
         val factoryName = factory.asClassName().toJavaPoet()
-        val factoryImplName = ClassName.get(
+        val factoryImplName = XClassName.get(
             factoryName.packageName(),
             "${factoryName.simpleName()}$CONTAINER_IMPL_SUFFIX"
         )

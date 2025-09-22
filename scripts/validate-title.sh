@@ -43,7 +43,7 @@ validate_version() {
   local changelog="$(cat CHANGELOG.md | grep -E "^## Boring YURI $version \([0-9]{4}-[0-9]{2}-[0-9]{2}\)$")"
   [ -z "$changelog" ] && fail "'CHANGELOG.md' doesn't contain an entry for '$version'."
 
-  echo "::set-output name=version::$version"
+  echo "version=$version" >> $GITHUB_OUTPUT
 }
 
 validate_version "$1"

@@ -1,3 +1,8 @@
+## Boring YURI 2.1.0 (2025-09-22)
+* Support Kotlin `2.2.20` and KSP `2.2.20-2.0.3`.
+* Upgrade compile sdk and target sdk to Android API 36.
+* Upgrade dependencies and build tools.
+
 ## Boring YURI 2.1.0 (2024-11-25)
 * Support Kotlin `2.0.21` and KSP `2.0.21-1.0.25`
 * Upgrade dependencies and build tools

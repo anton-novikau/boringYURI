@@ -17,7 +17,7 @@
 package boringyuri.processor.common.steps.ext
 
 import androidx.room.compiler.processing.XAnnotated
-import androidx.room.compiler.processing.XAnnotationBox
+import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XArrayType
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
@@ -182,12 +182,12 @@ fun XAnnotated.requireTypeAdapter(): XType {
     return requireAnnotationValueAsType<TypeAdapter>()
 }
 
-private class TypeAdapterVisitor : TypeVisitor<XAnnotationBox<TypeAdapter>?, Unit?> {
-    override fun visit(type: XType, param: Unit?): XAnnotationBox<TypeAdapter>? {
+private class TypeAdapterVisitor : TypeVisitor<XAnnotation?, Unit?> {
+    override fun visit(type: XType, param: Unit?): XAnnotation? {
         return type.typeElement?.getAnnotation(TypeAdapter::class)
     }
 
-    override fun visitArray(type: XArrayType, param: Unit?): XAnnotationBox<TypeAdapter>? {
+    override fun visitArray(type: XArrayType, param: Unit?): XAnnotation? {
         return type.componentType.accept(this, param)
     }
 }

@@ -30,6 +30,7 @@ import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.requireAnnotation
 import boringyuri.processor.common.steps.ext.createFieldSpec
+import boringyuri.processor.common.steps.ext.valueAsString
 import boringyuri.processor.common.steps.uripart.MethodReadPathSegment
 import boringyuri.processor.common.steps.uripart.MethodReadQueryParameter
 import boringyuri.processor.common.steps.uripart.ReadQueryParameter
@@ -39,7 +40,6 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.TypeName
 import org.apache.commons.lang3.StringUtils
-import kotlin.collections.set
 
 @OptIn(ExperimentalProcessingApi::class)
 class IndependentUriDataGeneratorStep(
@@ -100,7 +100,7 @@ class IndependentUriDataGeneratorStep(
     private fun obtainUriMetadata(sourceElement: XTypeElement): UriMetadata {
         val uriDataAnnotation = sourceElement.requireAnnotation<UriData>()
 
-        val basePath = uriDataAnnotation.value
+        val basePath = uriDataAnnotation.valueAsString()
         // Base path may contain constant segments, wildcard segments and templates
         // for method parameters. We will replace the templates with the path parameters
         // on the next step. All constants and wildcards will be filtered out on obtaining
@@ -115,7 +115,7 @@ class IndependentUriDataGeneratorStep(
                 GETTER_PATTERN.find(methodName)?.run { groupValues[1] } ?: methodName
             )
 
-            val defaultValue = method.getAnnotation<DefaultValue>()?.value
+            val defaultValue = method.getAnnotation<DefaultValue>()?.valueAsString()
             val field = method.createFieldSpec(
                 paramName,
                 defaultValue,
@@ -132,7 +132,7 @@ class IndependentUriDataGeneratorStep(
                     )
                 }
 
-                val pathName = pathAnnotation.value.ifEmpty { paramName }
+                val pathName = pathAnnotation.valueAsString().ifEmpty { paramName }
                 val pathSegment = segments[pathName]
                 if (pathSegment is TemplatePathSegment) {
 
@@ -155,7 +155,7 @@ class IndependentUriDataGeneratorStep(
 
             } else {
                 val paramAnnotation = method.requireAnnotation<Param>()
-                val queryParamName = paramAnnotation.value.ifEmpty { paramName }
+                val queryParamName = paramAnnotation.valueAsString().ifEmpty { paramName }
                 queryParams.add(
                     MethodReadQueryParameter(
                         queryParamName,

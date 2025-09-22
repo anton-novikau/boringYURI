@@ -17,6 +17,7 @@ package boringyuri.processor.common.steps
 
 import androidx.room.compiler.codegen.toJavaPoet
 import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
 import androidx.room.compiler.processing.XFiler
@@ -42,8 +43,15 @@ import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.getAnnotations
 import boringyuri.processor.common.ext.requireAnnotation
+import boringyuri.processor.common.steps.ext.authority
 import boringyuri.processor.common.steps.ext.createModifiers
 import boringyuri.processor.common.steps.ext.createParamSpec
+import boringyuri.processor.common.steps.ext.encoded
+import boringyuri.processor.common.steps.ext.scheme
+import boringyuri.processor.common.steps.ext.valueAsBoolean
+import boringyuri.processor.common.steps.ext.valueAsDouble
+import boringyuri.processor.common.steps.ext.valueAsLong
+import boringyuri.processor.common.steps.ext.valueAsString
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI_BUILDER
 import boringyuri.processor.common.steps.type.CommonTypeName.OVERRIDE
@@ -156,7 +164,7 @@ class UriFactoryGeneratorStep(
     }
 
     private fun obtainBuilderMetadata(
-        builderAnnotation: UriBuilder,
+        builderAnnotation: XAnnotation,
         methodElement: XExecutableElement
     ): Triple<List<ParameterSpec>, List<PathSegment>, List<QueryParameter>> {
         val methodParameters = methodElement.parameters
@@ -196,7 +204,7 @@ class UriFactoryGeneratorStep(
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+            val defaultValue = param.getAnnotation<DefaultValue>()?.valueAsString()
 
             if (nullable && defaultValue == null) {
                 logger.error(
@@ -205,13 +213,13 @@ class UriFactoryGeneratorStep(
                 )
             }
 
-            val pathName = pathAnnotation.value.ifEmpty { spec.name }
+            val pathName = pathAnnotation.valueAsString().ifEmpty { spec.name }
             val segment = VariableWritePathSegment(
                 param,
                 spec,
                 defaultValue,
-                pathAnnotation.encoded,
-                URI_BUILDER_NAME
+                pathAnnotation.encoded(),
+                URI_BUILDER_NAME,
             )
 
             pathName to segment
@@ -227,9 +235,9 @@ class UriFactoryGeneratorStep(
 
             val spec = parameterSpecs.getValue(param)
             val nullable = annotationHandler.isNullable(spec.type, param)
-            val defaultValue = param.getAnnotation<DefaultValue>()?.value
+            val defaultValue = param.getAnnotation<DefaultValue>()?.valueAsString()
 
-            val paramName = paramAnnotation.value.ifEmpty { spec.name }
+            val paramName = paramAnnotation.valueAsString().ifEmpty { spec.name }
             VariableWriteQueryParameter(
                 paramName,
                 spec,
@@ -242,11 +250,11 @@ class UriFactoryGeneratorStep(
     }
 
     private fun obtainPathSegmentsFromBasePath(
-        builderAnnotation: UriBuilder,
+        builderAnnotation: XAnnotation,
         variablePathSegments: Map<String, VariableWritePathSegment>,
         originatingElement: XElement
     ): List<PathSegment> {
-        val basePath = builderAnnotation.value
+        val basePath = builderAnnotation.valueAsString()
 
         var unprocessedElementsCounter = variablePathSegments.size
         val segments = if (basePath.isNotEmpty()) {
@@ -255,7 +263,7 @@ class UriFactoryGeneratorStep(
                 .mapNotNullTo(ArrayList()) {
                     val template = PATH_TEMPLATE_REGEX.find(it)?.run { groupValues[1] }
                     val segment = if (template == null) {
-                        ConstantPathSegment(it, builderAnnotation.encoded, URI_BUILDER_NAME)
+                        ConstantPathSegment(it, builderAnnotation.encoded(), URI_BUILDER_NAME)
                     } else {
                         variablePathSegments[template]?.also { unprocessedElementsCounter-- }
                     }
@@ -304,8 +312,8 @@ class UriFactoryGeneratorStep(
             .addSuperinterface(containerElement.asClassName().toJavaPoet())
 
         val containerAnnotation = containerElement.requireAnnotation<UriFactory>()
-        val scheme = containerAnnotation.scheme
-        val authority = containerAnnotation.authority
+        val scheme = containerAnnotation.scheme()
+        val authority = containerAnnotation.authority()
 
         for (builderMetadata in containerMetadata) {
             val methodElement = builderMetadata.builderMethod
@@ -374,7 +382,7 @@ class UriFactoryGeneratorStep(
                 "\$L.appendQueryParameter(\$S, \$S)",
                 URI_BUILDER_NAME,
                 constParam.name,
-                constParam.value
+                constParam.valueAsString(),
             )
         }
     }
@@ -390,7 +398,7 @@ class UriFactoryGeneratorStep(
                 URI_BUILDER_NAME,
                 constParam.name,
                 STRING,
-                constParam.value
+                constParam.valueAsLong(),
             )
         }
     }
@@ -406,7 +414,7 @@ class UriFactoryGeneratorStep(
                 URI_BUILDER_NAME,
                 constParam.name,
                 STRING,
-                constParam.value
+                constParam.valueAsDouble(),
             )
         }
     }
@@ -422,7 +430,7 @@ class UriFactoryGeneratorStep(
                 URI_BUILDER_NAME,
                 constParam.name,
                 STRING,
-                constParam.value
+                constParam.valueAsBoolean(),
             )
         }
     }

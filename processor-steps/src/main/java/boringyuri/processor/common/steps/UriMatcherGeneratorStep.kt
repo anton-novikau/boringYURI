@@ -17,6 +17,7 @@
 package boringyuri.processor.common.steps
 
 import androidx.room.compiler.processing.ExperimentalProcessingApi
+import androidx.room.compiler.processing.XAnnotation
 import androidx.room.compiler.processing.XElement
 import androidx.room.compiler.processing.XExecutableElement
 import androidx.room.compiler.processing.XFiler
@@ -37,6 +38,10 @@ import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.requireAnnotation
+import boringyuri.processor.common.steps.ext.authority
+import boringyuri.processor.common.steps.ext.enabled
+import boringyuri.processor.common.steps.ext.valueAsInt
+import boringyuri.processor.common.steps.ext.valueAsString
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI
 import boringyuri.processor.common.steps.type.CommonTypeName.ANDROID_URI_MATCHER
 import boringyuri.processor.common.steps.type.CommonTypeName.NON_NULL
@@ -168,13 +173,13 @@ class UriMatcherGeneratorStep(
                     method,
                     "%s path template can't be built for '%s'",
                     ANDROID_URI_MATCHER.simpleName(),
-                    uriBuilderAnnotation.value
+                    uriBuilderAnnotation.valueAsString()
                 )
             } else {
                 val matcherCode = if (matchesToAnnotation != null) {
                     val fieldName = obtainMatcherCodeFieldName(matchesToAnnotation).also {
                         if (it == null) {
-                            val matcherCodeName = matchesToAnnotation.value
+                            val matcherCodeName = matchesToAnnotation.valueAsString()
                             logger.error(
                                 method,
                                 "@%s(\"%s\") contains invalid symbols for matcher code field",
@@ -184,7 +189,7 @@ class UriMatcherGeneratorStep(
                         }
                     } ?: continue  // skip methods with invalid matcher code names
 
-                    val enabled = matchesToAnnotation.enabled
+                    val enabled = matchesToAnnotation.enabled()
 
                     matcherCodes.getOrPut(fieldName) {
                         createMatcherCode(fieldName, enabled)
@@ -192,14 +197,17 @@ class UriMatcherGeneratorStep(
                         if (it.enabled != enabled) it.copy(enabled = enabled) else it
                     }
                 } else if (matcherCodeAnnotation != null) {
-                    createMatcherCode(matcherCodeAnnotation.value, matcherCodeAnnotation.enabled)
+                    createMatcherCode(
+                        matcherCodeAnnotation.valueAsInt(),
+                        matcherCodeAnnotation.enabled(),
+                    )
                 } else null
 
                 matcherCode?.let { pathMappings.add(pathTemplate to it) }
             }
         }
 
-        val authority = uriFactoryAnnotation.authority
+        val authority = uriFactoryAnnotation.authority()
         val matcherClassName = obtainMatcherClassName(factory)
         val matcherCodeClassName = matcherClassName.nestedClass(MATCHER_CODE_NAME)
 
@@ -227,7 +235,7 @@ class UriMatcherGeneratorStep(
 
     private fun obtainMatcherClassName(factory: XTypeElement): ClassName {
         val withUriMatcherAnnotation = factory.requireAnnotation<WithUriMatcher>()
-        val matcherName = withUriMatcherAnnotation.value
+        val matcherName = withUriMatcherAnnotation.valueAsString()
 
         return if (matcherName.isEmpty()) {
             val packageName = factory.packageName
@@ -248,7 +256,7 @@ class UriMatcherGeneratorStep(
         return method.parameters.mapNotNull {
             val pathAnnotation = it.getAnnotation<Path>() ?: return@mapNotNull null
 
-            val segmentName = pathAnnotation.value.ifEmpty {
+            val segmentName = pathAnnotation.valueAsString().ifEmpty {
                 it.name
             }
             segmentName to it.type.typeName
@@ -256,10 +264,10 @@ class UriMatcherGeneratorStep(
     }
 
     private fun obtainMatcherPathTemplate(
-        builderAnnotation: UriBuilder,
+        builderAnnotation: XAnnotation,
         parameters: Map<String, TypeName>
     ): String {
-        return builderAnnotation.value
+        return builderAnnotation.valueAsString()
             .split(PATH_SEPARATOR)
             .filter { it.isNotEmpty() }
             .joinToString(separator = PATH_SEPARATOR) {
@@ -272,9 +280,9 @@ class UriMatcherGeneratorStep(
     }
 
     private fun obtainMatcherCodeFieldName(
-        matchesToAnnotation: MatchesTo,
+        matchesToAnnotation: XAnnotation,
     ): String? {
-        return matchesToAnnotation.value.takeIf {
+        return matchesToAnnotation.valueAsString().takeIf {
             it.matches(FIELD_NAME_REGEX)
         }?.uppercase()
     }

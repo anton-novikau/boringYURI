@@ -1,3 +1,6 @@
+## Boring YURI 2.2.1 (2025-10-14)
+* Fix annotation parameter name() resolution ([PR #54](https://github.com/anton-novikau/boringYURI/pull/54)).
+
 ## Boring YURI 2.2.0 (2025-09-22)
 * Support Kotlin `2.2.20` and KSP `2.2.20-2.0.3`.
 * Upgrade compile sdk and target sdk to Android API 36.

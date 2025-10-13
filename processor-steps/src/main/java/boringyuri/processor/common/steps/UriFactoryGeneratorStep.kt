@@ -37,16 +37,17 @@ import boringyuri.api.constant.BooleanParam
 import boringyuri.api.constant.DoubleParam
 import boringyuri.api.constant.LongParam
 import boringyuri.api.constant.StringParam
-import boringyuri.processor.common.steps.ProcessorOptions.getTypeAdapterFactory
 import boringyuri.processor.common.base.BoringProcessingStep
 import boringyuri.processor.common.base.ProcessingSession
 import boringyuri.processor.common.ext.getAnnotation
 import boringyuri.processor.common.ext.getAnnotations
 import boringyuri.processor.common.ext.requireAnnotation
+import boringyuri.processor.common.steps.ProcessorOptions.getTypeAdapterFactory
 import boringyuri.processor.common.steps.ext.authority
 import boringyuri.processor.common.steps.ext.createModifiers
 import boringyuri.processor.common.steps.ext.createParamSpec
 import boringyuri.processor.common.steps.ext.encoded
+import boringyuri.processor.common.steps.ext.name
 import boringyuri.processor.common.steps.ext.scheme
 import boringyuri.processor.common.steps.ext.valueAsBoolean
 import boringyuri.processor.common.steps.ext.valueAsDouble
@@ -381,7 +382,7 @@ class UriFactoryGeneratorStep(
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$S)",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.name(),
                 constParam.valueAsString(),
             )
         }
@@ -396,7 +397,7 @@ class UriFactoryGeneratorStep(
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.name(),
                 STRING,
                 constParam.valueAsLong(),
             )
@@ -412,7 +413,7 @@ class UriFactoryGeneratorStep(
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.name(),
                 STRING,
                 constParam.valueAsDouble(),
             )
@@ -428,7 +429,7 @@ class UriFactoryGeneratorStep(
             method.addStatement(
                 "\$L.appendQueryParameter(\$S, \$T.valueOf(\$L))",
                 URI_BUILDER_NAME,
-                constParam.name,
+                constParam.name(),
                 STRING,
                 constParam.valueAsBoolean(),
             )

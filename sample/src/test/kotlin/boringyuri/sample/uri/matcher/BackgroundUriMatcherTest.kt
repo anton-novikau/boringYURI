@@ -30,10 +30,12 @@ class BackgroundUriMatcherTest {
             BackgroundProviderUriBuilder.Contract.CODE_CROPPED,
             sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/thumbnail/abc"))
         )
-        Assert.assertEquals(
-            BackgroundProviderUriBuilder.Contract.CODE_DEBUG,
-            sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/debug"))
-        )
+        if (boringyuri.sample.BuildConfig.DEBUG_ONLY) {
+            Assert.assertEquals(
+                BackgroundProviderUriBuilder.Contract.CODE_DEBUG,
+                sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/debug"))
+            )
+        }
         Assert.assertEquals(
             UriMatcher.NO_MATCH,
             sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/random"))

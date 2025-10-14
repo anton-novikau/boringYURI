@@ -20,6 +20,7 @@ ksp = "2.2.20-2.0.3"
 mavenPublish = "0.34.0"
 room = "2.7.2"
 viewmodel = "2.9.4"
+robolectric = "4.16"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotations" }
@@ -43,6 +44,8 @@ square-javaPoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
 
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
 [bundles]
 dagger = [
     "dagger-core",
@@ -57,7 +60,7 @@ dagger-compiler = [
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin"}
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 android-library = { id = "com.android.library", version.ref = "agp" }

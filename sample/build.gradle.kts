@@ -112,6 +112,7 @@ dependencies {
 
     // unit tests
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }
 
 if (useKsp) {

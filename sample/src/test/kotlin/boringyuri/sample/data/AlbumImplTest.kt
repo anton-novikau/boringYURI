@@ -1,7 +1,8 @@
 package boringyuri.sample.data
 
 import android.net.Uri
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -9,28 +10,35 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AlbumImplTest {
 
-    private val uriString = "content://albums/album/myAlbum/123"
-    private val uri = Uri.parse(uriString)
+    private lateinit var uriString: String
+    private lateinit var uri: Uri
 
-    val sut = AlbumImpl(uri)
+    private lateinit var album: Album
+
+    @Before
+    fun setUp() {
+        uriString = "content://albums/album/myAlbum/123"
+        uri = Uri.parse(uriString)
+        album = AlbumImpl(uri)
+    }
 
     @Test
     fun testCategoryCorrect() {
-        Assert.assertEquals("myAlbum", sut.getCategory())
+        assertEquals("myAlbum", album.getCategory())
     }
 
     @Test
     fun testIdCorrect() {
-        Assert.assertEquals(123L, sut.getId())
+        assertEquals(123L, album.getId())
     }
 
     @Test
     fun testAuthorCorrect() {
-        Assert.assertEquals("John Doe", sut.getAuthor())
+        assertEquals("John Doe", album.getAuthor())
     }
 
     @Test
     fun testToStringCorrect() {
-        Assert.assertEquals(sut.toString(), uriString)
+        assertEquals(album.toString(), uriString)
     }
 }

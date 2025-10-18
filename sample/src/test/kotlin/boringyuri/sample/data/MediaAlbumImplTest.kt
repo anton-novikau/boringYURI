@@ -1,31 +1,41 @@
 package boringyuri.sample.data
 
 import android.net.Uri
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class MediaAlbumImplTest {
-    private val testMediaType = "photo"
-    private val testFileSize = 2048L
-    private val testUriString = "content://any/uri?mediaType=$testMediaType&fileSize=$testFileSize"
-    private val testUri = Uri.parse(testUriString)
-    private val sut = MediaAlbumImpl(testUri)
+    private lateinit var testMediaType: String
+    private var testFileSize: Long = 0L
+    private lateinit var testUriString: String
+    private lateinit var testUri: Uri
+    private lateinit var mediaAlbum: MediaAlbum
+
+    @Before
+    fun setUp() {
+        testMediaType = "photo"
+        testFileSize = 2048L
+        testUriString = "content://any/uri?mediaType=$testMediaType&fileSize=$testFileSize"
+        testUri = Uri.parse(testUriString)
+        mediaAlbum = MediaAlbumImpl(testUri)
+    }
 
     @Test
     fun getMediaType() {
-        Assert.assertEquals(testMediaType, sut.getMediaType())
+        assertEquals(testMediaType, mediaAlbum.getMediaType())
     }
 
     @Test
     fun getFileSize() {
-        Assert.assertEquals(testFileSize, sut.getFileSize())
+        assertEquals(testFileSize, mediaAlbum.getFileSize())
     }
 
     @Test
     fun testToString() {
-        Assert.assertEquals(testUriString, sut.toString())
+        assertEquals(testUriString, mediaAlbum.toString())
     }
 }

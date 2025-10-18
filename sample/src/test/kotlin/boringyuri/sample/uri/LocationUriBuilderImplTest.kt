@@ -2,7 +2,8 @@ package boringyuri.sample.uri
 
 import android.net.Uri
 import boringyuri.sample.data.Address
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -10,9 +11,14 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LocationUriBuilderImplTest {
 
-    private val baseUri = "https://maps.example.com/maps/api"
+    private lateinit var baseUri: String
+    private lateinit var uriBuilder: LocationUriBuilder
 
-    private val sut = LocationUriBuilderImpl()
+    @Before
+    fun setUp() {
+        baseUri = "https://maps.example.com/maps/api"
+        uriBuilder = LocationUriBuilderImpl()
+    }
 
     @Test
     fun buildStaticMapUri() {
@@ -21,17 +27,17 @@ class LocationUriBuilderImplTest {
         val expected = Uri.parse(
             "$baseUri/staticmap?lat=$lat&lng=$lng&sensor=true&zoom=2.5"
         )
-        val actual = sut.buildStaticMapUri(lat, lng)
+        val actual = uriBuilder.buildStaticMapUri(lat, lng)
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
     fun buildAddressUri() {
         val address = Address("Minsk", "Nemiga")
         val expected = Uri.parse("$baseUri/geocode?address=Minsk%3BNemiga%3Bnull&sensor=true")
-        val actual = sut.buildAddressUri(address)
-        Assert.assertEquals(expected, actual)
+        val actual = uriBuilder.buildAddressUri(address)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -42,9 +48,9 @@ class LocationUriBuilderImplTest {
             "$baseUri/geocode?latlng=$lat%2C$lng&address=Minsk%3BNemiga%3Bnull&sensor=true"
         )
         val address = Address("Minsk", "Nemiga")
-        val actual = sut.buildGeocodeUri(lat to lng, address)
+        val actual = uriBuilder.buildGeocodeUri(lat to lng, address)
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -55,9 +61,9 @@ class LocationUriBuilderImplTest {
         }
 
         val expected = Uri.parse("$baseUri/pins?$latLngParams&zoom=4.5")
-        val actual = sut.buildShowPinsUri(latLng)
+        val actual = uriBuilder.buildShowPinsUri(latLng)
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -73,8 +79,8 @@ class LocationUriBuilderImplTest {
         val expected = Uri.parse(
             "$baseUri/pins?$pinParams&zoom=4.5"
         )
-        val actual = sut.buildShowPinsByCoordinatesUri(coordinates)
+        val actual = uriBuilder.buildShowPinsByCoordinatesUri(coordinates)
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 }

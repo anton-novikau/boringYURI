@@ -2,43 +2,73 @@ package boringyuri.sample.uri.matcher
 
 import android.content.UriMatcher
 import android.net.Uri
+import boringyuri.sample.BuildConfig
 import boringyuri.sample.uri.BackgroundProviderUriBuilder
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class BackgroundUriMatcherTest {
+    private lateinit var uriMatcher: BackgroundUriMatcher
+
+    @Before
+    fun setUp() {
+        uriMatcher = BackgroundUriMatcher()
+    }
+
     @Test(expected = UnsupportedOperationException::class)
     fun addURI() {
-        BackgroundUriMatcher().addURI("", "", 1)
+        uriMatcher.addURI("", "", 1)
     }
 
     @Test
-    fun match() {
-        val sut = BackgroundUriMatcher()
-        Assert.assertEquals(
+    fun matchCodeColor() {
+        assertEquals(
             BackgroundProviderUriBuilder.Contract.CODE_COLOR,
-            sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/color/1"))
+            uriMatcher.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/color/1"))
         )
-        Assert.assertEquals(
+    }
+
+    @Test
+    fun matchCodeOriginal() {
+        assertEquals(
             BackgroundProviderUriBuilder.Contract.CODE_ORIGINAL,
-            sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/original/1"))
+            uriMatcher.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/original/1"))
         )
-        Assert.assertEquals(
+    }
+
+    @Test
+    fun matchCodeCropped() {
+        assertEquals(
             BackgroundProviderUriBuilder.Contract.CODE_CROPPED,
-            sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/thumbnail/abc"))
+            uriMatcher.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/thumbnail/abc"))
         )
-        if (boringyuri.sample.BuildConfig.DEBUG_ONLY) {
-            Assert.assertEquals(
-                BackgroundProviderUriBuilder.Contract.CODE_DEBUG,
-                sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/debug"))
-            )
+    }
+
+    @Test
+    fun matchCodeDebugOnly() {
+        // DEBUG_ONLY is a build config dependant flag, not a constant
+        @Suppress("KotlinConstantConditions")
+        val expectedMatchCode = if (BuildConfig.DEBUG_ONLY) {
+            BackgroundProviderUriBuilder.Contract.CODE_DEBUG
+        } else {
+            UriMatcher.NO_MATCH
         }
-        Assert.assertEquals(
+
+        assertEquals(
+            expectedMatchCode,
+            uriMatcher.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/debug"))
+        )
+    }
+
+    @Test
+    fun matchUnknownCode() {
+        assertEquals(
             UriMatcher.NO_MATCH,
-            sut.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/random"))
+            uriMatcher.match(Uri.parse("content://boringyuri.sample.backgrounds/bg/random"))
         )
     }
 }

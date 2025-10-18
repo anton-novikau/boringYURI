@@ -1,33 +1,44 @@
 package boringyuri.sample.data
 
 import android.net.Uri
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CroppedBackgroundDataTest {
-    private val testId = "bg123"
-    private val testOrientation = 2
-    private val testUriString =
-        "content://boringyuri.sample.backgrounds/bg/thumbnail/$testId?orientation=$testOrientation"
-    private val uri = Uri.parse(testUriString)
+    private lateinit var testId: String
+    private var testOrientation: Int = 0
+    private lateinit var testUriString: String
+    private lateinit var uri: Uri
 
-    private val sut = CroppedBackgroundData(uri)
+    private lateinit var croppedBackgroundData: CroppedBackgroundData
+
+    @Before
+    fun setUp() {
+        testId = "bg123"
+        testOrientation = 2
+        testUriString = "content://boringyuri.sample.backgrounds/bg/thumbnail/$testId?" +
+                "orientation=$testOrientation"
+        uri = Uri.parse(testUriString)
+
+        croppedBackgroundData = CroppedBackgroundData(uri)
+    }
 
     @Test
     fun testBackgroundIdCorrect() {
-        Assert.assertEquals(testId, sut.backgroundId)
+        assertEquals(testId, croppedBackgroundData.backgroundId)
     }
 
     @Test
     fun testOrientationCorrect() {
-        Assert.assertEquals(testOrientation, sut.orientation)
+        assertEquals(testOrientation, croppedBackgroundData.orientation)
     }
 
     @Test
     fun testToStringCorrect() {
-        Assert.assertEquals(testUriString, sut.toString())
+        assertEquals(testUriString, croppedBackgroundData.toString())
     }
 }

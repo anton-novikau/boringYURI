@@ -16,8 +16,8 @@
 
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.SourcesJar
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -50,6 +50,9 @@ dependencies {
 
     implementation(libs.square.javaPoet)
     implementation(libs.androidx.room.xprocessing)
+    // XProcessing brings an older kotlin-metadata-jvm transitively which is unable to read
+    // metadata of classes compiled with newer Kotlin versions, so it must be aligned with Kotlin.
+    implementation(libs.kotlin.metadataJvm)
     implementation(libs.commons.text)
 }
 
@@ -81,18 +84,18 @@ tasks.withType(Jar::class).configureEach {
     }
 }
 
-tasks.withType<DokkaTask>().configureEach {
-    mustRunAfter(tasks["kaptKotlin"])
-
-    dokkaSourceSets {
-        configureEach {
-            fatJarMembers.forEach {
-                sourceRoots.from(
-                    project(":$it").sourceSets.getByName("main").java.srcDirs
-                )
-            }
+dokka {
+    dokkaSourceSets.configureEach {
+        fatJarMembers.forEach {
+            sourceRoots.from(
+                project(":$it").sourceSets.getByName("main").java.srcDirs
+            )
         }
     }
+}
+
+tasks.matching { it.name.startsWith("dokkaGenerate") }.configureEach {
+    mustRunAfter(tasks["kaptKotlin"])
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -104,8 +107,8 @@ tasks.withType<KotlinCompile>().configureEach {
 mavenPublishing {
     configure(
         KotlinJvm(
-            javadocJar = JavadocJar.Dokka("dokkaHtml"),
-            sourcesJar = true,
+            javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
+            sourcesJar = SourcesJar.Sources(),
         )
     )
 }

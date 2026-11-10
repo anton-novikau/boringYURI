@@ -15,8 +15,9 @@
  */
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinJvm
+import com.vanniktech.maven.publish.SourcesJar
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -76,14 +77,12 @@ tasks.withType(Jar::class).configureEach {
     }
 }
 
-tasks.withType<DokkaTask>().configureEach {
-    dokkaSourceSets {
-        configureEach {
-            fatJarMembers.forEach {
-                sourceRoots.from(
-                    project(":$it").sourceSets.getByName("main").java.srcDirs
-                )
-            }
+dokka {
+    dokkaSourceSets.configureEach {
+        fatJarMembers.forEach {
+            sourceRoots.from(
+                project(":$it").sourceSets.getByName("main").java.srcDirs
+            )
         }
     }
 }
@@ -92,15 +91,15 @@ tasks.withType<DokkaTask>().configureEach {
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11) // in order to compile Kotlin to java 11 bytecode
-        freeCompilerArgs.add("-Xjvm-default=all")
+        jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
     }
 }
 
 mavenPublishing {
     configure(
         KotlinJvm(
-            javadocJar = JavadocJar.Dokka("dokkaHtml"),
-            sourcesJar = true,
+            javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml"),
+            sourcesJar = SourcesJar.Sources(),
         )
     )
 }

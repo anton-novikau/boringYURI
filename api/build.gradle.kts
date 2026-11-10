@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
 /*
  * Copyright 2020 Anton Novikau
@@ -35,7 +36,7 @@ mavenPublishing {
     configure(
         JavaLibrary(
             javadocJar =  JavadocJar.Javadoc(),
-            sourcesJar = true,
+            sourcesJar = SourcesJar.Sources(),
         )
     )
 }

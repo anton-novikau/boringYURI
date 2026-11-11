@@ -46,7 +46,7 @@ public class MyActivity extends AppCompatActivity {
 ## Sample
 
 The detailed example on how to use `dagger` extension for `Boring Yuri` can be found in
-[sample-dagger](../dagger-sample).
+[dagger-sample](../dagger-sample).
 
 ## Installation
 
@@ -117,4 +117,4 @@ android {
 ```
 
 [1]: https://github.com/google/dagger/
-[2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java
+[2]: https://github.com/google/dagger/blob/master/dagger-runtime/main/java/dagger/Component.java

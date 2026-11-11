@@ -24,7 +24,7 @@ When you have the generated `dagger` module included in your application compone
 your injectable `Uri` factories:
 
 ```kotlin
-class MyActivity : AppCompatActivity {
+class MyActivity : AppCompatActivity() {
 
     @Inject
     lateinit var uriFactory: ContactUriFactory
@@ -44,7 +44,7 @@ class MyActivity : AppCompatActivity {
 ## Sample
 
 The detailed example on how to use `dagger` extension for `Boring Yuri` can be found in
-[sample-dagger](../dagger-sample).
+[dagger-sample](../dagger-sample).
 
 ## Installation
 
@@ -77,5 +77,5 @@ ksp {
 ```
 
 [1]: https://github.com/google/dagger/
-[2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java
+[2]: https://github.com/google/dagger/blob/master/dagger-runtime/main/java/dagger/Component.java
 [3]: https://kotlinlang.org/docs/ksp-overview.html

@@ -43,9 +43,9 @@ import java.lang.annotation.Target;
  * </code></pre>
  * <p>
  * Calling {@code uriBuilder.buildRegularUserUri("10020042", "John Doe")} will produce
- * {@code content://com.example.provider/user/colleague?phoneNumber="10020042"&name="John%20Doe"}
+ * {@code content://com.example.provider/user/colleague?phoneNumber=10020042&name=John%20Doe}
  * whereas {@code uriBuilder.buildAdminUserUri("20030042", "Jane Doe")} will produce
- * {@code content://com.example.provider/user/admin?phoneNumber="20030042"&name="Jane%20Doe"}
+ * {@code content://com.example.provider/user/admin?phoneNumber=20030042&name=Jane%20Doe}
  * </p>
  *
  * @see UriBuilder
@@ -55,7 +55,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface UriFactory {
     /**
-     * A {@code Uri} scheme applied to all the build methods in the factory.
+     * A {@code Uri} scheme applied to all the builder methods in the factory.
      * Example: "http" or "content".
      */
     String scheme();

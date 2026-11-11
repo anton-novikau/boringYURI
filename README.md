@@ -1,13 +1,13 @@
 # Boring YURI
 
 `Boring Yuri` (pronounced as `'bɔːrɪŋ júrij`) is a humble guy who knows how to do his boring job.
-And his job is to deal with the [Uri][1] routine. This job has a little fun, but someone has
+And his job is to deal with the [Uri][1] routine. This job has little fun in it, but someone has
 to do it. So `Boring Yuri` is at your service.
 
 This is a source code generation library that provides a simple annotation-based API to convert
 your objects into Android `Uri` or to restore the objects back from the `Uri`. The API itself was
 inspired by popular annotation-based libraries [Retrofit][2] and [Gson][3], but, unlike them,
-`Boring Yuri` does all the job on the compile time and the purpose of the library has a little
+`Boring Yuri` does all the job on the compile time and the purpose of the library has little
 in common with them.
 
 * [Usage](#usage)
@@ -33,7 +33,7 @@ in common with them.
 Here is a simple HTTP URL to build:
 
 ```
-https://example.com/user?name="John%20Doe"&phone_number="%2B15417543010"
+https://example.com/user?name=John%20Doe&phone_number=%2B15417543010
 ```
 Usually you have to create a `Uri.Builder` and provide URL scheme, authority, path,
 query parameter names and the values.
@@ -100,12 +100,12 @@ UserUriBuilder builder = new UserUriBuilderImpl();
 
 builder.buildUserUri("John Doe", "+15417543010");
 ```
-gives you `https://example.com/user?name="John%20Doe&phone_number=%2B15417543010"`
+gives you `https://example.com/user?name=John%20Doe&phone_number=%2B15417543010`
 
 ### Variable path segment
 
-When a URI needs a variable path segment (or several variable segments) there is `@Path` comes
-to your rescue. To build a URI that fetches a user details by the `id` set as the last path
+When a URI needs a variable path segment (or several variable segments), `@Path` comes
+to your rescue. To build a URI that fetches user details by the `id` set as the last path
 segment:
 
 ```
@@ -130,7 +130,7 @@ Which generates:
 ```java
 class UserUriBuilderImpl implements UserUriBuilder {
     @NonNull
-    public Uri buildUserUri(String name, String phoneNumber) {
+    public Uri buildUserUri(int userId) {
         Uri.Builder builder = new Uri.Builder()
                 .scheme("https")
                 .authority("example.com");
@@ -145,7 +145,7 @@ class UserUriBuilderImpl implements UserUriBuilder {
 `@Path` can be used with as many method parameters as you need. You should just provide a path
 segment name in the `@UriBuilder` base path. The segment name can be specified either in a
  `value()` parameter of `@Path` or a method parameter name can be used. The order of the path
-method parameters doesn't matter so you're free do define them as you like:
+method parameters doesn't matter so you're free to define them as you like:
 
 ```java
     @UriBuilder("/user/{group}/{id}")
@@ -163,7 +163,7 @@ the method parameter name will. This happens because the obfuscation step is exe
 annotation processing step where method parameter names are transformed into the names of the
 query parameters or path segments. It is still highly recommended to specify these names explicitly
 in `@Path` and `@Param` annotations in order to make sure somebody won't refactor the code and
-break the contract with the receiver's side accidentally (eg. back-end may still expect the old
+break the contract with the receiver's side accidentally (e.g. back-end may still expect the old
 query parameter names).
 
 **IMPORTANT:** `@Path` method parameters **can not be nullable**. They must be explicitly
@@ -175,7 +175,7 @@ parameter in a method signature.
 ### Types
 
 `Boring Yuri` knows how to convert primitives, primitive wrappers, `String` and `Uri` to a path
-segment or a query parameter. But sometimes it's not enough and we have to deal with application
+segment or a query parameter. But sometimes it's not enough, and we have to deal with application
 specific, platform or library types.
 
 #### Arrays
@@ -193,13 +193,13 @@ interface UserUriBuilder {
 }
 ```
 
-So calling `foo.buildFetchUserDetailsUri(new int[] { 42, 24 })` will build
+So calling `builder.buildFetchUserDetailsUri(new int[] { 42, 24 })` will build
 `https://example.com/user?id=42&id=24`.
 
 **NOTE:** the array rule is not applicable for query parameters of `List`, `Set` or any other
 `Collection` and a [custom type conversion](#platform-or-library-specific-types) must be defined.
 
-**NOTE:** unlike `@Param` method parameters `@Path` of an array type are supposed to have
+**NOTE:** unlike `@Param` method parameters, `@Path` parameters of an array type are supposed to have
 a [custom type conversion](#platform-or-library-specific-types) defined.
 
 #### Application specific types
@@ -256,7 +256,7 @@ class UserTypeAdapter implements BoringTypeAdapter<User> {
 }
 ```
 
-So so now we're safe to use `User` in a method parameter of a `Uri` builder method:
+So now we're safe to use `User` in a method parameter of a `Uri` builder method:
 
 ```java
 @UriFactory(scheme = "https", authority="example.com")
@@ -269,8 +269,8 @@ interface UserUriBuilder {
 }
 ```
 
-And calling `builder.buildUserUri(new User(42, "John Doe))` will give you
-`https://example.com/user?data="42%3BJohn%20Doe"`, where `%3B` is a url encoded semicolon `;`.
+And calling `builder.buildUserUri(new User(42, "John Doe"))` will give you
+`https://example.com/user?data=42%3BJohn%20Doe`, where `%3B` is a url encoded semicolon `;`.
 
 #### Platform or Library specific types
 
@@ -310,9 +310,9 @@ class CoordinatesTypeAdapter implements BoringTypeAdapter<Pair<Double, Double>> 
 ```
 
 Calling `builder.buildGeocodeUri(Pair.create(53.893009, 27.567444))` will give you
-`https://maps.example.com/maps/api/geocode?latlng=53.893009,27.567444`
+`https://maps.example.com/maps/api/geocode?latlng=53.893009%2C27.567444`, where `%2C` is a url encoded comma `,`.
 
-**NOTE:** specifying `@TypeAdapter` at use will override the standard type conversion (eg. if you
+**NOTE:** specifying `@TypeAdapter` at use will override the standard type conversion (e.g. if you
 need a different decimal format for a number). 
 
 If a **query parameter** is an array of any custom type (application, library or platform specific),
@@ -338,9 +338,9 @@ the array component type.
 
 ### Constant query parameters
 
-When the parameter value doesn't changes from one build to another, but it is expected to be set on
+When the parameter value doesn't change from one build to another, but it is expected to be set on
 the receiver's side, `Boring Yuri` has a bunch of annotations for constant query parameters. For
-example we need to tell the REST service if the client has a geolocation sensor and to provide a
+example, we need to tell the REST service if the client has a geolocation sensor and to provide a
 zoom level of the requested static map:
 
 ```java
@@ -401,13 +401,13 @@ https://example.com/search/api/media?query=Yawning%20Sloths&type=photo&type=vide
 ```
 
 **NOTE:** constant query parameters of a builder method **can not** have the same name if they are
-of different types (eg. one is a `@StringParam` and the other is a `@LongParam`).
+of different types (e.g. one is a `@StringParam` and the other is a `@LongParam`).
 
 ### Deserialize data from Uri
 
 Sometimes, working with `Uri`, you may need to restore query parameters and path segments from
 the given `Uri` and convert them into appropriate types. This often happens when your application
-have its own  `ContentProvider`, so it becomes a receiver of the `Uri`.
+has its own `ContentProvider`, so it becomes a receiver of the `Uri`.
 
 ```java
 @UriFactory(scheme = ContentResolver.SCHEME_CONTENT, authority = "boringyuri.sample.provider")
@@ -546,7 +546,7 @@ a specific builder, but it is, let's say, "independent". For example:
 
  * You want to have a data class that knows how to parse `Uri` correctly, but you don't need
 a builder.
- * You have two or more builders that produce `Uri`'s of a similar data (eg. they have the same
+ * You have two or more builders that produce `Uri`'s of a similar data (e.g. they have the same
 set of query parameters) so you would like to have a data class of the same type to work with
 these `Uri`'s.
 
@@ -613,15 +613,15 @@ method in the factory interface.
 
 ##### Inheritance in Uri data
 When two independent `Uri` data classes may have common properties, it is possible to use interface
-inheritance in order to avoid defining same query parameters and path segments in multiple files.
-Besides inheritance can also be used to generate data classes not only for descendants, but also
+inheritance in order to avoid defining the same query parameters and path segments in multiple files.
+Besides, inheritance can also be used to generate data classes not only for descendants, but also
 for ancestors, so it could be possible to parse the data partially without knowing a concrete
 type of the `Uri` data.
 
-For example we could to have `Uri`s for Images, Video and Sounds. All three types may have `id`,
+For example, we could have `Uri`s for Images, Video and Sounds. All three types may have `id`,
 `mediaType` and `fileSize`. Some of the properties may be common only for the two types out of three,
-eg. Images and Video may have a `thumbnail` and Sound and Video may have a `duration`. And finally
-some of the properties could exist only for the specific types, eg. Sound may have `genre` and Image
+e.g. Images and Video may have a `thumbnail` and Sound and Video may have a `duration`. And finally
+some of the properties could exist only for the specific types, e.g. Sound may have `genre` and Image
 may have a `description`.
 
 So we may create a base `Uri` data interface `FileData`:
@@ -661,7 +661,7 @@ Now we may define the concrete interfaces for Image, Video and Sound:
 @UriData("/image/{id}")
 public interface ImageData extends MediaData, FileData {
     @Param("desc")
-    int getDescription();
+    String getDescription();
 }
 
 @UriData("/video/{id}")
@@ -678,7 +678,7 @@ public interface SoundData extends PlayableData, FileData {
 
 Now if we have three `Uri`s for each of the file types:
 ```
-1. content://com.example.provider/image/42?mediaType=image%2Fjpeg&fileSize=100&desc=Some%2BDescription&thumbnail=path_to_thumb
+1. content://com.example.provider/image/42?mediaType=image%2Fjpeg&fileSize=100&desc=Some%20Description&thumbnail=path_to_thumb
 2. content://com.example.provider/video/24?mediaType=video%2Fmp4&fileSize=400&duration=300&thumbnail=path_to_video_thumb
 3. content://com.example.provider/sound/22?mediaType=audio%2Fogg&fileSize=150&duration=400&genre=rock
 ```
@@ -686,9 +686,9 @@ Now if we have three `Uri`s for each of the file types:
 To obtain all properties for the `Uri` `#1` a generated `ImageDataImpl` can be used. For `#2` and `#3`
 it's `VideoDataImpl` and `SoundDataImpl` respectively. But if we know there is one of these three
 `Uri`s and we don't care about the type specific properties, but we only need to obtain a
-`mimeType` and `id`, we may use `FileDataImpl` and it will work just fine.
+`mediaType` and `id`, we may use `FileDataImpl` and it will work just fine.
 
-**NOTE:** generated classes `SoundDataImpl` and `VideoDataImpl` do not inherit neither
+**NOTE:** generated classes `SoundDataImpl` and `VideoDataImpl` inherit neither
 `PlayableDataImpl` nor `FileDataImpl`, but only the interfaces.
 
 If a parent interface doesn't need to have a generated data class, because it's only used to specify
@@ -729,7 +729,7 @@ data classes.
 The `@DefaultValue` can also be used when a query parameter or a path segment have a value that
 is incompatible with the associated getter of a primitive (or a primitive wrapper) type.
 
-For example you have an independent `UserData` with `id` of type `long`:
+For example, you have an independent `UserData` with `id` of type `long`:
 ```java
 @UriData("/user")
 interface UserData {
@@ -744,7 +744,7 @@ interface UserData {
 But for some reason the `Uri` you're trying to process with this data class has `id` of `String`:
 ```java
 Uri uri = Uri.parse("https://example.com/user?id=d14bee5");
-UserData data = new UserData(uri);
+UserData data = new UserDataImpl(uri);
 
 long id = data.getId(); // id == 42 
 ```
@@ -792,12 +792,12 @@ So for a builder that uses `Location` as method parameter the default value shou
 
 ### Matching URIs in Android ContentProvider
 
-Quite often in Android we use `Uri` to deal with [ContentProvider][5]. And in `ContentProvider` it
-is widely used a utility called [UriMatcher][6]. This utility does a fast search among the set
+Quite often in Android we use `Uri` to deal with [ContentProvider][5]. And in `ContentProvider` a
+utility called [UriMatcher][6] is widely used. This utility does a fast search among the set
 of the `Uri`s handled by the same `ContentProvider` and returns an integer code when the `Uri` is
 matched.
 
-Creating a `UriMatcher` and setting it up is quite a boring routine that includes defining an
+Creating a `UriMatcher` and setting it up is quite a boring routine that includes defining
 integer constants for every `Uri` that can be handled by the specific `ContentProvider` and adding
 all possible matches of the `Uri`s with these `UriMatcher` codes:
 
@@ -820,7 +820,7 @@ class BoringFileProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        switch (matcher.match(uri) {
+        switch (matcher.match(uri)) {
             case PHOTO_CODE:
                 // find a photo file for the requested Uri and return it as a file descriptor
                 ...
@@ -862,8 +862,8 @@ interface UserProviderUriBuilder {
 }
 ```
 
-This setup will create you a `UserProviderUriMatcher` that has all the `Uri`s with the
-`@MatcherCode` annotations  mapped to the code values in it. Variable path segments from
+This setup will create a `UserProviderUriMatcher` that has all the `Uri`s with the
+`@MatcherCode` annotations mapped to the code values in it. Variable path segments from
 the `@UriBuilder` are replaced with either `#` or `*`, depending on the method parameter type.
 
 ```java
@@ -990,8 +990,8 @@ backgroundMatcher.match(backgroundUri) != colorMatcher.match(colorUri)
 
 **IMPORTANT:** The value in `@MatchesTo` annotation may contain only valid symbols for a java
 variable as it's going to be used as a name of the constant, so it may only start with a letter
-and may contain only alphanumerics and underscores. The given `String` will be upper cased in
-order to comply with the java code style for static constants.  
+or an underscore and may contain only alphanumerics and underscores. The given `String` will be uppercased in
+order to comply with the Java code style for static constants.  
 
 #### Disable URI matching based on a build type or a flavor
 
@@ -1002,7 +1002,7 @@ or `@MatchesTo` annotations:
 ```groovy
 android {
     ...
-    releaseTypes {
+    buildTypes {
         ...
         debug {
             buildConfigField("boolean", "DEBUG_ONLY", "true")
@@ -1016,7 +1016,7 @@ android {
 }
 ```
 
-As soon as you have the build type dependant variable defined in the `build.gradle` of your
+As soon as you have the build type dependent variable defined in the `build.gradle` of your
 application, you may use it in either `@MatcherCode` or `@MatchesTo` applied to a builder method
 that need to be switched off in the `release` build:
 
@@ -1094,7 +1094,7 @@ Add the repo below to download `SNAPSHOT` releases.
 ```kotlin
 repositories {
   mavenCentral()
-  maven { setUrl("https://oss.sonatype.org/content/repositories/snapshots/") }
+  maven { setUrl("https://central.sonatype.com/repository/maven-snapshots/") }
 }
 ```
 
@@ -1116,9 +1116,9 @@ dependencies {
 
  * `boringyuri.type_adapter_factory` – option to specify the `BoringTypeAdapter` factory class
   (it must be a fully qualified name) and to enable instance caching for the created adapters.
-  Enabling this option allows to use the memory more efficiently and to create every instance of
+  Enabling this option allows using the memory more efficiently and creating every instance of
   the specific type adapter only once. When the option is turned off, every instance of the adapter
-  is created at use which gives to garbage collector more work.
+  is created at use which gives the garbage collector more work.
 
 To enable the option above you need to include the following in your app module
 `build.gradle.kts` (or `build.gradle`) file:
@@ -1127,7 +1127,7 @@ With Kotlin KSP:
 
 ```kotlin
 ksp {
-  arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
+  arg("boringyuri.type_adapter_factory", "your.company.domain.TypeAdapterFactory")
 }
 ```
 
@@ -1136,7 +1136,7 @@ With Kotlin KAPT:
 ```kotlin
 kapt {
     arguments {
-        arg("boringyuri.type_adapter_factory", "your.company.domain.BoringTypeAdapter")
+        arg("boringyuri.type_adapter_factory", "your.company.domain.TypeAdapterFactory")
     }
 }
 ```
@@ -1148,7 +1148,7 @@ android {
     defaultConfig {
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["boringyuri.type_adapter_factory": "your.company.domain.BoringTypeAdapter"]
+                arguments = ["boringyuri.type_adapter_factory": "your.company.domain.TypeAdapterFactory"]
             }
         }
     }
@@ -1176,6 +1176,6 @@ limitations under the License.
 [1]: https://developer.android.com/reference/android/net/Uri
 [2]: https://github.com/square/retrofit
 [3]: https://github.com/google/gson
-[4]: https://oss.sonatype.org/content/repositories/snapshots/
+[4]: https://central.sonatype.com/repository/maven-snapshots/
 [5]: https://developer.android.com/reference/android/content/ContentProvider
 [6]: https://developer.android.com/reference/android/content/UriMatcher

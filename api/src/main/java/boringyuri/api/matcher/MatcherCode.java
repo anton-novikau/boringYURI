@@ -62,7 +62,7 @@ import java.lang.annotation.Target;
  * </code></pre>
  * <p>
  * The uniqueness of the codes provided as a value of {@code MatcherCode} must be maintained
- * by the developer, unlike the matcher code produced by the {@link MatchesTo}, which uniqueness
+ * by the developer, unlike the matcher code produced by the {@link MatchesTo}, whose uniqueness
  * is guaranteed by the library.
  * </p>
  * <p>
@@ -86,12 +86,12 @@ public @interface MatcherCode {
     /**
      * <p>
      * Flag that indicates if the {@code Uri} can be enabled or disabled based on some static
-     * condition, eg. build environment (prod/debug) or build flavor. When the {@code Uri} is
-     * disabled it just won't be added to the {@code UriMatcher} so there never be a valid
+     * condition, e.g. build environment (prod/debug) or build flavor. When the {@code Uri} is
+     * disabled it just won't be added to the {@code UriMatcher} so there will never be a valid
      * mapping found for it.
      * </p>
      * <p>
-     * By default the {@code Uri} is always enabled.
+     * By default, the {@code Uri} is always enabled.
      * </p>
      */
     boolean enabled() default true;

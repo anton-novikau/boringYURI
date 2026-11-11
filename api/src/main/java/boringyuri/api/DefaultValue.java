@@ -24,37 +24,39 @@ import java.lang.annotation.Target;
 /**
  * <p>
  * The value of a path segment or a query parameter that can be used as a fallback for
- * <code>null</code> method parameter on building the {@code Uri} or for absent query
+ * a <code>null</code> method parameter on building the {@code Uri} or for an absent query
  * parameter on reading the data from the {@code Uri}. The default value is also used
- * when incompatible data received in a specific path segment or a query parameter.
+ * when incompatible data is received in a specific path segment or a query parameter
+ * (e.g. a value that can't be parsed to a number).
  * </p>
  * <p>Examples:</p>
  * <pre><code>
  *     &#64;UriBuilder("/user/{id}")
- *     Uri buildUserUri(&#64;@Nullable &#64;Path("id") @DefaultValue("f42b3a") String userId);
+ *     Uri buildUserUri(&#64;Nullable &#64;Path("id") &#64;DefaultValue("f42b3a") String userId);
  * </code></pre>
  * Calling {@code foo.buildUserUri(null)} yields {@code /user/f42b3a}.
  * <pre><code>
  *     &#64;UriBuilder("/user")
- *     Uri buildUserUri(&#64;@Nullable &#64;Param("id") @DefaultValue("f42b3a") String userId);
+ *     Uri buildUserUri(&#64;Nullable &#64;Param("id") &#64;DefaultValue("f42b3a") String userId);
  * </code></pre>
  * Calling {@code foo.buildUserUri(null)} yields {@code /user?id=f42b3a}.
  * <pre><code>
- *     &#64;UserData("/user/{id}")
+ *     &#64;UriData("/user/{id}")
  *     interface UserUriData {
  *
  *         &#64;Path("id")
  *         &#64;DefaultValue("42")
- *         long getUserId()
+ *         long getUserId();
  *
  *         &#64;Param("age")
  *         &#64;DefaultValue("27")
- *         int getAge()
+ *         int getAge();
  *     }
  * </code></pre>
- * Calling {@code new UserUriData("https://example.com/user/xxxx").getUserId()} yields {@code 42}
- * and calling {@code new UserUriData("https://example.com/user/33?age=five).getAge()} yields
- * {@code 27}.
+ * Calling {@code new UserUriDataImpl(Uri.parse("https://example.com/user/xxxx")).getUserId()}
+ * yields {@code 42} and calling
+ * {@code new UserUriDataImpl(Uri.parse("https://example.com/user/33?age=five")).getAge()}
+ * yields {@code 27}.
  * <p>
  * The default value must be correctly serialized for a specific type of a method parameter or
  * a getter method, otherwise you may have an incorrect or unexpected result. For types that

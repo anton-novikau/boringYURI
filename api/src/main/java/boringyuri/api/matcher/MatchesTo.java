@@ -136,7 +136,7 @@ public @interface MatchesTo {
      * The {@code value} must contain only valid java field symbols which are alphanumerics and
      * underscore. It can not start with a number, but can start with an underscore.
      * The {@code value} can be either in the upper case or the lowercase, but the constant will
-     * always comply the java code style, so it will be transformed to the upper case.
+     * always comply with the java code style, so it will be transformed to the upper case.
      * </p>
      */
     String value();
@@ -144,12 +144,12 @@ public @interface MatchesTo {
     /**
      * <p>
      * Flag that indicates if the {@code Uri} can be enabled or disabled based on some static
-     * condition, eg. build environment (prod/debug) or build flavor. When the {@code Uri} is
-     * disabled it just won't be added to the {@code UriMatcher} so there never be a valid
+     * condition, e.g. build environment (prod/debug) or build flavor. When the {@code Uri} is
+     * disabled it just won't be added to the {@code UriMatcher} so there will never be a valid
      * mapping found for it.
      * </p>
      * <p>
-     * By default the {@code Uri} is always enabled.
+     * By default, the {@code Uri} is always enabled.
      * </p>
      */
     boolean enabled() default true;

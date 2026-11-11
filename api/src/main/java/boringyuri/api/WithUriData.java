@@ -36,10 +36,10 @@ import java.lang.annotation.Target;
  *     Uri buildCreateUserUri(&#64;Path long id, &#64;Param String name, &#64;Param String phoneNumber);
  * </code></pre>
  * <p>
- * For the {@code Uri} above there going to be generated the following data class:
+ * For the {@code Uri} above the following data class is going to be generated:
  * </p>
  * <pre><code>
- *     public final class CreateUserData {
+ *     public final class CreateUserUriData {
  *         &#64;NonNull
  *         private final Uri dataUri;
  *
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
  *
  *         private String phoneNumber;
  *
- *         public CreateUserData(&#64;NonNull Uri uri) {
+ *         public CreateUserUriData(&#64;NonNull Uri uri) {
  *             dataUri = uri;
  *         }
  *
@@ -72,13 +72,13 @@ import java.lang.annotation.Target;
  *     }
  * </code></pre>
  * <p>
- * Every field will be obtained from an appropriate query parameter of a path segment and converted
- * from {@code String} into appropriate type if the type conversion is defined: the parameter is
+ * Every field will be obtained from an appropriate query parameter or a path segment and converted
+ * from {@code String} into the appropriate type if the type conversion is defined: the parameter is
  * of a standard type or a {@link boringyuri.api.adapter.BoringTypeAdapter BoringTypeAdapter}
  * implementation is registered.
  * </p>
  * <p>
- * All method parameter annotations are copied to the getter methods and if the nullability is
+ * All method parameter annotations, except the Boring YURI ones, are copied to the getter methods and if the nullability is
  * defined for the parameter it will be validated when it is parsed from the {@code Uri}.
  * </p>
  *
@@ -94,7 +94,8 @@ public @interface WithUriData {
      * </p>
      * <p>
      * If the data class name is not provided it will be generated based on the builder method
-     * name trimming "build" if present and adding the default class name suffix. The package name
+     * name trimming "build" if present and adding the {@code Data} suffix (e.g.
+     * {@code buildCreateUserUri} produces {@code CreateUserUriData}). The package name
      * will be the same as the factory's package.
      * </p>
      */

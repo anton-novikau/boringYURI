@@ -21,10 +21,10 @@ import androidx.annotation.NonNull;
 /**
  * <p>Converts Java or Kotlin objects to {@code String} and back.</p>
  * <p>
- * By default Boring YURI knows how to serialize and deserialize only
+ * By default, Boring YURI knows how to serialize and deserialize only
  * primitives, primitive wrappers, {@code String} and {@code Uri}.
  * If the standard conversion is not appropriate or it is required
- * to use some non standard type in the uri builder, implement this
+ * to use some non-standard type in the uri builder, implement this
  * interface and use it as in the examples below:
  * </p>
  * <pre><code>
@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
  *
  *          &#64;NonNull
  *          public Rect deserialize(&#64;NonNull String rect) {
- *              String[] vertices = rect.splint(";");
+ *              String[] vertices = rect.split(";");
  *
  *              return new Rect(
  *                  Integer.parseInt(vertices[0]),
@@ -52,7 +52,7 @@ import androidx.annotation.NonNull;
  * <ol>
  *     <li>
  *     Use {@link TypeAdapter} annotation for the class that must be converted.
- *     This way works good for the custom types that belong to your code.
+ *     This way works well for the custom types that belong to your code.
  *     <pre><code>
  *          &#64;TypeAdapter(UserTypeAdapter.class)
  *          public class User {
@@ -69,7 +69,7 @@ import androidx.annotation.NonNull;
  *     </code></pre>
  *     </li>
  *     <li>
- *     Use {@link TypeAdapter} annotation for in combination with
+ *     Use {@link TypeAdapter} annotation in combination with
  *     {@link boringyuri.api.Param} or {@link boringyuri.api.Path} in uri builder
  *     method signature or in data class getter method
  *     <pre><code>
@@ -98,7 +98,7 @@ import androidx.annotation.NonNull;
  */
 public interface BoringTypeAdapter<T> {
     /**
-     * Converts {@code original} object of the specified type {@code T} to {@code String}.
+     * Converts the {@code value} object of the specified type {@code T} to {@code String}.
      */
     @NonNull
     String serialize(@NonNull T value);

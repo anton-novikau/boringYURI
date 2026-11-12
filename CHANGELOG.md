@@ -1,3 +1,11 @@
+## Boring YURI 2.3.0 (2026-11-13)
+* Support Kotlin `2.4.21` and KSP `2.3.13`.
+* Fix KAPT processors failing on code compiled with Kotlin `2.4` by aligning `kotlin-metadata-jvm` with the Kotlin version.
+* Upgrade compile sdk and target sdk to Android API 37.
+* Upgrade dependencies and build tools (Gradle `9.7.1`, AGP `9.3.3`).
+* Fix incorrect statements, examples and typos in the documentation and Javadocs.
+* Add unit tests for the generated code in the sample app and run them with both KAPT and KSP processors.
+
 ## Boring YURI 2.2.1 (2025-10-14)
 * Fix annotation parameter name() resolution ([PR #54](https://github.com/anton-novikau/boringYURI/pull/54)).
 

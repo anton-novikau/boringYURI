@@ -21,7 +21,9 @@ import boringyuri.sample.data.Address
 
 class AddressTypeAdapter : BoringTypeAdapter<Address> {
     override fun serialize(address: Address): String {
-        return "${address.city};${address.street};${address.zipCode}"
+        // null values are written as empty fields so they can be restored as nulls
+        return listOf(address.city, address.street.orEmpty(), address.zipCode.orEmpty())
+            .joinToString(separator = ";")
     }
 
     override fun deserialize(address: String): Address {
@@ -29,8 +31,8 @@ class AddressTypeAdapter : BoringTypeAdapter<Address> {
 
         return Address(
             addressData[0],
-            addressData.getOrNull(1),
-            addressData.getOrNull(2)
+            addressData.getOrNull(1)?.ifEmpty { null },
+            addressData.getOrNull(2)?.ifEmpty { null },
         )
     }
 }

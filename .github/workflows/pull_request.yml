@@ -45,5 +45,8 @@ jobs:
       - name: Build 'sample' with KSP
         run: ./gradlew -Pboringyuri.useKsp clean :sample:assembleDebug --stacktrace
 
+      - name: Test 'sample' with KSP
+        run: ./gradlew -Pboringyuri.useKsp :sample:testDebugUnitTest :sample:testReleaseUnitTest --stacktrace
+
       - name: Build 'dagger-sample' with KSP
         run: ./gradlew -Pboringyuri.useKsp :dagger-sample:assembleDebug --stacktrace

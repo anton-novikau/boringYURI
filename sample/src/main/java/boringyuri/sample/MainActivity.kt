@@ -16,13 +16,18 @@
 
 package boringyuri.sample
 
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import boringyuri.sample.data.Address
 import boringyuri.sample.uri.ContactUriBuilder
 import boringyuri.sample.uri.LocationUriBuilder
@@ -35,8 +40,18 @@ class MainActivity : AppCompatActivity() {
     private val contactUriBuilder = ContactUriBuilder.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // the dark action bar is drawn behind the status bar, so the status bar icons must be light
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
 
         val uriView = findViewById<TextView>(R.id.uri)
         val dataView = findViewById<TextView>(R.id.data)

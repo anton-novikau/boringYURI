@@ -35,7 +35,7 @@ class LocationUriBuilderImplTest {
     @Test
     fun buildAddressUri() {
         val address = Address("Minsk", "Nemiga")
-        val expected = Uri.parse("$baseUri/geocode?address=Minsk%3BNemiga%3Bnull&sensor=true")
+        val expected = Uri.parse("$baseUri/geocode?address=Minsk%3BNemiga%3B&sensor=true")
         val actual = uriBuilder.buildAddressUri(address)
         assertEquals(expected, actual)
     }
@@ -45,7 +45,7 @@ class LocationUriBuilderImplTest {
         val lat = 1L
         val lng = 2L
         val expected = Uri.parse(
-            "$baseUri/geocode?latlng=$lat%2C$lng&address=Minsk%3BNemiga%3Bnull&sensor=true"
+            "$baseUri/geocode?latlng=$lat%2C$lng&address=Minsk%3BNemiga%3B&sensor=true"
         )
         val address = Address("Minsk", "Nemiga")
         val actual = uriBuilder.buildGeocodeUri(lat to lng, address)

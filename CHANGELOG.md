@@ -1,3 +1,11 @@
+## Boring YURI 2.3.0 (2026-11-13)
+* Support Kotlin `2.4.21` and KSP `2.3.13`.
+* Fix KAPT processors failing on code compiled with Kotlin `2.4` by aligning `kotlin-metadata-jvm` with the Kotlin version.
+* Upgrade compile sdk and target sdk to Android API 37.
+* Upgrade dependencies and build tools (Gradle `9.7.1`, AGP `9.3.3`).
+* Fix incorrect statements, examples and typos in the documentation and Javadocs.
+* Add unit tests for the generated code in the sample app and run them with both KAPT and KSP processors.
+
 ## Boring YURI 2.2.1 (2025-10-14)
 * Fix annotation parameter name() resolution ([PR #54](https://github.com/anton-novikau/boringYURI/pull/54)).
 
@@ -32,7 +40,7 @@
 * Upgrade dependencies.
 
 ## Boring YURI 1.2.0 (2022-01-06)
-* Add support of inheritance in independent `Uri` data classes ([Issue #20](https://github.com/anton-novikau/boringYURI/issues/20)).
+* Add support for inheritance in independent `Uri` data classes ([Issue #20](https://github.com/anton-novikau/boringYURI/issues/20)).
 * Remove support of ordered path segments in favor of named path segments ([Issue #22](https://github.com/anton-novikau/boringYURI/issues/22)).
 * Add `@Override` annotations to the generated getter methods in independent `Uri` data classes.
 * Upgrade dependencies.
@@ -44,16 +52,16 @@
 
 ## Boring YURI 1.1.3 (2021-01-03)
 
-* Add support of [UriMatcher][3] with either user defined matcher codes or automatically generated
+* Add support for [UriMatcher][3] with either user defined matcher codes or automatically generated
   ones ([Issue #15](https://github.com/anton-novikau/boringYURI/issues/15)).
-* Add ability to disable a `Uri` in `UriMatcher` for a specific build type of a product flavor.
+* Add ability to disable a `Uri` in `UriMatcher` for a specific build type or a product flavor.
 * Add ability to provide a custom name to a `Uri` data class associated with the builder method.
 * Upgrade dependencies.
 
 ## Boring YURI 1.1.2 (2020-06-02)
 
-* Add support of arrays in query parameters ([Issue #12](https://github.com/anton-novikau/boringYURI/issues/12)).
-* Add support of repeated constant query parameters with the same name.
+* Add support for arrays in query parameters ([Issue #12](https://github.com/anton-novikau/boringYURI/issues/12)).
+* Add support for repeated constant query parameters with the same name.
 * Fix getter modifiers for constant query parameters ([Bug #13](https://github.com/anton-novikau/boringYURI/issues/13)).
 
 ## Boring YURI 1.1.1 (2020-05-18)
@@ -62,7 +70,7 @@
 
 ## Boring YURI 1.1.0 (2020-05-03)
 
-* Add support of the named path segments in `Uri` factories and `Uri` data classes.
+* Add support for the named path segments in `Uri` factories and `Uri` data classes.
 * Improve validation and compilation error/warning messages.
 * Use `TypeAdapterFactory` with instance cache for `BoringTypeAdapter`s.
 * Add [Dagger][2] support to `Uri` factory classes.
@@ -70,9 +78,9 @@
 
 ## Boring YURI 1.0.0 (2020-04-20)
 
-* Build [Uri][1] from a builder method parameters.
-* Generate data classes for a specific `Uri` builder methods to deserialize `Uri` path segments
-  and query parameters into object representation.
+* Build [Uri][1] from builder method parameters.
+* Generate data classes for specific `Uri` builder methods to deserialize `Uri` path segments
+  and query parameters into an object representation.
 * Generate independent data classes that are not associated with a specific `Uri` builder method
   by an interface declaration.
 * Add `TypeAdapter` to serialize/deserialize non-standard types.

@@ -24,9 +24,9 @@ import java.lang.annotation.Target;
 /**
  * <p>
  * An annotation that indicates to use {@link BoringTypeAdapter} with a class, method or
- * a method parameter when they are of a non standard type supported by Boring YURI (eg.
- * primitive, primitive wrapper, {@code String} or {@code Uri}) or the type require some
- * non standard type serialization/deserialization.
+ * a method parameter when they are of a type that is not supported by Boring YURI out of the
+ * box (i.e. not a primitive, a primitive wrapper, {@code String} or {@code Uri}) or the type
+ * requires some non-standard serialization/deserialization.
  * </p>
  * <p>Here are some examples of how this annotation can be used:</p>
  * <pre><code>
@@ -65,7 +65,7 @@ import java.lang.annotation.Target;
  *      }
  * </code></pre>
  * <p>
- * For parameters of an {@code array} type the <code>&#64;TypeAdapter</code> should be used
+ * For query parameters of an {@code array} type the <code>&#64;TypeAdapter</code> should be used
  * for an {@code array} element, not for the {@code array} itself. Example:
  *
  * <pre><code>
@@ -83,6 +83,10 @@ import java.lang.annotation.Target;
  * In the example above the first method has a <code>&#64;TypeAdapter</code> specified at use
  * for the type {@code Rect} and the second method uses an array of {@code User}s from the very
  * first example where the {@code User} is annotated with <code>&#64;TypeAdapter(UserTypeAdapter.class)</code>.
+ * </p>
+ * <p>
+ * Path segments of an {@code array} type are serialized as a single value, so the
+ * <code>&#64;TypeAdapter</code> must be defined for the {@code array} itself.
  * </p>
  *
  * @see boringyuri.api.Path

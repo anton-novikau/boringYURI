@@ -15,14 +15,11 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Locale
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.android.legacyKapt)
     alias(libs.plugins.kotlin.ksp)
 }
 
@@ -65,32 +62,6 @@ android {
     buildFeatures {
         buildConfig = true
     }
-
-    if (useKsp) {
-        buildTypes.onEach { buildType ->
-            if (productFlavors.isEmpty()) {
-                sourceSets {
-                    getByName("main")
-                        .kotlin
-                        .srcDirs(
-                            "build/generated/ksp/${buildType.name}/kotlin",
-                            "build/generated/ksp/${buildType.name}/java",
-                        )
-                }
-            } else {
-                productFlavors.onEach { flavor ->
-                    sourceSets {
-                        getByName("main")
-                            .kotlin
-                            .srcDirs(
-                                "build/generated/ksp/${flavor.name}${buildType.name.replaceFirstCharToCapital()}/kotlin",
-                                "build/generated/ksp/${flavor.name}${buildType.name.replaceFirstCharToCapital()}/java",
-                            )
-                    }
-                }
-            }
-        }
-    }
 }
 
 dependencies {
@@ -112,6 +83,7 @@ dependencies {
 
     // unit tests
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }
 
 if (useKsp) {
@@ -133,13 +105,9 @@ if (useKsp) {
     }
 }
 
-tasks.withType<KotlinCompile>().configureEach {
+kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11) // in order to compile Kotlin to java 11 bytecode
-        freeCompilerArgs.add("-Xjvm-default=all")
+        // jvmTarget defaults to android.compileOptions.targetCompatibility with built-in Kotlin
+        jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
     }
-}
-
-fun String.replaceFirstCharToCapital() = replaceFirstChar {
-    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
 }

@@ -27,7 +27,7 @@ plugins {
     alias(libs.plugins.kotlin.ksp) apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.legacyKapt) apply false
     alias(libs.plugins.kotlin.dokka) apply false
     alias(libs.plugins.maven.publish) apply false
 }
@@ -48,6 +48,6 @@ allprojects {
     }
 }
 
-tasks.create<Delete>("clean") {
+tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

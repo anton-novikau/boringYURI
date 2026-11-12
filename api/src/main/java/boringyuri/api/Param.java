@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
  * <p>
  * Query parameter appended to the {@code Uri}.
  * </p><p>
- * <code>null</code> values are ignored to be added to the {@code Uri} query parameter.
- * An array annotated with <code>&#64;Param</code> will result a query parameter for every
+ * <code>null</code> values are not added to the {@code Uri} query parameters.
+ * An array annotated with <code>&#64;Param</code> will result in a query parameter for every
  * non-<code>null</code> array element.
  * </p><p>
  * Values of primitive types, primitive wrapper types, {@code String} or {@code Uri} can be
@@ -41,25 +41,25 @@ import java.lang.annotation.Target;
  *     &#64;UriBuilder("user")
  *     public Uri buildFetchUserDetailsUri(&#64;Param int userId);
  * </code></pre>
- * Calling with {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?userId=100}
+ * Calling {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?userId=100}
  *
  * <pre><code>
  *     &#64;UriBuilder("user")
  *     public Uri buildFetchUserDetailsUri(&#64;Param("id") int userId);
  * </code></pre>
- * Calling with {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?id=100}
+ * Calling {@code foo.buildFetchUserDetailsUri(100)} yields {@code /user?id=100}
  *
  * <pre><code>
  *     &#64;Param
  *     int getUserId();
  * </code></pre>
- * Calling with {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("userId")}
+ * Calling {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("userId")}
  *
  * <pre><code>
  *     &#64;Param("id")
  *     int getUserId();
  * </code></pre>
- * Calling with {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("id")}
+ * Calling {@code foo.getUserId()} yields {@code userDetailsUri.getQueryParameter("id")}
  *
  * <pre><code>
  *     &#64;UriBuilder("user")
@@ -79,8 +79,8 @@ public @interface Param {
      * </p><p>
      * If not specified, the method parameter name will be used. If &#64;Param is used
      * with a getter method of a uri data interface and the parameter name is not specified,
-     * the getter name will be taken without the {@code get}, {@code is} or {@code are}
-     * prefix and the first letter will be lowered. For example:
+     * the getter name will be taken without the {@code get}, {@code is}, {@code has} or {@code are}
+     * prefix and the first letter will be lowercased. For example:
      * </p>
      * <pre><code>
      * &#64;Param
@@ -90,7 +90,7 @@ public @interface Param {
      *
      * <pre><code>
      * &#64;Param
-     * String isEnabled();
+     * boolean isEnabled();
      * </code></pre>
      * Becomes "enabled"
      */

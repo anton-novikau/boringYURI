@@ -46,7 +46,7 @@ public class MyActivity extends AppCompatActivity {
 ## Sample
 
 The detailed example on how to use `dagger` extension for `Boring Yuri` can be found in
-[sample-dagger](../dagger-sample).
+[dagger-sample](../dagger-sample).
 
 ## Installation
 
@@ -58,7 +58,7 @@ With Kotlin KSP:
 ```kotlin
 dependencies {
         ...
-  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.2.1")
+  ksp("com.github.anton-novikau:boringyuri-dagger-ksp:2.3.0")
 }
 ```
 
@@ -67,7 +67,7 @@ With Kotlin KAPT:
 ```kotlin
 dependencies {
         ...
-  kapt("com.github.anton-novikau:boringyuri-dagger:2.2.1")
+  kapt("com.github.anton-novikau:boringyuri-dagger:2.3.0")
 }
 ```
 
@@ -76,7 +76,7 @@ With Java only:
 ```groovy
 dependencies {
          ...
-  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.2.1"
+  annotationProcessor "com.github.anton-novikau:boringyuri-dagger:2.3.0"
 }
 ```
 
@@ -117,4 +117,4 @@ android {
 ```
 
 [1]: https://github.com/google/dagger/
-[2]: https://github.com/google/dagger/blob/master/java/dagger/Component.java
+[2]: https://github.com/google/dagger/blob/master/dagger-runtime/main/java/dagger/Component.java

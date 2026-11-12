@@ -16,9 +16,14 @@
 
 package boringyuri.dagger.sample
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import boringyuri.dagger.sample.data.User
 import boringyuri.dagger.sample.uri.UserProviderUriBuilder
 import dagger.android.support.DaggerAppCompatActivity
@@ -30,8 +35,18 @@ class MainActivity : DaggerAppCompatActivity() {
     lateinit var uriBuilder: UserProviderUriBuilder
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // the dark action bar is drawn behind the status bar, so the status bar icons must be light
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
 
         val userUri = uriBuilder.buildUserUri(User(USER_ID, "John Doe"))
 
